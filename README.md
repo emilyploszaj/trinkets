@@ -32,7 +32,7 @@ repositories {
 And then to add Trinkets you add it as a dependency in your build.gradle
 ```
 dependencies{
-	modImplementation "com.github.emilyploszaj:trinkets"
+	modImplementation "com.github.emilyploszaj:trinkets:v1.0.0"
 }
 ```
 All you need to get started with Trinkets is to register a slot and add an item to the game that implementes `ITrinket`, here is a short example:
