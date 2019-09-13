@@ -1,0 +1,24 @@
+{
+  "required": true,
+  "package": "dev.emi.trinkets.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+	"InventoryScreenMixin",
+	"PlayerContainerMixin",
+	"PlayerEntityMixin",
+	"MinecraftServerMixin",
+	"AbstractContainerScreenMixin",
+	"ClientPlayerEntityMixin",
+	"ServerPlayNetworkHandlerMixin",
+	"LivingEntityMixin",
+	"ElytraFeatureRendererMixin",
+	"ElytraItemMixin",
+	"MobEntityMixin",
+	"AbstractInventoryScreenMixin"
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
