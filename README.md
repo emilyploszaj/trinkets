@@ -8,6 +8,7 @@ Trinkets adds a slot group and slot system to Minecraft. Slot groups are collect
 
 ## Suggested Slots
 If you're a developer using Trinkets for your mod, here is the list of slots I suggest you use before creating new ones. These slots are not enabled by default but have textures provided by Trinkets and should be used for the most compatibility between mods. This list will be added to and modified over time.
+
 | Slot | Examples | Texture identifier
 | --- | --- | --- |
 | `head:mask` | Masks, glasses, monocles | `new Identifier("trinkets", "textures/item/empty_trinket_slot_mask.png`
@@ -31,7 +32,7 @@ repositories {
 ```
 And then to add Trinkets you add it as a dependency in your build.gradle
 ```
-dependencies{
+dependencies {
 	modImplementation "com.github.emilyploszaj:trinkets:v1.0.0"
 }
 ```
