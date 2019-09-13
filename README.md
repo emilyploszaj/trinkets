@@ -22,11 +22,15 @@ If you're a developer using Trinkets for your mod, here is the list of slots I s
 | `offhand:ring` | Rings, other jewelery | `new Identifier("trinkets", "textures/item/empty_trinket_slot_ring.png)`
 
 ## Developers
-To add Trinkets to your project you need to add jitpack to your repositories in your build.gradle
+To add Trinkets to your project you need to add jitpack and nerdhubmc to your repositories in your build.gradle
 ```
 repositories {
 	maven {
 		url = "https://jitpack.io"
+	}
+	maven {
+		name = "NerdHubMC"
+		url = "https://maven.abusedmaster.xyz/"
 	}
 }
 ```
