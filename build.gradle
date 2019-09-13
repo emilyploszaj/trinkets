@@ -13,10 +13,12 @@ group = project.maven_group
 minecraft {
 }
 
-repositories {
-	maven {
-		name = "NerdHubMC"
-		url = "https://maven.abusedmaster.xyz/"
+allprojects{
+	repositories {
+		maven {
+			name = "NerdHubMC"
+			url = "https://maven.abusedmaster.xyz/"
+		}
 	}
 }
 dependencies {
