@@ -16,7 +16,6 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -189,6 +188,9 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreen<Playe
 		}else{
 			return;
 		}
+	}
+	@Inject(at = @At(value = "TAIL"), method = "render")
+	protected void render(int int_1, int int_2, float float_1, CallbackInfo info){
 		PlayerInventory playerInventory_1 = this.minecraft.player.inventory;
 		ItemStack itemStack_1 = playerInventory_1.getCursorStack();
 		if (!itemStack_1.isEmpty()) {
@@ -204,15 +206,22 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreen<Playe
 						string_1 = "" + Formatting.YELLOW + "0";
 					}
 				}
-				Method method = AbstractContainerScreen.class.getDeclaredMethod("drawItem", ItemStack.class, int.class, int.class, String.class);
-				method.setAccessible(true);
-				method.invoke(this, itemStack_1, int_1 - 8, int_2 - int_12, string_1);
+				drawItem(itemStack_1, int_1 - 8, int_2 - int_12, string_1);
 			} catch (Exception e) {
 				e.printStackTrace();
 				//Nice
 			}
 		}
 	}
+	public void drawItem(ItemStack itemStack_1, int int_1, int int_2, String string_1) {
+		GlStateManager.translatef(0.0F, 0.0F, 32.0F);
+		this.blitOffset = 200;
+		this.itemRenderer.zOffset = 200.0F;
+		this.itemRenderer.renderGuiItem(itemStack_1, int_1, int_2);
+		this.itemRenderer.renderGuiItemOverlay(this.font, itemStack_1, int_1, int_2, string_1);
+		this.blitOffset = 0;
+		this.itemRenderer.zOffset = 0.0F;
+	 }
 	public void renderGroupBack(SlotGroup group){
 		int count = group.slots.size();
 		int offset = 1;
