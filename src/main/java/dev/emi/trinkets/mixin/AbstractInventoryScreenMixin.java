@@ -22,6 +22,11 @@ public abstract class AbstractInventoryScreenMixin<T extends Container> extends 
 	}
 	@Shadow
 	protected abstract void drawPotionEffects();
+	/**
+	 * I was getting compiler warnings without this comment
+	 * @author Emi
+	 * @reason Had to change render order
+	 */
 	@Overwrite
 	public void render(int int_1, int int_2, float float_1){
 		if (this.offsetGuiForEffects) {

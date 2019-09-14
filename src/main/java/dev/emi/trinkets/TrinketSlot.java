@@ -1,6 +1,7 @@
 package dev.emi.trinkets;
 
 import dev.emi.trinkets.api.ITrinket;
+import dev.emi.trinkets.api.TrinketInventory;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.container.Slot;
@@ -41,13 +42,13 @@ public class TrinketSlot extends Slot{
 	public void setStack(ItemStack stack){
 		super.setStack(stack);
 		if(stack.getItem() instanceof ITrinket){
-			((ITrinket) stack.getItem()).onEquip(stack);
+			((ITrinket) stack.getItem()).onEquip(((PlayerEntity) ((TrinketInventory) this.inventory).getComponent().getEntity()), stack);
 		}
 	}
 	@Override
 	public ItemStack takeStack(int int_1){
 		if(this.getStack().getItem() instanceof ITrinket){
-			((ITrinket) this.getStack().getItem()).onUnequip(this.getStack());
+			((ITrinket) this.getStack().getItem()).onUnequip(((PlayerEntity) ((TrinketInventory) this.inventory).getComponent().getEntity()), this.getStack());
 		}
 		return super.takeStack(int_1);
 	}

@@ -14,7 +14,8 @@
 	"ElytraFeatureRendererMixin",
 	"ElytraItemMixin",
 	"MobEntityMixin",
-	"AbstractInventoryScreenMixin"
+	"AbstractInventoryScreenMixin",
+	"PlayerEntityRendererMixin"
   ],
   "client": [
   ],

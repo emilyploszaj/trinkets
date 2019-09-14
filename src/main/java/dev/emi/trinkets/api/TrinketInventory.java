@@ -11,6 +11,9 @@ public class TrinketInventory extends BasicInventory{
 		super(size);
 		this.component = component;
 	}
+	public PlayerTrinketComponent getComponent(){
+		return component;
+	}
 	public void markDirty(){
 		component.markDirty();
 	}

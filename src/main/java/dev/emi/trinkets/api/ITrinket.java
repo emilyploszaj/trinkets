@@ -2,9 +2,13 @@ package dev.emi.trinkets.api;
 
 import java.util.List;
 
+import com.mojang.blaze3d.platform.GlStateManager;
+
 import net.minecraft.block.DispenserBlock;
 import net.minecraft.block.dispenser.DispenserBehavior;
 import net.minecraft.block.dispenser.ItemDispenserBehavior;
+import net.minecraft.client.network.AbstractClientPlayerEntity;
+import net.minecraft.client.render.entity.model.PlayerEntityModel;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -31,13 +35,13 @@ public interface ITrinket{
 	public default void tick(PlayerEntity player, ItemStack stack){
 	}
 	/**
-	 * @return Whether the itemstack can be inserted into the slot
+	 * @return Whether the itemstack can be inserted into a slot
 	 */
 	public default boolean canInsert(ItemStack stack){
 		return true;
 	}
 	/**
-	 * @return Whether the itemstack can be removed from the slot
+	 * @return Whether the itemstack can be removed from a slot
 	 */
 	public default boolean canTake(ItemStack stack){
 		return true;
@@ -45,12 +49,23 @@ public interface ITrinket{
 	/**
 	 * Called when equipped by a player
 	 */
-	public default void onEquip(ItemStack stack){
+	public default void onEquip(PlayerEntity player, ItemStack stack){
 	}
 	/**
 	 * Called when unequipped by a player
 	 */
-	public default void onUnequip(ItemStack stack){
+	public default void onUnequip(PlayerEntity player, ItemStack stack){
+	}
+	/**
+	 * Called to render the trinket
+	 * @see {@link #translateToFace(PlayerEntityModel, AbstractClientPlayerEntity, float, float)}
+	 * @see {@link #translateToChest(PlayerEntityModel, AbstractClientPlayerEntity, float, float)}
+	 * @see {@link #translateToRightArm(PlayerEntityModel, AbstractClientPlayerEntity, float, float)}
+	 * @see {@link #translateToLeftArm(PlayerEntityModel, AbstractClientPlayerEntity, float, float)}
+	 * @see {@link #translateToRightLeg(PlayerEntityModel, AbstractClientPlayerEntity, float, float)}
+	 * @see {@link #translateToLeftLeg(PlayerEntityModel, AbstractClientPlayerEntity, float, float)}
+	 */
+	public default void render(PlayerEntityModel<AbstractClientPlayerEntity> model, AbstractClientPlayerEntity player, float headYaw, float headPitch){
 	}
 	
 	//Helper stuff for creating trinkets that interact with vanilla behavior properly
@@ -85,5 +100,88 @@ public interface ITrinket{
 		}else{
 			return new TypedActionResult<ItemStack>(ActionResult.FAIL, itemStack_1);
 		}
+	}
+	//Helper stuff for rendering
+	/**
+	 * Translates the rendering context to the center of the player's face, parameters should be passed from {@link #render(PlayerEntityModel, AbstractClientPlayerEntity, float, float)}
+	 */
+	public static void translateToFace(PlayerEntityModel<AbstractClientPlayerEntity> model, AbstractClientPlayerEntity player, float headYaw, float headPitch){
+		if(player.isInSwimmingPose() || player.isFallFlying()){
+			GlStateManager.rotatef(model.headwear.roll, 0.0F, 0.0F, 1.0F);
+			GlStateManager.rotatef(headYaw, 0.0F, 1.0F, 0.0F);
+			GlStateManager.rotatef(-45.0F, 1.0F, 0.0F, 0.0F);
+		}else{
+			if(player.isInSneakingPose() && !model.isRiding){
+				GlStateManager.translatef(0.0F, 0.25F, 0.0F);
+			}
+			GlStateManager.rotatef(headYaw, 0.0F, 1.0F, 0.0F);
+			GlStateManager.rotatef(headPitch, 1.0F, 0.0F, 0.0F);
+		}
+		GlStateManager.translatef(0.0F, -0.25F, -0.3F);
+	}
+	/**
+	 * Translates the rendering context to the center of the player's chest/torso segment, parameters should be passed from {@link #render(PlayerEntityModel, AbstractClientPlayerEntity, float, float)}
+	 */
+	public static void translateToChest(PlayerEntityModel<AbstractClientPlayerEntity> model, AbstractClientPlayerEntity player, float headYaw, float headPitch){
+		if(player.isInSneakingPose() && !model.isRiding && !player.isSwimming()){
+			GlStateManager.translatef(0.0F, 0.2F, 0.0F);
+			GlStateManager.rotatef(model.body.pitch * 60, 1.0F, 0.0F, 0.0F);
+		}
+		GlStateManager.rotatef(model.body.yaw * 60, 0.0F, 1.0F, 0.0F);
+		GlStateManager.translatef(0.0F, 0.4F, -0.16F);
+	}
+	/**
+	 * Translates the rendering context to the center of the bottom of the player's right arm, parameters should be passed from {@link #render(PlayerEntityModel, AbstractClientPlayerEntity, float, float)}
+	 */
+	public static void translateToRightArm(PlayerEntityModel<AbstractClientPlayerEntity> model, AbstractClientPlayerEntity player, float headYaw, float headPitch){
+		if(player.isInSneakingPose() && !model.isRiding && !player.isSwimming()){
+			GlStateManager.translatef(0.0F, 0.2F, 0.0F);
+		}
+		GlStateManager.rotatef(model.body.yaw * 60, 0.0F, 1.0F, 0.0F);
+		GlStateManager.translatef(-0.3125F, 0.15625F, 0.0F);
+		GlStateManager.rotatef(model.rightArm.roll * 57.5F, 0.0F, 0.0F, 1.0F);
+		GlStateManager.rotatef(model.rightArm.yaw * 57.5F, 0.0F, 1.0F, 0.0F);
+		GlStateManager.rotatef(model.rightArm.pitch * 57.5F, 1.0F, 0.0F, 0.0F);
+		GlStateManager.translatef(-0.0625F, 0.625F, 0.0F);
+	}
+	/**
+	 * Translates the rendering context to the center of the bottom of the player's left arm, parameters should be passed from {@link #render(PlayerEntityModel, AbstractClientPlayerEntity, float, float)}
+	 */
+	public static void translateToLeftArm(PlayerEntityModel<AbstractClientPlayerEntity> model, AbstractClientPlayerEntity player, float headYaw, float headPitch){
+		if(player.isInSneakingPose() && !model.isRiding && !player.isSwimming()){
+			GlStateManager.translatef(0.0F, 0.2F, 0.0F);
+		}
+		GlStateManager.rotatef(model.body.yaw * 60, 0.0F, 1.0F, 0.0F);
+		GlStateManager.translatef(0.3125F, 0.15625F, 0.0F);
+		GlStateManager.rotatef(model.leftArm.roll * 57.5F, 0.0F, 0.0F, 1.0F);
+		GlStateManager.rotatef(model.leftArm.yaw * 57.5F, 0.0F, 1.0F, 0.0F);
+		GlStateManager.rotatef(model.leftArm.pitch * 57.5F, 1.0F, 0.0F, 0.0F);
+		GlStateManager.translatef(0.0625F, 0.625F, 0.0F);
+	}
+	/**
+	 * Translates the rendering context to the center of the bottom of the player's right leg, parameters should be passed from {@link #render(PlayerEntityModel, AbstractClientPlayerEntity, float, float)}
+	 */
+	public static void translateToRightLeg(PlayerEntityModel<AbstractClientPlayerEntity> model, AbstractClientPlayerEntity player, float headYaw, float headPitch){
+		if(player.isInSneakingPose() && !model.isRiding && !player.isSwimming()){
+			GlStateManager.translatef(0.0F, 0.0F, 0.25F);
+		}
+		GlStateManager.translatef(-0.125F, 0.75F, 0.0F);
+		GlStateManager.rotatef(model.rightLeg.roll * 57.5F, 0.0F, 0.0F, 1.0F);
+		GlStateManager.rotatef(model.rightLeg.yaw * 57.5F, 0.0F, 1.0F, 0.0F);
+		GlStateManager.rotatef(model.rightLeg.pitch * 57.5F, 1.0F, 0.0F, 0.0F);
+		GlStateManager.translatef(0.0F, 0.75F, 0.0F);
+	}
+	/**
+	 * Translates the rendering context to the center of the bottom of the player's left leg, parameters should be passed from {@link #render(PlayerEntityModel, AbstractClientPlayerEntity, float, float)}
+	 */
+	public static void translateToLeftLeg(PlayerEntityModel<AbstractClientPlayerEntity> model, AbstractClientPlayerEntity player, float headYaw, float headPitch){
+		if(player.isInSneakingPose() && !model.isRiding && !player.isSwimming()){
+			GlStateManager.translatef(0.0F, 0.0F, 0.25F);
+		}
+		GlStateManager.translatef(0.125F, 0.75F, 0.0F);
+		GlStateManager.rotatef(model.leftLeg.roll * 57.5F, 0.0F, 0.0F, 1.0F);
+		GlStateManager.rotatef(model.leftLeg.yaw * 57.5F, 0.0F, 1.0F, 0.0F);
+		GlStateManager.rotatef(model.leftLeg.pitch * 57.5F, 1.0F, 0.0F, 0.0F);
+		GlStateManager.translatef(0.0F, 0.75F, 0.0F);
 	}
 }
