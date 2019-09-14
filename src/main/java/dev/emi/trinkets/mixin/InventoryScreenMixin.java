@@ -1,12 +1,10 @@
 package dev.emi.trinkets.mixin;
 
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.DrawableHelper;
-import net.minecraft.client.gui.screen.ingame.AbstractContainerScreen;
 import net.minecraft.client.gui.screen.ingame.AbstractInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.client.gui.screen.recipebook.RecipeBookProvider;
@@ -15,7 +13,6 @@ import net.minecraft.container.Slot;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -195,18 +192,7 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreen<Playe
 		ItemStack itemStack_1 = playerInventory_1.getCursorStack();
 		if (!itemStack_1.isEmpty()) {
 			try {
-				int int_12 = 8;
-				String string_1 = null;
-				if (this.isCursorDragging && this.cursorDragSlots.size() > 1) {
-					itemStack_1 = itemStack_1.copy();
-					Field draggedStackRemainderField = AbstractContainerScreen.class.getDeclaredField("draggedStackRemainder");
-					draggedStackRemainderField.setAccessible(true);
-					itemStack_1.setCount((int) draggedStackRemainderField.get(this));
-					if (itemStack_1.isEmpty()) {
-						string_1 = "" + Formatting.YELLOW + "0";
-					}
-				}
-				drawItem(itemStack_1, int_1 - 8, int_2 - int_12, string_1);
+				drawItem(itemStack_1, int_1 - 8, int_2 - 8, null);
 			} catch (Exception e) {
 				e.printStackTrace();
 				//Nice
