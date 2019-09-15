@@ -1,7 +1,6 @@
 package dev.emi.trinkets;
 
 import dev.emi.trinkets.api.ITrinket;
-import dev.emi.trinkets.api.TrinketInventory;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.container.Slot;
@@ -28,7 +27,7 @@ public class TrinketSlot extends Slot{
 		return false;
 	}
 	@Override
-	public boolean canTakeItems(PlayerEntity playerEntity_1) {
+	public boolean canTakeItems(PlayerEntity player){
 		ItemStack stack = this.getStack();
 		if(EnchantmentHelper.hasBindingCurse(stack)){
 			return false;
@@ -36,20 +35,14 @@ public class TrinketSlot extends Slot{
 		if(stack.getItem() instanceof ITrinket){
 			return ((ITrinket) stack.getItem()).canTake(stack);
 		}
-		return super.canTakeItems(playerEntity_1);
+		return super.canTakeItems(player);
 	}
 	@Override
 	public void setStack(ItemStack stack){
 		super.setStack(stack);
-		if(stack.getItem() instanceof ITrinket){
-			((ITrinket) stack.getItem()).onEquip(((PlayerEntity) ((TrinketInventory) this.inventory).getComponent().getEntity()), stack);
-		}
 	}
 	@Override
 	public ItemStack takeStack(int int_1){
-		if(this.getStack().getItem() instanceof ITrinket){
-			((ITrinket) this.getStack().getItem()).onUnequip(((PlayerEntity) ((TrinketInventory) this.inventory).getComponent().getEntity()), this.getStack());
-		}
 		return super.takeStack(int_1);
 	}
 	@Override

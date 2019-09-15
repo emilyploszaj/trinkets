@@ -125,9 +125,9 @@ public interface ITrinket{
 	public static void translateToChest(PlayerEntityModel<AbstractClientPlayerEntity> model, AbstractClientPlayerEntity player, float headYaw, float headPitch){
 		if(player.isInSneakingPose() && !model.isRiding && !player.isSwimming()){
 			GlStateManager.translatef(0.0F, 0.2F, 0.0F);
-			GlStateManager.rotatef(model.body.pitch * 60, 1.0F, 0.0F, 0.0F);
+			GlStateManager.rotatef(model.body.pitch * 57.5F, 1.0F, 0.0F, 0.0F);
 		}
-		GlStateManager.rotatef(model.body.yaw * 60, 0.0F, 1.0F, 0.0F);
+		GlStateManager.rotatef(model.body.yaw * 57.5F, 0.0F, 1.0F, 0.0F);
 		GlStateManager.translatef(0.0F, 0.4F, -0.16F);
 	}
 	/**
@@ -137,7 +137,7 @@ public interface ITrinket{
 		if(player.isInSneakingPose() && !model.isRiding && !player.isSwimming()){
 			GlStateManager.translatef(0.0F, 0.2F, 0.0F);
 		}
-		GlStateManager.rotatef(model.body.yaw * 60, 0.0F, 1.0F, 0.0F);
+		GlStateManager.rotatef(model.body.yaw * 57.5F, 0.0F, 1.0F, 0.0F);
 		GlStateManager.translatef(-0.3125F, 0.15625F, 0.0F);
 		GlStateManager.rotatef(model.rightArm.roll * 57.5F, 0.0F, 0.0F, 1.0F);
 		GlStateManager.rotatef(model.rightArm.yaw * 57.5F, 0.0F, 1.0F, 0.0F);
@@ -151,7 +151,7 @@ public interface ITrinket{
 		if(player.isInSneakingPose() && !model.isRiding && !player.isSwimming()){
 			GlStateManager.translatef(0.0F, 0.2F, 0.0F);
 		}
-		GlStateManager.rotatef(model.body.yaw * 60, 0.0F, 1.0F, 0.0F);
+		GlStateManager.rotatef(model.body.yaw * 57.5F, 0.0F, 1.0F, 0.0F);
 		GlStateManager.translatef(0.3125F, 0.15625F, 0.0F);
 		GlStateManager.rotatef(model.leftArm.roll * 57.5F, 0.0F, 0.0F, 1.0F);
 		GlStateManager.rotatef(model.leftArm.yaw * 57.5F, 0.0F, 1.0F, 0.0F);

@@ -7,6 +7,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import dev.emi.trinkets.TrinketSlot;
+import dev.emi.trinkets.api.ITrinket;
+import dev.emi.trinkets.api.PlayerTrinketComponent;
 import dev.emi.trinkets.api.TrinketComponent;
 import dev.emi.trinkets.api.TrinketSlots;
 import dev.emi.trinkets.api.TrinketsApi;
@@ -51,14 +53,27 @@ public abstract class PlayerContainerMixin extends CraftingContainer<CraftingInv
 	}
 	@Inject(at = @At("HEAD"), method = "transferSlot", cancellable = true)
 	public void transferSlot(PlayerEntity playerEntity_1, int int_1, CallbackInfoReturnable<ItemStack> info){
-		if(int_1 > 45) return;
 		net.minecraft.container.Slot slot_1 = (net.minecraft.container.Slot) this.slotList.get(int_1);
-		if (slot_1 != null && slot_1.hasStack()) {
-			ItemStack itemStack_1 = slot_1.getStack();
+		if(int_1 > 45){
+			if(slot_1 != null && slot_1.hasStack()){
+				ItemStack stack = slot_1.getStack();
+				ItemStack copy = stack.copy();
+				if(!this.insertItem(stack, 9, 45, false)){
+					info.setReturnValue(ItemStack.EMPTY);
+				}else{
+					if(copy.getItem() instanceof ITrinket){
+						TrinketComponent comp = TrinketsApi.getTrinketComponent(playerEntity_1);
+						((ITrinket) copy.getItem()).onUnequip((PlayerEntity) ((PlayerTrinketComponent) comp).getEntity(), copy);
+					}
+					info.setReturnValue(stack);
+				}
+			}
+		}else if(slot_1 != null && slot_1.hasStack()){
+			ItemStack stack = slot_1.getStack();
 			TrinketComponent comp = TrinketsApi.getTrinketComponent(playerEntity_1);
-			if(comp.equip(itemStack_1)){
-				itemStack_1.setCount(0);
-				info.setReturnValue(itemStack_1);
+			if(comp.equip(stack)){
+				stack.setCount(0);
+				info.setReturnValue(stack);
 			}
 		}
 	}
