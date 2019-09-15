@@ -34,11 +34,11 @@ dependencies {
 	// You may need to force-disable transitiveness on them.
 	
 	//Base
-	modCompile "com.github.NerdHubMC.Cardinal-Components-API:cardinal-components-base:2.0.1-SNAPSHOT"
-	include "com.github.NerdHubMC.Cardinal-Components-API:cardinal-components-base:2.0.1-SNAPSHOT"
+	modCompile "com.github.NerdHubMC.Cardinal-Components-API:cardinal-components-base:2.0.1"
+	include "com.github.NerdHubMC.Cardinal-Components-API:cardinal-components-base:2.0.1"
 	//Entity
-	modCompile "com.github.NerdHubMC.Cardinal-Components-API:cardinal-components-entity:2.0.1-SNAPSHOT"
-	include "com.github.NerdHubMC.Cardinal-Components-API:cardinal-components-entity:2.0.1-SNAPSHOT"
+	modCompile "com.github.NerdHubMC.Cardinal-Components-API:cardinal-components-entity:2.0.1"
+	include "com.github.NerdHubMC.Cardinal-Components-API:cardinal-components-entity:2.0.1"
 }
 processResources {
 	inputs.property "version", project.version
