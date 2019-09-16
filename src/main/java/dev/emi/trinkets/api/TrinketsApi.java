@@ -18,6 +18,9 @@ public class TrinketsApi{
 	public static Inventory getTrinketsInventory(PlayerEntity player){
 		return TRINKETS.get(player).getInventory();
 	}
+	/**
+	 * @return The {@link TrinketComponent} associated with the given player
+	 */
 	public static TrinketComponent getTrinketComponent(PlayerEntity player){
 		return TRINKETS.get(player);
 	}

@@ -1,9 +1,12 @@
 package dev.emi.trinkets;
 
+import java.util.List;
+
 import com.mojang.blaze3d.platform.GlStateManager;
 
 import dev.emi.trinkets.api.ITrinket;
 import dev.emi.trinkets.api.TrinketComponent;
+import dev.emi.trinkets.api.TrinketSlots;
 import dev.emi.trinkets.api.TrinketsApi;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.render.entity.feature.FeatureRenderer;
@@ -24,11 +27,12 @@ public class TrinketFeatureRenderer extends FeatureRenderer<AbstractClientPlayer
 	@Override
 	public void render(AbstractClientPlayerEntity var1, float var2, float var3, float var4, float var5, float var6, float var7, float var8){
 		TrinketComponent comp = TrinketsApi.getTrinketComponent(var1);
+		List<String> names = TrinketSlots.getAllSlotNames();
 		for(int i = 0; i < comp.getInventory().getInvSize(); i++){
 			GlStateManager.pushMatrix();
 			ItemStack stack = comp.getInventory().getInvStack(i);
 			if(stack.getItem() instanceof ITrinket){
-				((ITrinket) stack.getItem()).render(featureContext.getModel(), var1, var6, var7);
+				((ITrinket) stack.getItem()).render(names.get(i), featureContext.getModel(), var1, var6, var7);
 			}
 			GlStateManager.popMatrix();
 		}

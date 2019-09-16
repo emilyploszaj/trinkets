@@ -58,6 +58,7 @@ public interface ITrinket{
 	}
 	/**
 	 * Called to render the trinket
+	 * @param slot The {@code group:slot} structured slot the trinket is being rendered in
 	 * @see {@link #translateToFace(PlayerEntityModel, AbstractClientPlayerEntity, float, float)}
 	 * @see {@link #translateToChest(PlayerEntityModel, AbstractClientPlayerEntity, float, float)}
 	 * @see {@link #translateToRightArm(PlayerEntityModel, AbstractClientPlayerEntity, float, float)}
@@ -65,7 +66,7 @@ public interface ITrinket{
 	 * @see {@link #translateToRightLeg(PlayerEntityModel, AbstractClientPlayerEntity, float, float)}
 	 * @see {@link #translateToLeftLeg(PlayerEntityModel, AbstractClientPlayerEntity, float, float)}
 	 */
-	public default void render(PlayerEntityModel<AbstractClientPlayerEntity> model, AbstractClientPlayerEntity player, float headYaw, float headPitch){
+	public default void render(String slot, PlayerEntityModel<AbstractClientPlayerEntity> model, AbstractClientPlayerEntity player, float headYaw, float headPitch){
 	}
 	
 	//Helper stuff for creating trinkets that interact with vanilla behavior properly
