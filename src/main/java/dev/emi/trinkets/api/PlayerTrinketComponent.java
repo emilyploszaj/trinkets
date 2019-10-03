@@ -55,7 +55,7 @@ public class PlayerTrinketComponent implements TrinketComponent, EntitySyncedCom
 			if(s.equals(slot)) return getInventory().getInvStack(i);
 			i++;
 		}
-		return null;
+		return ItemStack.EMPTY;
 	}
 	/**
 	 * Attempts to equip a trinket into any available trinket slots

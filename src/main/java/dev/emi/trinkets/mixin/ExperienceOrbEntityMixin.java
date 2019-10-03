@@ -23,7 +23,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 
-@Mixin(ExperienceOrbEntity.class)
+@Mixin(priority = 999, value = ExperienceOrbEntity.class)
 public abstract class ExperienceOrbEntityMixin extends Entity {
 	public ExperienceOrbEntityMixin(EntityType<?> entityType_1, World world_1) {
 		super(entityType_1, world_1);
