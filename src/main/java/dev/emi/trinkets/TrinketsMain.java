@@ -16,7 +16,7 @@ public class TrinketsMain implements ModInitializer{
 	@SuppressWarnings("unchecked")
 	public void onInitialize(){
 		EntityComponentCallback.event(PlayerEntity.class).register((player, components) -> components.put(TrinketsApi.TRINKETS, new PlayerTrinketComponent(player)));
-		EntityComponents.setRespawnCopyStrategy(TrinketsApi.TRINKETS, (RespawnCopyStrategy<TrinketComponent>) RespawnCopyStrategy.INVENTORY);
+		EntityComponents.setRespawnCopyStrategy(TrinketsApi.TRINKETS, RespawnCopyStrategy.INVENTORY);
 		TrinketSlots.addSubSlot("chest", "cape", new Identifier("trinkets", "textures/item/empty_trinket_slot_cape.png"));
 		//Slots used for testing
 		//TrinketSlots.addSubSlot("head", "mask", new Identifier("trinkets", "textures/item/empty_trinket_slot_mask.png"));
