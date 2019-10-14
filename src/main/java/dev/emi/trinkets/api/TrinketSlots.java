@@ -10,12 +10,12 @@ public class TrinketSlots{
 
 	static{
 		//Default slot groups
-		TrinketSlots.addSlotGroup("head", 7, 7, 5);
-		TrinketSlots.addSlotGroup("chest", 7, 25, 6);
-		TrinketSlots.addSlotGroup("legs", 7, 43, 7);
-		TrinketSlots.addSlotGroup("feet", 7, 61, 8);
-		TrinketSlots.addSlotGroup("hand", 76, 43, "gloves");
-		TrinketSlots.addSlotGroup("offhand", 76, 61, 45);
+		TrinketSlots.addSlotGroup(SlotGroups.HEAD, 7, 7, 5);
+		TrinketSlots.addSlotGroup(SlotGroups.CHEST, 7, 25, 6);
+		TrinketSlots.addSlotGroup(SlotGroups.LEGS, 7, 43, 7);
+		TrinketSlots.addSlotGroup(SlotGroups.FEET, 7, 61, 8);
+		TrinketSlots.addSlotGroup(SlotGroups.HAND, 76, 43, "gloves");
+		TrinketSlots.addSlotGroup(SlotGroups.OFFHAND, 76, 61, 45);
 	}
 	/**
 	 * Adds a slot group with no existing vanilla slot
