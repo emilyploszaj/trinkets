@@ -1,6 +1,8 @@
 package dev.emi.trinkets;
 
 import dev.emi.trinkets.api.ITrinket;
+import dev.emi.trinkets.api.SlotGroups;
+import dev.emi.trinkets.api.Slots;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.container.Slot;
@@ -19,7 +21,7 @@ public class TrinketSlot extends Slot{
 		this.minor = minor;
 	}
 	public boolean canInsert(ItemStack itemStack){
-		if(major == "chest" && minor == "cape" && itemStack.getItem() == Items.ELYTRA) return true;
+		if(major == SlotGroups.CHEST && minor == Slots.CAPE && itemStack.getItem() == Items.ELYTRA) return true;
 		if(itemStack.getItem() instanceof ITrinket){
 			ITrinket trinket = (ITrinket) itemStack.getItem();
 			return trinket.canWearInSlot(major, minor) && trinket.canInsert(itemStack);

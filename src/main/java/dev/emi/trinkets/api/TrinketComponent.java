@@ -10,5 +10,8 @@ import net.minecraft.item.ItemStack;
 public interface TrinketComponent extends Component{
 	public Inventory getInventory();
 	public ItemStack getStack(String slot);
+	public default ItemStack getStack(String group, String slot){
+		return getStack(group + ':' + slot);
+	}
 	public boolean equip(ItemStack stack);
 }

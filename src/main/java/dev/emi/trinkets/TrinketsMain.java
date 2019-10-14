@@ -2,6 +2,7 @@ package dev.emi.trinkets;
 
 import dev.emi.trinkets.api.PlayerTrinketComponent;
 import dev.emi.trinkets.api.SlotGroups;
+import dev.emi.trinkets.api.Slots;
 import dev.emi.trinkets.api.TrinketComponent;
 import dev.emi.trinkets.api.TrinketSlots;
 import dev.emi.trinkets.api.TrinketsApi;
@@ -18,7 +19,7 @@ public class TrinketsMain implements ModInitializer{
 	public void onInitialize(){
 		EntityComponentCallback.event(PlayerEntity.class).register((player, components) -> components.put(TrinketsApi.TRINKETS, new PlayerTrinketComponent(player)));
 		EntityComponents.setRespawnCopyStrategy(TrinketsApi.TRINKETS, RespawnCopyStrategy.INVENTORY);
-		TrinketSlots.addSubSlot(SlotGroups.CHEST, "cape", new Identifier("trinkets", "textures/item/empty_trinket_slot_cape.png"));
+		TrinketSlots.addSubSlot(SlotGroups.CHEST, Slots.CAPE, new Identifier("trinkets", "textures/item/empty_trinket_slot_cape.png"));
 		//Slots used for testing
 		//TrinketSlots.addSubSlot("head", "mask", new Identifier("trinkets", "textures/item/empty_trinket_slot_mask.png"));
 		//TrinketSlots.addSubSlot("chest", "necklace", new Identifier("trinkets", "textures/item/empty_trinket_slot_necklace.png"));

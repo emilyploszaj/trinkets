@@ -14,7 +14,7 @@ public class TrinketSlots{
 		TrinketSlots.addSlotGroup(SlotGroups.CHEST, 7, 25, 6);
 		TrinketSlots.addSlotGroup(SlotGroups.LEGS, 7, 43, 7);
 		TrinketSlots.addSlotGroup(SlotGroups.FEET, 7, 61, 8);
-		TrinketSlots.addSlotGroup(SlotGroups.HAND, 76, 43, "gloves");
+		TrinketSlots.addSlotGroup(SlotGroups.HAND, 76, 43, Slots.GLOVES);
 		TrinketSlots.addSlotGroup(SlotGroups.OFFHAND, 76, 61, 45);
 	}
 	/**
