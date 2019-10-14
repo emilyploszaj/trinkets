@@ -34,6 +34,6 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
 	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerEntity;getEquippedStack(Lnet/minecraft/entity/EquipmentSlot;)Lnet/minecraft/item/ItemStack;"), method = "tickMovement")
 	public ItemStack getEquippedStackProxy(ClientPlayerEntity player, EquipmentSlot slot){
 		TrinketComponent comp = TrinketsApi.getTrinketComponent(player);
-		return comp.getStack(SlotGroups.CHEST + ':' + Slots.CAPE);
+		return comp.getStack(SlotGroups.CHEST, Slots.CAPE);
 	}
 }
