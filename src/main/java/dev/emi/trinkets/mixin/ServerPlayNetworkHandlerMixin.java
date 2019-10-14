@@ -1,5 +1,7 @@
 package dev.emi.trinkets.mixin;
 
+import dev.emi.trinkets.api.SlotGroups;
+import dev.emi.trinkets.api.Slots;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -17,6 +19,6 @@ public abstract class ServerPlayNetworkHandlerMixin implements ServerPlayPacketL
 	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayerEntity;getEquippedStack(Lnet/minecraft/entity/EquipmentSlot;)Lnet/minecraft/item/ItemStack;"), method = "onClientCommand")
 	public ItemStack getEquippedStackProxy(ServerPlayerEntity player, EquipmentSlot slot){
 		TrinketComponent comp = TrinketsApi.getTrinketComponent(player);
-		return comp.getStack("chest:cape");
+		return comp.getStack(SlotGroups.CHEST, Slots.CAPE);
 	}
 }

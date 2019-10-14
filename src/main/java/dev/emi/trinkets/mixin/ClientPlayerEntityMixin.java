@@ -2,6 +2,8 @@ package dev.emi.trinkets.mixin;
 
 import com.mojang.authlib.GameProfile;
 
+import dev.emi.trinkets.api.SlotGroups;
+import dev.emi.trinkets.api.Slots;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -32,6 +34,6 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
 	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerEntity;getEquippedStack(Lnet/minecraft/entity/EquipmentSlot;)Lnet/minecraft/item/ItemStack;"), method = "tickMovement")
 	public ItemStack getEquippedStackProxy(ClientPlayerEntity player, EquipmentSlot slot){
 		TrinketComponent comp = TrinketsApi.getTrinketComponent(player);
-		return comp.getStack("chest:cape");
+		return comp.getStack(SlotGroups.CHEST, Slots.CAPE);
 	}
 }

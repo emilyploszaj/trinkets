@@ -1,5 +1,7 @@
 package dev.emi.trinkets.mixin;
 
+import dev.emi.trinkets.api.SlotGroups;
+import dev.emi.trinkets.api.Slots;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -25,7 +27,7 @@ public abstract class LivingEntityMixin extends Entity {
 		if(entity instanceof PlayerEntity){
 			PlayerEntity player = (PlayerEntity) entity;
 			TrinketComponent comp = TrinketsApi.getTrinketComponent(player);
-			return comp.getStack("chest:cape");
+			return comp.getStack(SlotGroups.CHEST, Slots.CAPE);
 		}else{
 			return entity.getEquippedStack(slot);
 		}

@@ -69,7 +69,7 @@ public class PlayerTrinketComponent implements TrinketComponent, EntitySyncedCom
 			if(stack.getItem() == Items.ELYTRA){
 				for(SlotGroup group: TrinketSlots.slotGroups){
 					for(Slot slot: group.slots){
-						if(group.getName().equals("chest") && slot.getName() == "cape"){
+						if(group.getName().equals(SlotGroups.CHEST) && slot.getName() == Slots.CAPE){
 							if(getInventory().getInvStack(i).isEmpty()){
 								getInventory().setInvStack(i, stack.copy());
 								TrinketsClient.lastEquipped = group;
