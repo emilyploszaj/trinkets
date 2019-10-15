@@ -20,21 +20,26 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
 
+/**
+ * Changes dispenser and right click equipping to use trinket slots
+ */
 @Mixin(ElytraItem.class)
-public abstract class ElytraItemMixin{
+public abstract class ElytraItemMixin {
+
 	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/block/DispenserBlock;registerBehavior(Lnet/minecraft/item/ItemConvertible;Lnet/minecraft/block/dispenser/DispenserBehavior;)V"), method = "<init>")
-	private void registerBehaviorProxy(ItemConvertible item, DispenserBehavior behavior){
+	private void registerBehaviorProxy(ItemConvertible item, DispenserBehavior behavior) {
 		DispenserBlock.registerBehavior(item, ITrinket.TRINKET_DISPENSER_BEHAVIOR);
 	}
+
 	@Inject(at = @At("HEAD"), method = "use", cancellable = true)
-	public void use(World world_1, PlayerEntity playerEntity_1, Hand hand_1, CallbackInfoReturnable<TypedActionResult<ItemStack>> info){
-		ItemStack itemStack_1 = playerEntity_1.getStackInHand(hand_1);
-		TrinketComponent comp = TrinketsApi.getTrinketComponent(playerEntity_1);
-		if(comp.equip(itemStack_1)){
-			itemStack_1.setCount(0);
-			info.setReturnValue(new TypedActionResult<ItemStack>(ActionResult.SUCCESS, itemStack_1));
-		}else{
-			info.setReturnValue(new TypedActionResult<ItemStack>(ActionResult.FAIL, itemStack_1));
+	public void use(World world, PlayerEntity player, Hand hand, CallbackInfoReturnable<TypedActionResult<ItemStack>> info) {
+		ItemStack stack = player.getStackInHand(hand);
+		TrinketComponent comp = TrinketsApi.getTrinketComponent(player);
+		if (comp.equip(stack)) {
+			stack.setCount(0);
+			info.setReturnValue(new TypedActionResult<ItemStack>(ActionResult.SUCCESS, stack));
+		} else {
+			info.setReturnValue(new TypedActionResult<ItemStack>(ActionResult.FAIL, stack));
 		}
 	 }
 }

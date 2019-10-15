@@ -28,21 +28,23 @@ import net.minecraft.item.ItemStack;
  */
 @Mixin(PlayerContainer.class)
 public abstract class PlayerContainerMixin extends CraftingContainer<CraftingInventory> {
-	public PlayerContainerMixin(ContainerType<?> containerType_1, int int_1) {
-		super(containerType_1, int_1);
+
+	public PlayerContainerMixin(ContainerType<?> type, int i) {
+		super(type, i);
 	}
+
 	@Inject(at = @At("RETURN"), method = "<init>")
-	protected void init(PlayerInventory playerInventory_1, boolean boolean_1, PlayerEntity playerEntity_1, CallbackInfo info){
-		Inventory inv = TrinketsApi.getTrinketsInventory(playerEntity_1);
+	protected void init(PlayerInventory inventory, boolean b, PlayerEntity player, CallbackInfo info) {
+		Inventory inv = TrinketsApi.getTrinketsInventory(player);
 		int i = 0;
-		for(SlotGroup group: TrinketSlots.slotGroups){
+		for (SlotGroup group: TrinketSlots.slotGroups) {
 			int j = 0;
-			for(Slot slot: group.slots){
+			for (Slot slot: group.slots) {
 				TrinketSlot ts;
-				if(j == 0 && !group.onReal){
+				if (j == 0 && !group.onReal) {
 					ts = new TrinketSlot(inv, i, group.x + 1, group.y + 1, group.getName(), slot.getName());
 					ts.keepVisible = true;
-				}else{
+				} else {
 					ts = new TrinketSlot(inv, i, Integer.MIN_VALUE, 8, group.getName(), slot.getName());
 				}
 				addSlot(ts);
@@ -51,27 +53,28 @@ public abstract class PlayerContainerMixin extends CraftingContainer<CraftingInv
 			}
 		}
 	}
+
 	@Inject(at = @At("HEAD"), method = "transferSlot", cancellable = true)
-	public void transferSlot(PlayerEntity playerEntity_1, int int_1, CallbackInfoReturnable<ItemStack> info){
-		net.minecraft.container.Slot slot_1 = (net.minecraft.container.Slot) this.slotList.get(int_1);
-		if(int_1 > 45){
-			if(slot_1 != null && slot_1.hasStack()){
-				ItemStack stack = slot_1.getStack();
+	public void transferSlot(PlayerEntity player, int i, CallbackInfoReturnable<ItemStack> info) {
+		net.minecraft.container.Slot slot = (net.minecraft.container.Slot) this.slotList.get(i);
+		if (i > 45) {
+			if(slot != null && slot.hasStack()){
+				ItemStack stack = slot.getStack();
 				ItemStack copy = stack.copy();
 				if(!this.insertItem(stack, 9, 45, false)){
 					info.setReturnValue(ItemStack.EMPTY);
 				}else{
 					if(copy.getItem() instanceof ITrinket){
-						TrinketComponent comp = TrinketsApi.getTrinketComponent(playerEntity_1);
+						TrinketComponent comp = TrinketsApi.getTrinketComponent(player);
 						((ITrinket) copy.getItem()).onUnequip((PlayerEntity) ((PlayerTrinketComponent) comp).getEntity(), copy);
 					}
 					info.setReturnValue(stack);
 				}
 			}
-		}else if(slot_1 != null && slot_1.hasStack()){
-			ItemStack stack = slot_1.getStack();
-			TrinketComponent comp = TrinketsApi.getTrinketComponent(playerEntity_1);
-			if(comp.equip(stack)){
+		} else if(slot != null && slot.hasStack()) {
+			ItemStack stack = slot.getStack();
+			TrinketComponent comp = TrinketsApi.getTrinketComponent(player);
+			if (comp.equip(stack)) {
 				stack.setCount(0);
 				info.setReturnValue(stack);
 			}

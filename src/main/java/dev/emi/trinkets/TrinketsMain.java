@@ -3,7 +3,6 @@ package dev.emi.trinkets;
 import dev.emi.trinkets.api.PlayerTrinketComponent;
 import dev.emi.trinkets.api.SlotGroups;
 import dev.emi.trinkets.api.Slots;
-import dev.emi.trinkets.api.TrinketComponent;
 import dev.emi.trinkets.api.TrinketSlots;
 import dev.emi.trinkets.api.TrinketsApi;
 import nerdhub.cardinal.components.api.event.EntityComponentCallback;
@@ -13,10 +12,10 @@ import net.fabricmc.api.ModInitializer;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Identifier;
 
-public class TrinketsMain implements ModInitializer{
+public class TrinketsMain implements ModInitializer {
+	
 	@Override
-	@SuppressWarnings("unchecked")
-	public void onInitialize(){
+	public void onInitialize() {
 		EntityComponentCallback.event(PlayerEntity.class).register((player, components) -> components.put(TrinketsApi.TRINKETS, new PlayerTrinketComponent(player)));
 		EntityComponents.setRespawnCopyStrategy(TrinketsApi.TRINKETS, RespawnCopyStrategy.INVENTORY);
 		TrinketSlots.addSubSlot(SlotGroups.CHEST, Slots.CAPE, new Identifier("trinkets", "textures/item/empty_trinket_slot_cape.png"));

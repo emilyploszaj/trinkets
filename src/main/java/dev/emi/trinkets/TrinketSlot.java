@@ -13,43 +13,49 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 
 public class TrinketSlot extends Slot{
-	public String major, minor;
+	public String group, slot;
 	public boolean keepVisible;
-	public TrinketSlot(Inventory inventory_1, int int_1, int int_2, int int_3, String major, String minor){
-		super(inventory_1, int_1, int_2, int_3);
-		this.major = major;
-		this.minor = minor;
+
+	public TrinketSlot(Inventory inventory, int id, int x, int y, String group, String slot) {
+		super(inventory, id, x, y);
+		this.group = group;
+		this.slot = slot;
 	}
-	public boolean canInsert(ItemStack itemStack){
-		if(major == SlotGroups.CHEST && minor == Slots.CAPE && itemStack.getItem() == Items.ELYTRA) return true;
-		if(itemStack.getItem() instanceof ITrinket){
+
+	public boolean canInsert(ItemStack itemStack) {
+		if (group.equals(SlotGroups.CHEST) && slot.equals(Slots.CAPE) && itemStack.getItem() == Items.ELYTRA) return true;
+		if (itemStack.getItem() instanceof ITrinket) {
 			ITrinket trinket = (ITrinket) itemStack.getItem();
-			return trinket.canWearInSlot(major, minor) && trinket.canInsert(itemStack);
+			return trinket.canWearInSlot(group, slot) && trinket.canInsert(itemStack);
 		}
 		return false;
 	}
+
 	@Override
-	public boolean canTakeItems(PlayerEntity player){
+	public boolean canTakeItems(PlayerEntity player) {
 		ItemStack stack = this.getStack();
-		if(EnchantmentHelper.hasBindingCurse(stack)){
+		if (EnchantmentHelper.hasBindingCurse(stack)) {
 			return false;
 		}
-		if(stack.getItem() instanceof ITrinket){
+		if (stack.getItem() instanceof ITrinket) {
 			return ((ITrinket) stack.getItem()).canTake(stack);
 		}
 		return super.canTakeItems(player);
 	}
+
 	@Override
-	public void setStack(ItemStack stack){
+	public void setStack(ItemStack stack) {
 		super.setStack(stack);
 	}
+
 	@Override
-	public ItemStack takeStack(int int_1){
+	public ItemStack takeStack(int int_1) {
 		return super.takeStack(int_1);
 	}
+
 	@Override
 	@Environment(EnvType.CLIENT)
-	public String getBackgroundSprite(){
+	public String getBackgroundSprite() {
 		return "trinkets:item/empty";
 	}
 }

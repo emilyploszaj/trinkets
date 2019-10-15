@@ -24,15 +24,18 @@ import net.minecraft.item.ItemStack;
  */
 @Mixin(ClientPlayerEntity.class)
 public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity {
-	public ClientPlayerEntityMixin(ClientWorld clientWorld_1, GameProfile gameProfile_1) {
-		super(clientWorld_1, gameProfile_1);
+
+	public ClientPlayerEntityMixin(ClientWorld world, GameProfile profile) {
+		super(world, profile);
 	}
+
 	@Inject(at = @At("TAIL"), method = "closeScreen")
-	public void closeScreen(CallbackInfo info){
+	public void closeScreen(CallbackInfo info) {
 		TrinketsClient.slotGroup = null;
 	}
+
 	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerEntity;getEquippedStack(Lnet/minecraft/entity/EquipmentSlot;)Lnet/minecraft/item/ItemStack;"), method = "tickMovement")
-	public ItemStack getEquippedStackProxy(ClientPlayerEntity player, EquipmentSlot slot){
+	public ItemStack getEquippedStackProxy(ClientPlayerEntity player, EquipmentSlot slot) {
 		TrinketComponent comp = TrinketsApi.getTrinketComponent(player);
 		return comp.getStack(SlotGroups.CHEST, Slots.CAPE);
 	}

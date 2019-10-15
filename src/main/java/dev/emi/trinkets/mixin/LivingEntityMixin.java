@@ -18,17 +18,18 @@ import net.minecraft.world.World;
 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin extends Entity {
-	public LivingEntityMixin(EntityType<?> entityType_1, World world_1) {
-		super(entityType_1, world_1);
+
+	public LivingEntityMixin(EntityType<?> type, World world) {
+		super(type, world);
 	}
 
 	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;getEquippedStack(Lnet/minecraft/entity/EquipmentSlot;)Lnet/minecraft/item/ItemStack;"), method = "initAi")
-	public ItemStack getEquippedStackProxy(LivingEntity entity, EquipmentSlot slot){
-		if(entity instanceof PlayerEntity){
+	public ItemStack getEquippedStackProxy(LivingEntity entity, EquipmentSlot slot) {
+		if (entity instanceof PlayerEntity) {
 			PlayerEntity player = (PlayerEntity) entity;
 			TrinketComponent comp = TrinketsApi.getTrinketComponent(player);
 			return comp.getStack(SlotGroups.CHEST, Slots.CAPE);
-		}else{
+		} else {
 			return entity.getEquippedStack(slot);
 		}
 	}

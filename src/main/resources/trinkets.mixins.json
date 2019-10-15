@@ -1,27 +1,27 @@
 {
-  "required": true,
-  "package": "dev.emi.trinkets.mixin",
-  "compatibilityLevel": "JAVA_8",
-  "mixins": [
-	"InventoryScreenMixin",
-	"PlayerContainerMixin",
-	"PlayerEntityMixin",
-	"MinecraftServerMixin",
-	"AbstractContainerScreenMixin",
-	"ClientPlayerEntityMixin",
-	"ServerPlayNetworkHandlerMixin",
-	"LivingEntityMixin",
-	"ElytraFeatureRendererMixin",
-	"ElytraItemMixin",
-	"MobEntityMixin",
-	"AbstractInventoryScreenMixin",
-	"PlayerEntityRendererMixin",
-	"ExperienceOrbEntityMixin",
-	"CreativeInventoryScreenMixin"
-  ],
-  "client": [
-  ],
-  "injectors": {
-    "defaultRequire": 1
-  }
+	"required": true,
+	"package": "dev.emi.trinkets.mixin",
+	"compatibilityLevel": "JAVA_8",
+	"mixins": [
+		"PlayerContainerMixin",
+		"PlayerEntityMixin",
+		"MinecraftServerMixin",
+		"ClientPlayerEntityMixin",
+		"ServerPlayNetworkHandlerMixin",
+		"LivingEntityMixin",
+		"ElytraItemMixin",
+		"MobEntityMixin",
+		"ExperienceOrbEntityMixin"
+	],
+	"client": [
+		"InventoryScreenMixin",
+		"AbstractContainerScreenMixin",
+		"ElytraFeatureRendererMixin",
+		"AbstractInventoryScreenMixin",
+		"PlayerEntityRendererMixin",
+		"CreativeInventoryScreenMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
 }

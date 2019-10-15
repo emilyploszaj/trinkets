@@ -7,21 +7,23 @@ import net.minecraft.inventory.Inventory;
 import net.minecraft.util.Identifier;
 
 /**
- * Basic Trinkets calls to get information about players
+ * Basic Trinkets calls to get information about players and their trinkets
  */
-public class TrinketsApi{
+public class TrinketsApi {
 	public static final ComponentType<TrinketComponent> TRINKETS = ComponentRegistry.INSTANCE.registerIfAbsent(new Identifier("trinkets:trinkets"), TrinketComponent.class);
+
 	/**
 	 * @return An inventory holding all trinket slots indexed numerically
 	 * @see {@link #getTrinketComponent(player)} and {@link dev.emi.trinkets.api.PlayerTrinketComponent#getStack(slot)} for getting slots by name
 	 */
-	public static Inventory getTrinketsInventory(PlayerEntity player){
+	public static Inventory getTrinketsInventory(PlayerEntity player) {
 		return TRINKETS.get(player).getInventory();
 	}
+
 	/**
 	 * @return The {@link TrinketComponent} associated with the given player
 	 */
-	public static TrinketComponent getTrinketComponent(PlayerEntity player){
+	public static TrinketComponent getTrinketComponent(PlayerEntity player) {
 		return TRINKETS.get(player);
 	}
 }

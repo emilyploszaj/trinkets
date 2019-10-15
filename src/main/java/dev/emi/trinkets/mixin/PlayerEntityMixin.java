@@ -18,24 +18,25 @@ import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 
 /**
- * Drops trinkets on death
+ * Drops trinkets on death if other items are dropping
  */
 @Mixin(PlayerEntity.class)
 public abstract class PlayerEntityMixin extends LivingEntity {
-	protected PlayerEntityMixin(EntityType<? extends LivingEntity> entityType_1, World world_1) {
-		super(entityType_1, world_1);
+
+	protected PlayerEntityMixin(EntityType<? extends LivingEntity> type, World world) {
+		super(type, world);
 	}
+
 	@Shadow
-	public ItemEntity dropItem(ItemStack itemStack_1, boolean boolean_1, boolean boolean_2) {
-		return null;
-	}
+	public abstract ItemEntity dropItem(ItemStack stack, boolean b1, boolean b2);
+
 	@Inject(at = @At("RETURN"), method = "dropInventory")
-	protected void dropInventory(CallbackInfo info){
+	protected void dropInventory(CallbackInfo info) {
 		if (!this.world.getGameRules().getBoolean(GameRules.KEEP_INVENTORY)) {
 			Inventory inv = TrinketsApi.TRINKETS.get(this).getInventory();
-			for(int i = 0; i < inv.getInvSize(); i++){
+			for (int i = 0; i < inv.getInvSize(); i++) {
 				ItemStack stack = inv.getInvStack(i);
-				if(!stack.isEmpty()){
+				if (!stack.isEmpty()) {
 					this.dropItem(stack, true, false);
 				}
 			}
