@@ -17,7 +17,7 @@ import net.minecraft.item.Items;
 public abstract class MobEntityMixin{
 
 	@Inject(at = @At("HEAD"), method = "getPreferredEquipmentSlot", cancellable = true)
-	private static void getPreferredEquipmentSlot(ItemStack itemStack_1, CallbackInfoReturnable<EquipmentSlot> info) { 
-		if(itemStack_1.getItem() == Items.ELYTRA) info.setReturnValue(EquipmentSlot.MAINHAND);
+	private static void getPreferredEquipmentSlot(ItemStack stack, CallbackInfoReturnable<EquipmentSlot> info) { 
+		if(stack.getItem() == Items.ELYTRA) info.setReturnValue(EquipmentSlot.MAINHAND);
 	}
 }

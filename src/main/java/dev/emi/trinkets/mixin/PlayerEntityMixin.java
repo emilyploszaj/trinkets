@@ -30,7 +30,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 	@Shadow
 	public abstract ItemEntity dropItem(ItemStack stack, boolean b1, boolean b2);
 
-	@Inject(at = @At("RETURN"), method = "dropInventory")
+	@Inject(at = @At("TAIL"), method = "dropInventory")
 	protected void dropInventory(CallbackInfo info) {
 		if (!this.world.getGameRules().getBoolean(GameRules.KEEP_INVENTORY)) {
 			Inventory inv = TrinketsApi.TRINKETS.get(this).getInventory();

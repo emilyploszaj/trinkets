@@ -5,34 +5,35 @@ import java.util.List;
 
 import net.minecraft.util.Identifier;
 
+/**
+ * Registry and container of all slot groups and slots
+ */
 public class TrinketSlots {
 	public static List<SlotGroup> slotGroups = new ArrayList<SlotGroup>();
 
 	static {
 		//Default slot groups
-		TrinketSlots.addSlotGroup(SlotGroups.HEAD, 7, 7, 5);
-		TrinketSlots.addSlotGroup(SlotGroups.CHEST, 7, 25, 6);
-		TrinketSlots.addSlotGroup(SlotGroups.LEGS, 7, 43, 7);
-		TrinketSlots.addSlotGroup(SlotGroups.FEET, 7, 61, 8);
-		TrinketSlots.addSlotGroup(SlotGroups.HAND, 76, 43, Slots.GLOVES);
-		TrinketSlots.addSlotGroup(SlotGroups.OFFHAND, 76, 61, 45);
+		TrinketSlots.addSlotGroup(SlotGroups.HEAD, 5);
+		TrinketSlots.addSlotGroup(SlotGroups.CHEST, 6);
+		TrinketSlots.addSlotGroup(SlotGroups.LEGS, 7);
+		TrinketSlots.addSlotGroup(SlotGroups.FEET, 8);
+		TrinketSlots.addSlotGroup(SlotGroups.OFFHAND, 45);
+		TrinketSlots.addSlotGroup(SlotGroups.HAND, Slots.GLOVES);
 	}
 
 	/**
 	 * Adds a slot group with no existing vanilla slot
 	 * @param name Slot group name, standardly the name of a body part
-	 * @param x	Screen x coordinate relative to the left of the survival inventory
-	 * @param y Screen y coordinate relative to the top of the survival inventory
 	 * @param defaultSlot The name of the default display slot for the group, this slot is not created and must be added later
 	 */
-	public static void addSlotGroup(String name, int x, int y, String defaultSlot) {
+	public static void addSlotGroup(String name, String defaultSlot) {
 		if (name.matches("^[a-zA-Z0-9]+$")) {
 			for (SlotGroup group: slotGroups) {
 				if (group.name.equals(name)) {
 					return;
 				}
 			}
-			SlotGroup group = new SlotGroup(name, x, y);
+			SlotGroup group = new SlotGroup(name);
 			group.defaultSlot = defaultSlot;
 			slotGroups.add(group);
 		} else {
@@ -40,21 +41,14 @@ public class TrinketSlots {
 		}
 	}
 
-	/**
-	 * Adds a slot group over an existing vanilla slot
-	 * @param name Slot group name, standardly the name of a body part
-	 * @param x	Screen x coordinate relative to the left of the survival inventory
-	 * @param y Screen y coordinate relative to the top of the survival inventory
-	 * @param vanillaSlot The id in the survival inventory of the slot to place over
-	 */
-	public static void addSlotGroup(String name, int x, int y, int vanillaSlot) {
+	private static void addSlotGroup(String name, int vanillaSlot) {
 		if (name.matches("^[a-zA-Z0-9]+$")) {
 			for (SlotGroup group: slotGroups) {
 				if(group.name.equals(name)){
 					return;
 				}
 			}
-			SlotGroup group = new SlotGroup(name, x, y);
+			SlotGroup group = new SlotGroup(name);
 			group.vanillaSlot = vanillaSlot;
 			group.onReal = true;
 			slotGroups.add(group);
@@ -69,8 +63,8 @@ public class TrinketSlots {
 	 * @param slotName Name of the new slot
 	 * @param texture The identifier representing the path to the file to be used for rendering the slot's background. Please use {@code new Identifier("trinkets", "textures/gui/blank_back.png")} if you want a blank slot
 	 */
-	public static void addSubSlot(String groupName, String slotName, Identifier texture) {
-		if (slotName.matches("^[a-zA-Z]+$")) {
+	public static void addSlot(String groupName, String slotName, Identifier texture) {
+		if (slotName.matches("^[a-zA-Z0-9]+$")) {
 			for (SlotGroup group: slotGroups) {
 				if (group.name.equals(groupName)) {
 					for (Slot slot: group.slots) {
@@ -106,6 +100,31 @@ public class TrinketSlots {
 	}
 
 	/**
+	 * @return List of all slots currently registered
+	 */
+	public static List<Slot> getAllSlots() {
+		List<Slot> slots = new ArrayList<Slot>();
+		for(SlotGroup group: slotGroups){
+			for(Slot slot: group.slots){
+				slots.add(slot);
+			}
+		}
+		return slots;
+	}
+
+	/**
+	 * @return Slot from group and slot names
+	 */
+	public static Slot getSlotFromName(String group, String slot) {
+		for(SlotGroup g: slotGroups){
+			for(Slot s: g.slots){
+				if(g.name.equals(group) && s.name.equals(slot)) return s;
+			}
+		}
+		return null;
+	}
+
+	/**
 	 * @return Number of slots currently registered
 	 */
 	public static int getSlotCount(){
@@ -121,28 +140,14 @@ public class TrinketSlots {
 		public String defaultSlot;
 		public List<Slot> slots = new ArrayList<Slot>();
 		public boolean onReal = false;
-		public int x, y, vanillaSlot = -1;
+		public int vanillaSlot = -1;
 
-		public SlotGroup(String name, int x, int y) {
+		public SlotGroup(String name) {
 			this.name = name;
-			this.x = x;
-			this.y = y;
 		}
 
 		public String getName() {
 			return name;
-		}
-
-		public boolean inBounds(float cursorX, float cursorY, boolean focused) {
-			if (focused) {
-				int count = slots.size();
-				if(onReal) count++;
-				int l = count / 2;
-				int r = count - l - 1;
-				return cursorX > x - l * 18 - 4 && cursorY > y - 4 && cursorX < x + r * 18 + 22 && cursorY < y + 22;
-			} else {
-				return cursorX > x && cursorY > y && cursorX < x + 18 && cursorY < y + 18;
-			}
 		}
 	}
 

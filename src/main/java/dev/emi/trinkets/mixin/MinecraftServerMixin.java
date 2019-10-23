@@ -26,7 +26,7 @@ public class MinecraftServerMixin {
 	@Shadow
 	private PlayerManager playerManager;
 
-	@Inject(at = @At("RETURN"), method = "tick")
+	@Inject(at = @At("TAIL"), method = "tick")
 	protected void tick(BooleanSupplier supplier, CallbackInfo info) {
 		for (PlayerEntity p: playerManager.getPlayerList()) {
 			Inventory inv = TrinketsApi.getTrinketsInventory(p);

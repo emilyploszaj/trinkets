@@ -47,6 +47,7 @@ public class TrinketInventory extends BasicInventory {
 		return stack;
 	}
 
+	@Override
 	public void markDirty() {
 		component.markDirty();
 	}

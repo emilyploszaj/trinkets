@@ -1,18 +1,5 @@
 package dev.emi.trinkets.mixin;
 
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraft.client.gui.DrawableHelper;
-import net.minecraft.client.gui.screen.ingame.AbstractInventoryScreen;
-import net.minecraft.client.gui.screen.ingame.InventoryScreen;
-import net.minecraft.client.gui.screen.recipebook.RecipeBookProvider;
-import net.minecraft.container.PlayerContainer;
-import net.minecraft.container.Slot;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.ItemStack;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,12 +12,23 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import dev.emi.trinkets.TrinketInventoryRenderer;
 import dev.emi.trinkets.TrinketSlot;
 import dev.emi.trinkets.TrinketsClient;
-import dev.emi.trinkets.api.TrinketComponent;
+import dev.emi.trinkets.api.SlotGroups;
 import dev.emi.trinkets.api.TrinketSlots;
-import dev.emi.trinkets.api.TrinketsApi;
 import dev.emi.trinkets.api.TrinketSlots.SlotGroup;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.screen.ingame.AbstractInventoryScreen;
+import net.minecraft.client.gui.screen.ingame.InventoryScreen;
+import net.minecraft.client.gui.screen.recipebook.RecipeBookProvider;
+import net.minecraft.container.PlayerContainer;
+import net.minecraft.container.Slot;
+import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.item.ItemStack;
+import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 
 /**
  * Rendering, logic, etc. for slot groups and extra slots
@@ -44,32 +42,35 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreen<Playe
 	private float mouseY;
 	@Shadow
 	private static final Identifier RECIPE_BUTTON_TEX = new Identifier("textures/gui/recipe_button.png");
-
-	private static final Identifier MORE_SLOTS_TEX = new Identifier("trinkets", "textures/gui/more_slots.png");
-	private static final Identifier BLANK_BACK = new Identifier("trinkets", "textures/gui/blank_back.png");
+	
 	private List<TrinketSlot> invSlots;
 
 	public InventoryScreenMixin(PlayerContainer container, PlayerInventory inventory, Text text) {
 		super(container, inventory, text);
 	}
 
-	@Inject(at = @At("RETURN"), method = "init")
+	@Inject(at = @At("TAIL"), method = "init")
 	public void init(CallbackInfo info){
 		TrinketsClient.displayEquipped = 0;
 		invSlots = new ArrayList<>();
 		for (Slot slot: this.container.slotList) {
 			if (slot instanceof TrinketSlot) {
-				invSlots.add((TrinketSlot) slot);
-				if (!((TrinketSlot) slot).keepVisible) slot.xPosition = Integer.MIN_VALUE;
+				TrinketSlot ts = (TrinketSlot) slot;
+				invSlots.add(ts);
+				if (!ts.keepVisible) slot.xPosition = Integer.MIN_VALUE;
+				else {
+					ts.xPosition = getGroupX(TrinketSlots.getSlotFromName(ts.group, ts.slot).getSlotGroup()) + 1;
+					ts.yPosition = getGroupY(TrinketSlots.getSlotFromName(ts.group, ts.slot).getSlotGroup()) + 1;
+				}
 			}
 		}
 	}
 
-	@Inject(at = @At(value = "RETURN"), method = "tick")
+	@Inject(at = @At(value = "TAIL"), method = "tick")
 	protected void tick(CallbackInfo info) {
 		float relX = this.mouseX - this.left;
 		float relY = this.mouseY - this.top;
-		if (TrinketsClient.slotGroup == null || !TrinketsClient.slotGroup.inBounds(relX, relY, true)) {
+		if (TrinketsClient.slotGroup == null || !inBounds(TrinketsClient.slotGroup, relX, relY, true)) {
 			if (TrinketsClient.slotGroup != null) {
 				for (TrinketSlot ts: invSlots) {
 					if (ts.group.equals(TrinketsClient.slotGroup.getName()) && !ts.keepVisible) ts.xPosition = Integer.MIN_VALUE;
@@ -77,32 +78,34 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreen<Playe
 			}
 			TrinketsClient.slotGroup = null;
 			for (SlotGroup group: TrinketSlots.slotGroups) {
-				if (group.inBounds(relX, relY, false) && group.slots.size() > 0) {
+				if (inBounds(group, relX, relY, false) && group.slots.size() > 0) {
 					TrinketsClient.displayEquipped = 0;
 					TrinketsClient.slotGroup = group;
 					List<TrinketSlot> tSlots = new ArrayList<TrinketSlot>();
 					for (TrinketSlot ts: invSlots) {
 						if(ts.group.equals(group.getName())) tSlots.add(ts);
 					}
+					int groupX = getGroupX(group);
+					int groupY = getGroupY(group);
 					int count = group.slots.size();
 					int offset = 1;
 					if (group.onReal) {
 						count++;
 						offset = 0;
 					} else {
-						tSlots.get(0).xPosition = group.x + 1;
-						tSlots.get(0).yPosition = group.y + 1;
+						tSlots.get(0).xPosition = groupX + 1;
+						tSlots.get(0).yPosition = groupY + 1;
 					}
 					int l = count / 2;
 					int r = count - l - 1;
 					if(tSlots.size() == 0) break;
 					for (int i = 0; i < l; i++) {
-						tSlots.get(i + offset).xPosition = group.x - (i + 1) * 18 + 1;
-						tSlots.get(i + offset).yPosition = group.y + 1;
+						tSlots.get(i + offset).xPosition = groupX - (i + 1) * 18 + 1;
+						tSlots.get(i + offset).yPosition = groupY + 1;
 					}
 					for (int i = 0; i < r; i++) {
-						tSlots.get(i + l + offset).xPosition = group.x + (i + 1) * 18 + 1;
-						tSlots.get(i + l + offset).yPosition = group.y + 1;
+						tSlots.get(i + l + offset).xPosition = groupX + (i + 1) * 18 + 1;
+						tSlots.get(i + l + offset).yPosition = groupY + 1;
 					}
 					TrinketsClient.activeSlots = new ArrayList<Slot>();
 					if (group.vanillaSlot != -1) {
@@ -124,24 +127,26 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreen<Playe
 					for (TrinketSlot ts: invSlots) {
 						if (ts.group == group.getName()) tSlots.add(ts);
 					}
+					int groupX = getGroupX(group);
+					int groupY = getGroupY(group);
 					int count = group.slots.size();
 					int offset = 1;
 					if (group.onReal) {
 						count++;
 						offset = 0;
 					} else {
-						tSlots.get(0).xPosition = group.x + 1;
-						tSlots.get(0).yPosition = group.y + 1;
+						tSlots.get(0).xPosition = groupX + 1;
+						tSlots.get(0).yPosition = groupY + 1;
 					}
 					int l = count / 2;
 					int r = count - l - 1;
 					for (int i = 0; i < l; i++) {
-						tSlots.get(i + offset).xPosition = group.x - (i + 1) * 18 + 1;
-						tSlots.get(i + offset).yPosition = group.y + 1;
+						tSlots.get(i + offset).xPosition = groupX - (i + 1) * 18 + 1;
+						tSlots.get(i + offset).yPosition = groupY + 1;
 					}
 					for (int i = 0; i < r; i++) {
-						tSlots.get(i + l + offset).xPosition = group.x + (i + 1) * 18 + 1;
-						tSlots.get(i + l + offset).yPosition = group.y + 1;
+						tSlots.get(i + l + offset).xPosition = groupX + (i + 1) * 18 + 1;
+						tSlots.get(i + l + offset).yPosition = groupY + 1;
 					}
 					TrinketsClient.activeSlots = new ArrayList<Slot>();
 					if (group.vanillaSlot != -1) {
@@ -154,40 +159,40 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreen<Playe
 			}
 		}
 		for (TrinketSlot ts: invSlots) {
-			if (((TrinketsClient.lastEquipped == null || TrinketsClient.displayEquipped <= 0 || ts.group != TrinketsClient.lastEquipped.getName()) && (TrinketsClient.slotGroup == null || ts.group != TrinketsClient.slotGroup.getName())) && !ts.keepVisible) {
+			if (((TrinketsClient.lastEquipped == null || TrinketsClient.displayEquipped <= 0 || ts.group != TrinketsClient.lastEquipped.getName())
+					&& (TrinketsClient.slotGroup == null || ts.group != TrinketsClient.slotGroup.getName())) && !ts.keepVisible) {
 				ts.xPosition = Integer.MIN_VALUE;
 			}
 		}
 	}
 
-	@Inject(at = @At("RETURN"), method = "drawBackground")
-	protected void drawBackground(CallbackInfo info) {
-		if (TrinketsClient.slotGroup != null) {
-			renderGroupBack(TrinketsClient.slotGroup);
-		} else if (TrinketsClient.displayEquipped > 0 && TrinketsClient.lastEquipped != null) {
-			renderGroupBack(TrinketsClient.lastEquipped);
+	@Inject(at = @At("TAIL"), method = "drawBackground")
+	protected void drawBackground(float f, int x, int y, CallbackInfo info) {
+		SlotGroup lastGroup = TrinketSlots.slotGroups.get(TrinketSlots.slotGroups.size() - 1);
+		int lastX = getGroupX(lastGroup);
+		int lastY = getGroupY(lastGroup);
+		if (lastX < 0) {
+			TrinketInventoryRenderer.renderExcessSlotGroups(this, this.minecraft.getTextureManager(), left, top, lastX, lastY);
 		}
-		TrinketComponent comp = TrinketsApi.getTrinketComponent(this.playerInventory.player);
 		for (SlotGroup group: TrinketSlots.slotGroups) {
 			if (!group.onReal && group.slots.size() > 0) {
-				if (comp.getStack(group.getName() + ":" + group.slots.get(0).getName()).isEmpty()) {
-					this.minecraft.getTextureManager().bindTexture(group.slots.get(0).texture);
-				} else {
-					this.minecraft.getTextureManager().bindTexture(BLANK_BACK);
-				}
-				DrawableHelper.blit(this.left + group.x + 1, this.top + group.y + 1, 0, 0, 0, 16, 16, 16, 16);
-				this.minecraft.getTextureManager().bindTexture(MORE_SLOTS_TEX);
-				this.blit(this.left + group.x, this.top + group.y, 4, 4, 18, 18);
+				this.minecraft.getTextureManager().bindTexture(TrinketInventoryRenderer.MORE_SLOTS_TEX);
+				this.blit(this.left + getGroupX(group), this.top + getGroupY(group), 4, 4, 18, 18);
 			}
 		}
+	}
+
+	@Inject(at = @At(value = "TAIL"), method = "drawForeground")
+	protected void drawForeground(int x, int y, CallbackInfo info) {
+		super.drawForeground(x, y);
 	}
 	
 	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/ingame/InventoryScreen;drawMouseoverTooltip(II)V"), method = "render")
 	protected void drawMouseoverTooltip(int x, int y, float f, CallbackInfo info){
 		if (TrinketsClient.slotGroup != null) {
-			renderGroupFront(TrinketsClient.slotGroup);
+			TrinketInventoryRenderer.renderGroupFront(this, this.minecraft.getTextureManager(), this.playerInventory, left, top, TrinketsClient.slotGroup, getGroupX(TrinketsClient.slotGroup), getGroupY(TrinketsClient.slotGroup));
 		} else if (TrinketsClient.displayEquipped > 0 && TrinketsClient.lastEquipped != null) {
-			renderGroupFront(TrinketsClient.lastEquipped);
+			TrinketInventoryRenderer.renderGroupFront(this, this.minecraft.getTextureManager(), this.playerInventory, left, top, TrinketsClient.lastEquipped, getGroupX(TrinketsClient.lastEquipped), getGroupY(TrinketsClient.lastEquipped));
 		} else {
 			return;
 		}
@@ -195,16 +200,76 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreen<Playe
 	
 	@Inject(at = @At(value = "TAIL"), method = "render")
 	protected void render(int x, int y, float f, CallbackInfo info){
-		PlayerInventory playerInventory_1 = this.minecraft.player.inventory;
-		ItemStack itemStack_1 = playerInventory_1.getCursorStack();
-		if (!itemStack_1.isEmpty()) {
+		PlayerInventory inventory = this.minecraft.player.inventory;
+		ItemStack stack = inventory.getCursorStack();
+		if (!stack.isEmpty()) {
 			try {
-				drawItem(itemStack_1, x - 8, y - 8, null);
+				drawItem(stack, x - 8, y - 8, null);
 			} catch (Exception e) {
 				e.printStackTrace();
 				//Nice
 			}
 		}
+	}
+
+	@Inject(at = @At("HEAD"), method = "isClickOutsideBounds", cancellable = true)
+	protected void isClickOutsideBounds(double x, double y, int i, int j, int k, CallbackInfoReturnable<Boolean> info) {
+		if (TrinketsClient.slotGroup != null && inBounds(TrinketsClient.slotGroup, (float) x - left, (float) y - top, true)) info.setReturnValue(false);
+	}
+
+	public boolean inBounds(SlotGroup group, float x, float y, boolean focused) {
+		int groupX = getGroupX(group);
+		int groupY = getGroupY(group);
+		if (focused) {
+			int count = group.slots.size();
+			if (group.onReal)
+				count++;
+			int l = count / 2;
+			int r = count - l - 1;
+			return x > groupX - l * 18 - 4 && y > groupY - 4 && x < groupX + r * 18 + 22 && y < groupY + 22;
+		} else {
+			return x > groupX && y > groupY && x < groupX + 18 && y < groupY + 18;
+		}
+	}
+
+	public int getGroupX(SlotGroup group) {
+		if (group.vanillaSlot == 5) return 7;
+		if (group.vanillaSlot == 6) return 7;
+		if (group.vanillaSlot == 7) return 7;
+		if (group.vanillaSlot == 8) return 7;
+		if (group.vanillaSlot == 45) return 76;
+		if (group.getName().equals(SlotGroups.HAND)) return 76;
+		int j = 0;
+		if (TrinketSlots.slotGroups.get(5).slots.size() == 0) j = -1;
+		for (int i = 6; i < TrinketSlots.slotGroups.size(); i++) {
+			if (TrinketSlots.slotGroups.get(i) == group) {
+				j += i;
+				if (j < 8) return 76;
+				return -15 - ((j - 8) / 4) * 18;
+			} else if (TrinketSlots.slotGroups.get(i).slots.size() == 0) j--;
+		}
+		return 0;
+	}
+
+	public int getGroupY(SlotGroup group) {
+		if (group.vanillaSlot == 5) return 7;
+		if (group.vanillaSlot == 6) return 25;
+		if (group.vanillaSlot == 7) return 43;
+		if (group.vanillaSlot == 8) return 61;
+		if (group.vanillaSlot == 45) return 61;
+		if (group.getName().equals(SlotGroups.HAND)) return 43;
+		int j = 0;
+		if (TrinketSlots.slotGroups.get(5).slots.size() == 0) j = -1;
+		for (int i = 6; i < TrinketSlots.slotGroups.size(); i++) {
+			if (TrinketSlots.slotGroups.get(i) == group) {
+				j += i;
+				if (j == 5) return 43;
+				if (j == 6) return 25;
+				if (j == 7) return 7;
+				return 7 + ((j - 8) % 4) * 18;
+			} else if (TrinketSlots.slotGroups.get(i).slots.size() == 0) j--;
+		}
+		return 0;
 	}
 
 	public void drawItem(ItemStack stack, int x, int y, String string) {
@@ -215,64 +280,5 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreen<Playe
 		this.itemRenderer.renderGuiItemOverlay(this.font, stack, x, y, string);
 		this.blitOffset = 0;
 		this.itemRenderer.zOffset = 0.0F;
-	}
-
-	public void renderGroupBack(SlotGroup group) {
-		int count = group.slots.size();
-		int offset = 1;
-		GlStateManager.disableDepthTest();
-		TrinketComponent comp = TrinketsApi.getTrinketComponent(this.playerInventory.player);
-		if (group.onReal) {
-			count++;
-			offset = 0;
-		} else {
-			if (comp.getStack(group.getName() + ":" + group.slots.get(0).getName()).isEmpty()) {
-				this.minecraft.getTextureManager().bindTexture(group.slots.get(0).texture);
-			} else {
-				this.minecraft.getTextureManager().bindTexture(BLANK_BACK);
-			}
-			DrawableHelper.blit(this.left + group.x + 1, this.top + group.y + 1, 0, 0, 0, 16, 16, 16, 16);
-		}
-		int l = count / 2;
-		int r = count - l - 1;
-		for (int i = 0; i < l; i++) {
-			if (comp.getStack(group.getName() + ":" + group.slots.get(i + offset).getName()).isEmpty()) {
-				this.minecraft.getTextureManager().bindTexture(group.slots.get(i + offset).texture);
-			} else {
-				this.minecraft.getTextureManager().bindTexture(BLANK_BACK);
-			}
-			DrawableHelper.blit(this.left + group.x - 18 * (i + 1) + 1, this.top + group.y + 1, 0, 0, 0, 16, 16, 16, 16);
-		}
-		for (int i = 0; i < r; i++) {
-			if (comp.getStack(group.getName() + ":" + group.slots.get(i + l + offset).getName()).isEmpty()) {
-				this.minecraft.getTextureManager().bindTexture(group.slots.get(i + l + offset).texture);
-			} else {
-				this.minecraft.getTextureManager().bindTexture(BLANK_BACK);
-			}
-			DrawableHelper.blit(this.left + group.x + 18 * (i + 1) + 1, this.top + group.y + 1, 0, 0, 0, 16, 16, 16, 16);
-		}
-		GlStateManager.enableDepthTest();
-	}
-	public void renderGroupFront(SlotGroup group) {
-		int count = group.slots.size();
-		if(group.onReal) count++;
-		int l = count / 2;
-		int r = count - l - 1;
-		GlStateManager.disableDepthTest();
-		this.minecraft.getTextureManager().bindTexture(MORE_SLOTS_TEX);
-		this.blit(this.left + group.x, this.top + group.y - 4, 4, 0, 18, 26);
-		this.blit(this.left + group.x - 18 * l - 4, this.top + group.y - 4, 0, 0, 4, 26);
-		this.blit(this.left + group.x + 18 * (r + 1), this.top + group.y - 4, 22, 0, 4, 26);
-		for (int i = 0; i < l; i++) {
-			this.blit(this.left + group.x - 18 * (i + 1), this.top + group.y - 4, 4, 0, 18, 26);
-		}
-		for (int i = 0; i < r; i++) {
-			this.blit(this.left + group.x + 18 * (i + 1), this.top + group.y - 4, 4, 0, 18, 26);
-		}
-		GlStateManager.enableDepthTest();
-	}
-	@Inject(at = @At("HEAD"), method = "isClickOutsideBounds", cancellable = true)
-	protected void isClickOutsideBounds(double double_1, double double_2, int int_1, int int_2, int int_3, CallbackInfoReturnable<Boolean> info) {
-		if (TrinketsClient.slotGroup != null && TrinketsClient.slotGroup.inBounds((float) double_1 - left, (float) double_2 - top, true)) info.setReturnValue(false);
 	}
 }

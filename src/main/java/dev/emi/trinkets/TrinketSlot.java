@@ -12,7 +12,10 @@ import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 
-public class TrinketSlot extends Slot{
+/**
+ * A slot for a TrinketInventory, only properly utilized in the survival inventory due to restrictions in the creative inventory
+ */
+public class TrinketSlot extends Slot {
 	public String group, slot;
 	public boolean keepVisible;
 
@@ -49,8 +52,8 @@ public class TrinketSlot extends Slot{
 	}
 
 	@Override
-	public ItemStack takeStack(int int_1) {
-		return super.takeStack(int_1);
+	public ItemStack takeStack(int i) {
+		return super.takeStack(i);
 	}
 
 	@Override

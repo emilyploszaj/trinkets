@@ -41,11 +41,9 @@ public abstract class PlayerContainerMixin extends CraftingContainer<CraftingInv
 			int j = 0;
 			for (Slot slot: group.slots) {
 				TrinketSlot ts;
+				ts = new TrinketSlot(inv, i, Integer.MIN_VALUE, 8, group.getName(), slot.getName());
 				if (j == 0 && !group.onReal) {
-					ts = new TrinketSlot(inv, i, group.x + 1, group.y + 1, group.getName(), slot.getName());
 					ts.keepVisible = true;
-				} else {
-					ts = new TrinketSlot(inv, i, Integer.MIN_VALUE, 8, group.getName(), slot.getName());
 				}
 				addSlot(ts);
 				i++;
