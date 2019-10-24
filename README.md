@@ -11,15 +11,15 @@ If you're a developer using Trinkets for your mod, here is the list of slots I s
 
 | Slot | Examples | Texture identifier
 | --- | --- | --- |
-| `head:mask` | Masks, glasses, monocles | `new Identifier("trinkets", "textures/item/empty_trinket_slot_mask.png`
-| `chest:backpack` | Backpack | `new Identifier("trinkets", "textures/item/empty_trinket_slot_backpack.png`
-| `chest:cape` | Capes, wings | `new Identifier("trinkets", "textures/item/empty_trinket_slot_cape.png`
-| `chest:necklace` | Necklaces, collars | `new Identifier("trinkets", "textures/item/empty_trinket_slot_necklace.png`
-| `legs:belt` | Belts | `new Identifier("trinkets", "textures/item/empty_trinket_slot_belt.png`
-| `feet:aglet` | Aglets | `new Identifier("trinkets", "textures/item/empty_trinket_slot_aglet.png`
-| `offhand:ring` | Rings, other jewelery | `new Identifier("trinkets", "textures/item/empty_trinket_slot_ring.png)`
-| `hand:gloves` | Gloves | `new Identifier("trinkets", "textures/item/empty_trinket_slot_gloves.png`
-| `hand:ring` | Rings, other jewelery | `new Identifier("trinkets", "textures/item/empty_trinket_slot_ring.png)`
+| `head:mask` | Masks, glasses, monocles | `new Identifier("trinkets", "textures/item/empty_trinket_slot_mask.png")`
+| `chest:backpack` | Backpack | `new Identifier("trinkets", "textures/item/empty_trinket_slot_backpack.png")`
+| `chest:cape` | Capes, wings | `new Identifier("trinkets", "textures/item/empty_trinket_slot_cape.png")`
+| `chest:necklace` | Necklaces, collars | `new Identifier("trinkets", "textures/item/empty_trinket_slot_necklace.png")`
+| `legs:belt` | Belts | `new Identifier("trinkets", "textures/item/empty_trinket_slot_belt.png")`
+| `feet:aglet` | Aglets | `new Identifier("trinkets", "textures/item/empty_trinket_slot_aglet.png")`
+| `offhand:ring` | Rings, other jewelery | `new Identifier("trinkets", "textures/item/empty_trinket_slot_ring.png")`
+| `hand:gloves` | Gloves | `new Identifier("trinkets", "textures/item/empty_trinket_slot_gloves.png")`
+| `hand:ring` | Rings, other jewelery | `new Identifier("trinkets", "textures/item/empty_trinket_slot_ring.png")`
 
 ## Developers
 To add Trinkets to your project you need to add jitpack and nerdhubmc to your repositories in your build.gradle
