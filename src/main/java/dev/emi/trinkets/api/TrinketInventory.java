@@ -20,7 +20,7 @@ public class TrinketInventory extends BasicInventory {
 	}
 
 	@Override
-	public void setInvStack(int i, ItemStack stack){
+	public void setInvStack(int i, ItemStack stack) {
 		if (getInvStack(i).getItem() instanceof ITrinket) {
 			((ITrinket) getInvStack(i).getItem()).onUnequip((PlayerEntity) component.getEntity(), getInvStack(i));
 		}

@@ -82,23 +82,23 @@ public abstract class AbstractContainerScreenMixin<T extends Container> extends 
 			if (!(container.slotList.get(i).inventory instanceof TrinketInventory)) continue;
 			Slot ts = container.getSlot(i);
 			TrinketSlots.Slot s = trinketSlots.get(i - 46);
-			renderSlot(ts, s, x, y);
+			if (!(s.getSlotGroup() == TrinketsClient.slotGroup || (s.getSlotGroup() == TrinketsClient.lastEquipped && TrinketsClient.displayEquipped > 0))) renderSlot(ts, s, x, y);
 		}
 		//Redraw only the active group slots so they're always on top
 		for (int i = 0; i < container.slotList.size(); i++) {
 			if (!(container.slotList.get(i).inventory instanceof TrinketInventory)) continue;
 			Slot ts = container.getSlot(i);
 			TrinketSlots.Slot s = trinketSlots.get(i - 46);
-			if (s.getSlotGroup() == TrinketsClient.slotGroup) renderSlot(ts, s, x, y);
+			if (s.getSlotGroup() == TrinketsClient.slotGroup || (s.getSlotGroup() == TrinketsClient.lastEquipped && TrinketsClient.displayEquipped > 0)) renderSlot(ts, s, x, y);
 		}
 		GlStateManager.enableDepthTest();
 	}
 
 	public void renderSlot(Slot ts, TrinketSlots.Slot s, int x, int y){
-		GuiLighting.disable();
+		GlStateManager.pushMatrix();
+		GuiLighting.enableForItems();
 		GlStateManager.disableLighting();
 		GlStateManager.disableDepthTest();
-		GlStateManager.pushMatrix();
 		if (ts.getStack().isEmpty()) {
 			this.minecraft.getTextureManager().bindTexture(s.texture);
 		} else {

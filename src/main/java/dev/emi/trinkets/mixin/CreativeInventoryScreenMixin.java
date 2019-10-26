@@ -218,6 +218,7 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
 		ItemStack stack = inventory.getCursorStack();
 		if (!stack.isEmpty()) {
 			try {
+				GuiLighting.enableForItems();
 				drawItem(stack, x - 8, y - 8, null);
 			} catch (Exception e) {
 				e.printStackTrace();
