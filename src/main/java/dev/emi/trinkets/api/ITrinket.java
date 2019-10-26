@@ -3,6 +3,7 @@ package dev.emi.trinkets.api;
 import java.util.List;
 import java.util.UUID;
 
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.mojang.blaze3d.platform.GlStateManager;
 
@@ -73,7 +74,9 @@ public interface ITrinket {
 	 * @param uuid	UUID Trinkets should use for the provide slot when constructing EAMs
 	 * @param stack	Item stack to get modifiers for
 	 */
-	public Multimap<String, EntityAttributeModifier> getTrinketModifiers(String group, String slot, UUID uuid, ItemStack stack);
+	public default Multimap<String, EntityAttributeModifier> getTrinketModifiers(String group, String slot, UUID uuid, ItemStack stack){
+		return HashMultimap.create();
+	}
 
 	/**
 	 * Called to render the trinket
