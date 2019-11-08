@@ -2,6 +2,7 @@
 	"required": true,
 	"package": "dev.emi.trinkets.mixin",
 	"compatibilityLevel": "JAVA_8",
+	"plugin": "dev.emi.trinkets.TrinketsMixinPlugin",
 	"mixins": [
 		"PlayerContainerMixin",
 		"PlayerEntityMixin",

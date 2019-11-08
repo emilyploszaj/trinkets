@@ -24,9 +24,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 
 /**
- * Takes xp and puts it into mending trinkets. Priority is lowered to let SmarterMending take priority
+ * Takes xp and puts it into mending trinkets. (Disabled when SmarterMending is loaded)
  */
-@Mixin(priority = 900, value = ExperienceOrbEntity.class)
+@Mixin(ExperienceOrbEntity.class)
 public abstract class ExperienceOrbEntityMixin extends Entity {
 
 	public ExperienceOrbEntityMixin(EntityType<?> type, World world) {
