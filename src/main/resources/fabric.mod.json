@@ -1,10 +1,10 @@
 {
 	"schemaVersion": 1,
 	"id": "trinkets",
-	"version": "2.1.0",
+	"version": "2.1.1",
 
 	"name": "Trinkets",
-	"description": "Adds a data-driven accessory system to the game",
+	"description": "Adds a modular accessory system to the game",
 	"authors": [
 		"Emi"
 	],
