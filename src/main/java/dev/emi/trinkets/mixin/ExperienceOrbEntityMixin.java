@@ -59,7 +59,7 @@ public abstract class ExperienceOrbEntityMixin extends Entity {
 				}
 			}
 			if (list.size() + stacks.size() == 0) return null;
-			int i = entity.getRand().nextInt(list.size() + stacks.size());
+			int i = entity.getRandom().nextInt(list.size() + stacks.size());
 			if (i < list.size()) {
 				return list.get(i);
 			} else {

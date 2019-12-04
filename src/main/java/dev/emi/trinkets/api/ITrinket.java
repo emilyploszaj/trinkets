@@ -133,11 +133,11 @@ public interface ITrinket {
 	 */
 	public static void translateToFace(PlayerEntityModel<AbstractClientPlayerEntity> model, AbstractClientPlayerEntity player, float headYaw, float headPitch) {
 		if (player.isInSwimmingPose() || player.isFallFlying()) {
-			GlStateManager.rotatef(model.headwear.roll, 0.0F, 0.0F, 1.0F);
+			GlStateManager.rotatef(model.head.roll, 0.0F, 0.0F, 1.0F);
 			GlStateManager.rotatef(headYaw, 0.0F, 1.0F, 0.0F);
 			GlStateManager.rotatef(-45.0F, 1.0F, 0.0F, 0.0F);
 		} else {
-			if (player.isInSneakingPose() && !model.isRiding) {
+			if (player.isInSneakingPose() && !model.riding) {
 				GlStateManager.translatef(0.0F, 0.25F, 0.0F);
 			}
 			GlStateManager.rotatef(headYaw, 0.0F, 1.0F, 0.0F);
@@ -149,21 +149,21 @@ public interface ITrinket {
 	 * Translates the rendering context to the center of the player's chest/torso segment, parameters should be passed from {@link #render(PlayerEntityModel, AbstractClientPlayerEntity, float, float)}
 	 */
 	public static void translateToChest(PlayerEntityModel<AbstractClientPlayerEntity> model, AbstractClientPlayerEntity player, float headYaw, float headPitch) {
-		if (player.isInSneakingPose() && !model.isRiding && !player.isSwimming()) {
+		if (player.isInSneakingPose() && !model.riding && !player.isSwimming()) {
 			GlStateManager.translatef(0.0F, 0.2F, 0.0F);
-			GlStateManager.rotatef(model.body.pitch * 57.5F, 1.0F, 0.0F, 0.0F);
+			GlStateManager.rotatef(model.torso.pitch * 57.5F, 1.0F, 0.0F, 0.0F);
 		}
-		GlStateManager.rotatef(model.body.yaw * 57.5F, 0.0F, 1.0F, 0.0F);
+		GlStateManager.rotatef(model.torso.yaw * 57.5F, 0.0F, 1.0F, 0.0F);
 		GlStateManager.translatef(0.0F, 0.4F, -0.16F);
 	}
 	/**
 	 * Translates the rendering context to the center of the bottom of the player's right arm, parameters should be passed from {@link #render(PlayerEntityModel, AbstractClientPlayerEntity, float, float)}
 	 */
 	public static void translateToRightArm(PlayerEntityModel<AbstractClientPlayerEntity> model, AbstractClientPlayerEntity player, float headYaw, float headPitch) {
-		if (player.isInSneakingPose() && !model.isRiding && !player.isSwimming()) {
+		if (player.isInSneakingPose() && !model.riding && !player.isSwimming()) {
 			GlStateManager.translatef(0.0F, 0.2F, 0.0F);
 		}
-		GlStateManager.rotatef(model.body.yaw * 57.5F, 0.0F, 1.0F, 0.0F);
+		GlStateManager.rotatef(model.torso.yaw * 57.5F, 0.0F, 1.0F, 0.0F);
 		GlStateManager.translatef(-0.3125F, 0.15625F, 0.0F);
 		GlStateManager.rotatef(model.rightArm.roll * 57.5F, 0.0F, 0.0F, 1.0F);
 		GlStateManager.rotatef(model.rightArm.yaw * 57.5F, 0.0F, 1.0F, 0.0F);
@@ -174,10 +174,10 @@ public interface ITrinket {
 	 * Translates the rendering context to the center of the bottom of the player's left arm, parameters should be passed from {@link #render(PlayerEntityModel, AbstractClientPlayerEntity, float, float)}
 	 */
 	public static void translateToLeftArm(PlayerEntityModel<AbstractClientPlayerEntity> model, AbstractClientPlayerEntity player, float headYaw, float headPitch) {
-		if (player.isInSneakingPose() && !model.isRiding && !player.isSwimming()) {
+		if (player.isInSneakingPose() && !model.riding && !player.isSwimming()) {
 			GlStateManager.translatef(0.0F, 0.2F, 0.0F);
 		}
-		GlStateManager.rotatef(model.body.yaw * 57.5F, 0.0F, 1.0F, 0.0F);
+		GlStateManager.rotatef(model.torso.yaw * 57.5F, 0.0F, 1.0F, 0.0F);
 		GlStateManager.translatef(0.3125F, 0.15625F, 0.0F);
 		GlStateManager.rotatef(model.leftArm.roll * 57.5F, 0.0F, 0.0F, 1.0F);
 		GlStateManager.rotatef(model.leftArm.yaw * 57.5F, 0.0F, 1.0F, 0.0F);
@@ -188,7 +188,7 @@ public interface ITrinket {
 	 * Translates the rendering context to the center of the bottom of the player's right leg, parameters should be passed from {@link #render(PlayerEntityModel, AbstractClientPlayerEntity, float, float)}
 	 */
 	public static void translateToRightLeg(PlayerEntityModel<AbstractClientPlayerEntity> model, AbstractClientPlayerEntity player, float headYaw, float headPitch) {
-		if (player.isInSneakingPose() && !model.isRiding && !player.isSwimming()) {
+		if (player.isInSneakingPose() && !model.riding && !player.isSwimming()) {
 			GlStateManager.translatef(0.0F, 0.0F, 0.25F);
 		}
 		GlStateManager.translatef(-0.125F, 0.75F, 0.0F);
@@ -201,7 +201,7 @@ public interface ITrinket {
 	 * Translates the rendering context to the center of the bottom of the player's left leg, parameters should be passed from {@link #render(PlayerEntityModel, AbstractClientPlayerEntity, float, float)}
 	 */
 	public static void translateToLeftLeg(PlayerEntityModel<AbstractClientPlayerEntity> model, AbstractClientPlayerEntity player, float headYaw, float headPitch) {
-		if (player.isInSneakingPose() && !model.isRiding && !player.isSwimming()) {
+		if (player.isInSneakingPose() && !model.riding && !player.isSwimming()) {
 			GlStateManager.translatef(0.0F, 0.0F, 0.25F);
 		}
 		GlStateManager.translatef(0.125F, 0.75F, 0.0F);

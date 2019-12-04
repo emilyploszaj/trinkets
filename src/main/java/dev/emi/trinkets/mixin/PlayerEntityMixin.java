@@ -10,12 +10,17 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import dev.emi.trinkets.api.ITrinket;
+import dev.emi.trinkets.api.SlotGroups;
+import dev.emi.trinkets.api.Slots;
+import dev.emi.trinkets.api.TrinketComponent;
 import dev.emi.trinkets.api.TrinketSlots;
 import dev.emi.trinkets.api.TrinketsApi;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
@@ -26,7 +31,7 @@ import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 
 /**
- * Drops trinkets on death if other items are dropping and handling attributes
+ * Drops trinkets on death if other items are dropping, elytra check redirect, and handling attributes
  */
 @Mixin(PlayerEntity.class)
 public abstract class PlayerEntityMixin extends LivingEntity {
@@ -38,6 +43,17 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 
 	@Shadow
 	public abstract ItemEntity dropItem(ItemStack stack, boolean b1, boolean b2);
+
+	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;getEquippedStack(Lnet/minecraft/entity/EquipmentSlot;)Lnet/minecraft/item/ItemStack;"), method = "method_23668")
+	public ItemStack getEquippedStackProxy(PlayerEntity entity, EquipmentSlot slot) {
+		if (entity instanceof PlayerEntity) {
+			PlayerEntity player = (PlayerEntity) entity;
+			TrinketComponent comp = TrinketsApi.getTrinketComponent(player);
+			return comp.getStack(SlotGroups.CHEST, Slots.CAPE);
+		} else {
+			return entity.getEquippedStack(slot);
+		}
+	}
 
 	@Inject(at = @At("TAIL"), method = "dropInventory")
 	protected void dropInventory(CallbackInfo info) {
@@ -84,7 +100,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 			ITrinket trinket = (ITrinket) stack.getItem();
 			Multimap<String, EntityAttributeModifier> eams;
 			eams = trinket.getTrinketModifiers(group.getName(), slot.getName(), UUID.nameUUIDFromBytes((slot.getName() + ":" + group.getName()).getBytes()), stack);
-			player.getAttributeContainer().replaceAll(eams);
+			player.getAttributes().replaceAll(eams);
 		}
 	}
 	
@@ -95,7 +111,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 			ITrinket trinket = (ITrinket) stack.getItem();
 			Multimap<String, EntityAttributeModifier> eams;
 			eams = trinket.getTrinketModifiers(group.getName(), slot.getName(), UUID.nameUUIDFromBytes((slot.getName() + ":" + group.getName()).getBytes()), stack);
-			player.getAttributeContainer().removeAll(eams);
+			player.getAttributes().removeAll(eams);
 		}
 	}
 }

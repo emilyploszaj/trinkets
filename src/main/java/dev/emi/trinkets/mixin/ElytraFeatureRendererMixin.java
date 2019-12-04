@@ -30,7 +30,7 @@ public abstract class ElytraFeatureRendererMixin<T extends LivingEntity, M exten
 		super(context);
 	}
 
-	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;getEquippedStack(Lnet/minecraft/entity/EquipmentSlot;)Lnet/minecraft/item/ItemStack;"), method = "method_17161")
+	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;getEquippedStack(Lnet/minecraft/entity/EquipmentSlot;)Lnet/minecraft/item/ItemStack;"), method = "render")
 	public ItemStack getEquippedStackProxy(T entity, EquipmentSlot slot) {
 		if (entity instanceof PlayerEntity) {
 			PlayerEntity player = (PlayerEntity) entity;

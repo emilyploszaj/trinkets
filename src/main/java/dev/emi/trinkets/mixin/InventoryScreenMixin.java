@@ -18,12 +18,12 @@ import dev.emi.trinkets.TrinketsClient;
 import dev.emi.trinkets.api.SlotGroups;
 import dev.emi.trinkets.api.TrinketSlots;
 import dev.emi.trinkets.api.TrinketSlots.SlotGroup;
+import dev.emi.trinkets.mixin.SlotMixin;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screen.ingame.AbstractInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.client.gui.screen.recipebook.RecipeBookProvider;
-import net.minecraft.client.render.GuiLighting;
 import net.minecraft.container.PlayerContainer;
 import net.minecraft.container.Slot;
 import net.minecraft.entity.player.PlayerInventory;
@@ -58,10 +58,11 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreen<Playe
 			if (slot instanceof TrinketSlot) {
 				TrinketSlot ts = (TrinketSlot) slot;
 				invSlots.add(ts);
-				if (!ts.keepVisible) slot.xPosition = Integer.MIN_VALUE;
-				else {
-					ts.xPosition = getGroupX(TrinketSlots.getSlotFromName(ts.group, ts.slot).getSlotGroup()) + 1;
-					ts.yPosition = getGroupY(TrinketSlots.getSlotFromName(ts.group, ts.slot).getSlotGroup()) + 1;
+				if (!ts.keepVisible) {
+					((SlotMixin) (Object) slot).setXPosition(Integer.MIN_VALUE);
+				} else {
+					((SlotMixin) (Object) ts).setXPosition(getGroupX(TrinketSlots.getSlotFromName(ts.group, ts.slot).getSlotGroup()) + 1);
+					((SlotMixin) (Object) ts).setYPosition(getGroupY(TrinketSlots.getSlotFromName(ts.group, ts.slot).getSlotGroup()) + 1);
 				}
 			}
 		}
@@ -69,12 +70,14 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreen<Playe
 
 	@Inject(at = @At(value = "TAIL"), method = "tick")
 	protected void tick(CallbackInfo info) {
-		float relX = this.mouseX - this.left;
-		float relY = this.mouseY - this.top;
+		float relX = this.mouseX - this.x;
+		float relY = this.mouseY - this.y;
 		if (TrinketsClient.slotGroup == null || !inBounds(TrinketsClient.slotGroup, relX, relY, true)) {
 			if (TrinketsClient.slotGroup != null) {
 				for (TrinketSlot ts: invSlots) {
-					if (ts.group.equals(TrinketsClient.slotGroup.getName()) && !ts.keepVisible) ts.xPosition = Integer.MIN_VALUE;
+					if (ts.group.equals(TrinketsClient.slotGroup.getName()) && !ts.keepVisible) {
+						((SlotMixin) (Object) ts).setXPosition(Integer.MIN_VALUE);
+					}
 				}
 			}
 			TrinketsClient.slotGroup = null;
@@ -94,19 +97,19 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreen<Playe
 						count++;
 						offset = 0;
 					} else {
-						tSlots.get(0).xPosition = groupX + 1;
-						tSlots.get(0).yPosition = groupY + 1;
+						((SlotMixin) (Object) tSlots.get(0)).setXPosition(groupX + 1);
+						((SlotMixin) (Object) tSlots.get(0)).setYPosition(groupY + 1);
 					}
 					int l = count / 2;
 					int r = count - l - 1;
 					if(tSlots.size() == 0) break;
 					for (int i = 0; i < l; i++) {
-						tSlots.get(i + offset).xPosition = groupX - (i + 1) * 18 + 1;
-						tSlots.get(i + offset).yPosition = groupY + 1;
+						((SlotMixin) (Object) tSlots.get(i + offset)).setXPosition(groupX - (i + 1) * 18 + 1);
+						((SlotMixin) (Object) tSlots.get(i + offset)).setYPosition(groupY + 1);
 					}
 					for (int i = 0; i < r; i++) {
-						tSlots.get(i + l + offset).xPosition = groupX + (i + 1) * 18 + 1;
-						tSlots.get(i + l + offset).yPosition = groupY + 1;
+						((SlotMixin) (Object) tSlots.get(i + l + offset)).setXPosition(groupX + (i + 1) * 18 + 1);
+						((SlotMixin) (Object) tSlots.get(i + l + offset)).setYPosition(groupY + 1);
 					}
 					TrinketsClient.activeSlots = new ArrayList<Slot>();
 					if (group.vanillaSlot != -1) {
@@ -136,18 +139,18 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreen<Playe
 						count++;
 						offset = 0;
 					} else {
-						tSlots.get(0).xPosition = groupX + 1;
-						tSlots.get(0).yPosition = groupY + 1;
+						((SlotMixin) (Object) tSlots.get(0)).setXPosition(groupX + 1);
+						((SlotMixin) (Object) tSlots.get(0)).setYPosition(groupY + 1);
 					}
 					int l = count / 2;
 					int r = count - l - 1;
 					for (int i = 0; i < l; i++) {
-						tSlots.get(i + offset).xPosition = groupX - (i + 1) * 18 + 1;
-						tSlots.get(i + offset).yPosition = groupY + 1;
+						((SlotMixin) (Object) tSlots.get(i + offset)).setXPosition(groupX - (i + 1) * 18 + 1);
+						((SlotMixin) (Object) tSlots.get(i + offset)).setYPosition(groupY + 1);
 					}
 					for (int i = 0; i < r; i++) {
-						tSlots.get(i + l + offset).xPosition = groupX + (i + 1) * 18 + 1;
-						tSlots.get(i + l + offset).yPosition = groupY + 1;
+						((SlotMixin) (Object) tSlots.get(i + l + offset)).setXPosition(groupX + (i + 1) * 18 + 1);
+						((SlotMixin) (Object) tSlots.get(i + l + offset)).setYPosition(groupY + 1);
 					}
 					TrinketsClient.activeSlots = new ArrayList<Slot>();
 					if (group.vanillaSlot != -1) {
@@ -162,16 +165,16 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreen<Playe
 		for (TrinketSlot ts: invSlots) {
 			if (((TrinketsClient.lastEquipped == null || TrinketsClient.displayEquipped <= 0 || ts.group != TrinketsClient.lastEquipped.getName())
 					&& (TrinketsClient.slotGroup == null || ts.group != TrinketsClient.slotGroup.getName())) && !ts.keepVisible) {
-				ts.xPosition = Integer.MIN_VALUE;
+				((SlotMixin) (Object) ts).setXPosition(Integer.MIN_VALUE);
 			}
 		}
 		for (TrinketSlot ts : invSlots) {
 			int groupX = getGroupX(TrinketSlots.getSlotFromName(ts.group, ts.slot).getSlotGroup());
 			if (ts.keepVisible && groupX < 0) {
 				if (getRecipeBookGui().isOpen()) {
-					ts.xPosition = Integer.MIN_VALUE;
+					((SlotMixin) (Object) ts).setXPosition(Integer.MIN_VALUE);
 				} else {
-					ts.xPosition = groupX + 1;
+					((SlotMixin) (Object) ts).setXPosition(groupX + 1);
 				}
 			}
 		}
@@ -183,13 +186,13 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreen<Playe
 		int lastX = getGroupX(lastGroup);
 		int lastY = getGroupY(lastGroup);
 		if (!getRecipeBookGui().isOpen() && lastX < 0) {
-			TrinketInventoryRenderer.renderExcessSlotGroups(this, this.minecraft.getTextureManager(), left, top, lastX, lastY);
+			TrinketInventoryRenderer.renderExcessSlotGroups(this, this.minecraft.getTextureManager(), this.x, this.y, lastX, lastY);
 		}
 		for (SlotGroup group: TrinketSlots.slotGroups) {
 			if (!group.onReal && group.slots.size() > 0) {
 				if (getRecipeBookGui().isOpen() && getGroupX(group) < 0) continue;
 				this.minecraft.getTextureManager().bindTexture(TrinketInventoryRenderer.MORE_SLOTS_TEX);
-				this.blit(this.left + getGroupX(group), this.top + getGroupY(group), 4, 4, 18, 18);
+				this.blit(this.x + getGroupX(group), this.y + getGroupY(group), 4, 4, 18, 18);
 			}
 		}
 	}
@@ -197,26 +200,27 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreen<Playe
 	@Inject(at = @At(value = "TAIL"), method = "drawForeground")
 	protected void drawForeground(int x, int y, CallbackInfo info) {
 		super.drawForeground(x, y);
+		GlStateManager.disableLighting();
 	}
 	
 	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/ingame/InventoryScreen;drawMouseoverTooltip(II)V"), method = "render")
-	protected void drawMouseoverTooltip(int x, int y, float f, CallbackInfo info){
+	protected void drawMouseoverTooltip(int x, int y, float f, CallbackInfo info) {
 		if (TrinketsClient.slotGroup != null) {
-			TrinketInventoryRenderer.renderGroupFront(this, this.minecraft.getTextureManager(), this.playerInventory, left, top, TrinketsClient.slotGroup, getGroupX(TrinketsClient.slotGroup), getGroupY(TrinketsClient.slotGroup));
+			TrinketInventoryRenderer.renderGroupFront(this, this.minecraft.getTextureManager(), this.playerInventory, this.x, this.y, TrinketsClient.slotGroup, getGroupX(TrinketsClient.slotGroup), getGroupY(TrinketsClient.slotGroup));
 		} else if (TrinketsClient.displayEquipped > 0 && TrinketsClient.lastEquipped != null) {
-			TrinketInventoryRenderer.renderGroupFront(this, this.minecraft.getTextureManager(), this.playerInventory, left, top, TrinketsClient.lastEquipped, getGroupX(TrinketsClient.lastEquipped), getGroupY(TrinketsClient.lastEquipped));
+			TrinketInventoryRenderer.renderGroupFront(this, this.minecraft.getTextureManager(), this.playerInventory, this.x, this.y, TrinketsClient.lastEquipped, getGroupX(TrinketsClient.lastEquipped), getGroupY(TrinketsClient.lastEquipped));
 		} else {
 			return;
 		}
 	}
 	
 	@Inject(at = @At(value = "TAIL"), method = "render")
-	protected void render(int x, int y, float f, CallbackInfo info){
+	protected void render(int x, int y, float f, CallbackInfo info) {
 		PlayerInventory inventory = this.minecraft.player.inventory;
 		ItemStack stack = inventory.getCursorStack();
 		if (!stack.isEmpty()) {
 			try {
-				GuiLighting.enableForItems();
+				GlStateManager.enableLighting();
 				drawItem(stack, x - 8, y - 8, null);
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -227,7 +231,7 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreen<Playe
 
 	@Inject(at = @At("HEAD"), method = "isClickOutsideBounds", cancellable = true)
 	protected void isClickOutsideBounds(double x, double y, int i, int j, int k, CallbackInfoReturnable<Boolean> info) {
-		if (TrinketsClient.slotGroup != null && inBounds(TrinketsClient.slotGroup, (float) x - left, (float) y - top, true)) info.setReturnValue(false);
+		if (TrinketsClient.slotGroup != null && inBounds(TrinketsClient.slotGroup, (float) x - this.x, (float) y - this.y, true)) info.setReturnValue(false);
 	}
 
 	public boolean inBounds(SlotGroup group, float x, float y, boolean focused) {
@@ -288,11 +292,11 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreen<Playe
 
 	public void drawItem(ItemStack stack, int x, int y, String string) {
 		GlStateManager.translatef(0.0F, 0.0F, 32.0F);
-		this.blitOffset = 200;
+		setBlitOffset(200);
 		this.itemRenderer.zOffset = 200.0F;
 		this.itemRenderer.renderGuiItem(stack, x, y);
 		this.itemRenderer.renderGuiItemOverlay(this.font, stack, x, y, string);
-		this.blitOffset = 0;
+		setBlitOffset(0);
 		this.itemRenderer.zOffset = 0.0F;
 	}
 }

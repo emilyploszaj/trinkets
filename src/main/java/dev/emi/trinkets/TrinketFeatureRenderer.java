@@ -9,26 +9,24 @@ import dev.emi.trinkets.api.TrinketComponent;
 import dev.emi.trinkets.api.TrinketSlots;
 import dev.emi.trinkets.api.TrinketsApi;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
+import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.feature.FeatureRenderer;
 import net.minecraft.client.render.entity.feature.FeatureRendererContext;
 import net.minecraft.client.render.entity.model.PlayerEntityModel;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 
 public class TrinketFeatureRenderer extends FeatureRenderer<AbstractClientPlayerEntity, PlayerEntityModel<AbstractClientPlayerEntity>> {
 	private FeatureRendererContext<AbstractClientPlayerEntity, PlayerEntityModel<AbstractClientPlayerEntity>> context;
 
-	public TrinketFeatureRenderer(FeatureRendererContext<AbstractClientPlayerEntity, PlayerEntityModel<AbstractClientPlayerEntity>> context) {
+	public TrinketFeatureRenderer(
+			FeatureRendererContext<AbstractClientPlayerEntity, PlayerEntityModel<AbstractClientPlayerEntity>> context) {
 		super(context);
 		this.context = context;
 	}
 
 	@Override
-	public boolean hasHurtOverlay() {
-		return false;
-	}
-
-	@Override
-	public void render(AbstractClientPlayerEntity player, float a, float b, float c, float d, float headYaw, float headPitch, float e){
+	public void render(MatrixStack arg0, VertexConsumerProvider arg1, int arg2, AbstractClientPlayerEntity player, float a, float b, float c, float d, float headYaw, float headPitch) {
 		TrinketComponent comp = TrinketsApi.getTrinketComponent(player);
 		List<String> names = TrinketSlots.getAllSlotNames();
 		for (int i = 0; i < comp.getInventory().getInvSize(); i++) {

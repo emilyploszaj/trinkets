@@ -30,7 +30,7 @@ public class PlayerTrinketComponent implements TrinketComponent, EntitySyncedCom
 	public void fromTag(CompoundTag tag) {
 		List<String> keys = TrinketSlots.getAllSlotNames();
 		for (int i = 0; i < keys.size(); i++) {
-			if (tag.containsKey(keys.get(i))) {
+			if (tag.contains(keys.get(i))) {
 				inventory.setInvStack(i, ItemStack.fromTag(tag.getCompound(keys.get(i))));
 			}
 		}

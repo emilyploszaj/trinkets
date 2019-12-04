@@ -16,12 +16,12 @@ import dev.emi.trinkets.TrinketsClient;
 import dev.emi.trinkets.api.TrinketInventory;
 import dev.emi.trinkets.api.TrinketSlots;
 import dev.emi.trinkets.api.TrinketSlots.SlotGroup;
+import dev.emi.trinkets.mixin.SlotMixin;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screen.ingame.AbstractInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen.CreativeContainer;
-import net.minecraft.client.render.GuiLighting;
 import net.minecraft.container.Slot;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemGroup;
@@ -51,10 +51,10 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
 		List<TrinketSlots.Slot> trinketSlots = TrinketSlots.getAllSlots();
 		for (int i = 0; i < trinketSlots.size(); i++) {
 			if (!trinketSlots.get(i).getSlotGroup().onReal && trinketSlots.get(i).getSlotGroup().slots.get(0).equals(trinketSlots.get(i))) {
-				creativeSlots.get(i).xPosition = getGroupX(trinketSlots.get(i).getSlotGroup()) + 1;
-				creativeSlots.get(i).yPosition = getGroupY(trinketSlots.get(i).getSlotGroup()) + 1;
+				((SlotMixin) (Object) creativeSlots.get(i)).setXPosition(getGroupX(trinketSlots.get(i).getSlotGroup()) + 1);
+				((SlotMixin) (Object) creativeSlots.get(i)).setYPosition(getGroupY(trinketSlots.get(i).getSlotGroup()) + 1);
 			} else {
-				creativeSlots.get(i).xPosition = Integer.MIN_VALUE;
+				((SlotMixin) (Object) creativeSlots.get(i)).setXPosition(Integer.MIN_VALUE);
 			}
 		}
 	}
@@ -63,14 +63,15 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
 	protected void tick(CallbackInfo info) {
 		if (selectedTab != ItemGroup.INVENTORY.getIndex()) return;
 		List<TrinketSlots.Slot> trinketSlots = TrinketSlots.getAllSlots();
-		float relX = mouseX - this.left;
-		float relY = mouseY - this.top;
+		float relX = mouseX - this.x;
+		float relY = mouseY - this.y;
 		if (TrinketsClient.slotGroup == null || !inBounds(TrinketsClient.slotGroup, relX, relY, true)) {
 			if (TrinketsClient.slotGroup != null) {
 				for (int i = 0; i < trinketSlots.size(); i++) {
 					if (trinketSlots.get(i).getSlotGroup().getName().equals(TrinketsClient.slotGroup.getName())
-						&& (TrinketsClient.slotGroup.onReal || TrinketsClient.slotGroup.slots.get(0) != trinketSlots.get(i)))
-						creativeSlots.get(i).xPosition = Integer.MIN_VALUE;
+							&& (TrinketsClient.slotGroup.onReal || TrinketsClient.slotGroup.slots.get(0) != trinketSlots.get(i))) {
+						((SlotMixin) (Object) creativeSlots.get(i)).setXPosition(Integer.MIN_VALUE);
+					}
 				}
 			}
 			TrinketsClient.slotGroup = null;
@@ -92,18 +93,18 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
 						count++;
 						offset = 0;
 					} else {
-						tSlots.get(0).xPosition = groupX + 1;
-						tSlots.get(0).yPosition = groupY + 1;
+						((SlotMixin) (Object) tSlots.get(0)).setXPosition(groupX + 1);
+						((SlotMixin) (Object) tSlots.get(0)).setYPosition(groupY + 1);
 					}
 					int l = count / 2;
 					int r = count - l - 1;
 					for (int i = 0; i < l; i++) {
-						tSlots.get(i + offset).xPosition = groupX - (i + 1) * 18 + 1;
-						tSlots.get(i + offset).yPosition = groupY + 1;
+						((SlotMixin) (Object) tSlots.get(i + offset)).setXPosition(groupX - (i + 1) * 18 + 1);
+						((SlotMixin) (Object) tSlots.get(i + offset)).setYPosition(groupY + 1);
 					}
 					for (int i = 0; i < r; i++) {
-						tSlots.get(i + l + offset).xPosition = groupX + (i + 1) * 18 + 1;
-						tSlots.get(i + l + offset).yPosition = groupY + 1;
+						((SlotMixin) (Object) tSlots.get(i + l + offset)).setXPosition(groupX + (i + 1) * 18 + 1);
+						((SlotMixin) (Object) tSlots.get(i + l + offset)).setYPosition(groupY + 1);
 					}
 					TrinketsClient.activeSlots = new ArrayList<Slot>();
 					if (group.vanillaSlot != -1) {
@@ -136,18 +137,18 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
 						count++;
 						offset = 0;
 					} else {
-						tSlots.get(0).xPosition = groupX + 1;
-						tSlots.get(0).yPosition = groupY + 1;
+						((SlotMixin) (Object) tSlots.get(0)).setXPosition(groupX + 1);
+						((SlotMixin) (Object) tSlots.get(0)).setYPosition(groupY + 1);
 					}
 					int l = count / 2;
 					int r = count - l - 1;
 					for (int i = 0; i < l; i++) {
-						tSlots.get(i + offset).xPosition = groupX - (i + 1) * 18 + 1;
-						tSlots.get(i + offset).yPosition = groupY + 1;
+						((SlotMixin) (Object) tSlots.get(i + offset)).setXPosition(groupX - (i + 1) * 18 + 1);
+						((SlotMixin) (Object) tSlots.get(i + offset)).setYPosition(groupY + 1);
 					}
 					for (int i = 0; i < r; i++) {
-						tSlots.get(i + l + offset).xPosition = groupX + (i + 1) * 18 + 1;
-						tSlots.get(i + l + offset).yPosition = groupY + 1;
+						((SlotMixin) (Object) tSlots.get(i + l + offset)).setXPosition(groupX + (i + 1) * 18 + 1);
+						((SlotMixin) (Object) tSlots.get(i + l + offset)).setYPosition(groupY + 1);
 					}
 					TrinketsClient.activeSlots = new ArrayList<Slot>();
 					if (group.vanillaSlot != -1) {
@@ -163,7 +164,7 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
 			if (((TrinketsClient.lastEquipped == null || TrinketsClient.displayEquipped <= 0 || !trinketSlots.get(i).getSlotGroup().getName().equals(TrinketsClient.lastEquipped.getName()))
 					&& (TrinketsClient.slotGroup == null || !trinketSlots.get(i).getSlotGroup().equals(TrinketsClient.slotGroup)))
 					&& (trinketSlots.get(i).getSlotGroup().onReal || trinketSlots.get(i).getSlotGroup().slots.get(0) != trinketSlots.get(i))) {
-				creativeSlots.get(i).xPosition = Integer.MIN_VALUE;
+				((SlotMixin) (Object) creativeSlots.get(i)).setXPosition(Integer.MIN_VALUE);
 			}
 		}
 	}
@@ -171,13 +172,12 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
 	@Inject(at = @At(value = "TAIL"), method = "drawBackground")
 	protected void drawBackground(float f, int x, int y, CallbackInfo info) {
 		if (selectedTab != ItemGroup.INVENTORY.getIndex()) return;
-		GuiLighting.disable();
 		GlStateManager.disableLighting();
 		SlotGroup lastGroup = TrinketSlots.slotGroups.get(TrinketSlots.slotGroups.size() - 1);
 		int lastX = getGroupX(lastGroup);
 		int lastY = getGroupY(lastGroup);
 		if (lastX < 0) {
-			TrinketInventoryRenderer.renderExcessSlotGroups(this, this.minecraft.getTextureManager(), left, top, lastX, lastY);
+			TrinketInventoryRenderer.renderExcessSlotGroups(this, this.minecraft.getTextureManager(), this.x, this.y, lastX, lastY);
 		}
 	}
 
@@ -185,7 +185,6 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
 	protected void drawForeground(int x, int y, CallbackInfo info) {
 		if (selectedTab != ItemGroup.INVENTORY.getIndex()) return;
 		super.drawForeground(x, y);
-		GuiLighting.disable();
 		GlStateManager.disableLighting();
 		for (SlotGroup group : TrinketSlots.slotGroups) {
 			if (!group.onReal && group.slots.size() > 0) {
@@ -199,11 +198,11 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
 	protected void drawMouseoverTooltip(int x, int y, float f, CallbackInfo info) {
 		if (TrinketsClient.slotGroup != null) {
 			TrinketInventoryRenderer.renderGroupFront(this, this.minecraft.getTextureManager(), this.playerInventory,
-					left, top, TrinketsClient.slotGroup, getGroupX(TrinketsClient.slotGroup),
+					this.x, this.y, TrinketsClient.slotGroup, getGroupX(TrinketsClient.slotGroup),
 					getGroupY(TrinketsClient.slotGroup));
 		} else if (TrinketsClient.displayEquipped > 0 && TrinketsClient.lastEquipped != null) {
 			TrinketInventoryRenderer.renderGroupFront(this, this.minecraft.getTextureManager(), this.playerInventory,
-					left, top, TrinketsClient.lastEquipped, getGroupX(TrinketsClient.lastEquipped),
+					this.x, this.y, TrinketsClient.lastEquipped, getGroupX(TrinketsClient.lastEquipped),
 					getGroupY(TrinketsClient.lastEquipped));
 		} else {
 			return;
@@ -218,7 +217,6 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
 		ItemStack stack = inventory.getCursorStack();
 		if (!stack.isEmpty()) {
 			try {
-				GuiLighting.enableForItems();
 				drawItem(stack, x - 8, y - 8, null);
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -294,11 +292,11 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
 
 	public void drawItem(ItemStack stack, int x, int y, String string) {
 		GlStateManager.translatef(0.0F, 0.0F, 32.0F);
-		this.blitOffset = 200;
+		setBlitOffset(200);
 		this.itemRenderer.zOffset = 200.0F;
 		this.itemRenderer.renderGuiItem(stack, x, y);
 		this.itemRenderer.renderGuiItemOverlay(this.font, stack, x, y, string);
-		this.blitOffset = 0;
+		setBlitOffset(0);
 		this.itemRenderer.zOffset = 0.0F;
 	}
 }

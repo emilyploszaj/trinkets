@@ -12,7 +12,8 @@
 		"LivingEntityMixin",
 		"ElytraItemMixin",
 		"MobEntityMixin",
-		"ExperienceOrbEntityMixin"
+		"ExperienceOrbEntityMixin",
+		"SlotMixin"
 	],
 	"client": [
 		"InventoryScreenMixin",

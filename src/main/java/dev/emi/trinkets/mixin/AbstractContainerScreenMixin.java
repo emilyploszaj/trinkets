@@ -21,7 +21,6 @@ import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.AbstractContainerScreen;
 import net.minecraft.client.gui.screen.ingame.ContainerProvider;
-import net.minecraft.client.render.GuiLighting;
 import net.minecraft.container.Container;
 import net.minecraft.container.Slot;
 import net.minecraft.text.Text;
@@ -34,8 +33,6 @@ import net.minecraft.util.Identifier;
 @Environment(EnvType.CLIENT)
 @Mixin(AbstractContainerScreen.class)
 public abstract class AbstractContainerScreenMixin<T extends Container> extends Screen implements ContainerProvider<T> {
-	@Shadow
-	protected int left, top;
 	@Shadow
 	public T container;
 	@Shadow
@@ -96,7 +93,6 @@ public abstract class AbstractContainerScreenMixin<T extends Container> extends 
 
 	public void renderSlot(Slot ts, TrinketSlots.Slot s, int x, int y){
 		GlStateManager.pushMatrix();
-		GuiLighting.enableForItems();
 		GlStateManager.disableLighting();
 		GlStateManager.disableDepthTest();
 		if (ts.getStack().isEmpty()) {

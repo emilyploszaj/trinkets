@@ -3,8 +3,6 @@ package dev.emi.trinkets;
 import dev.emi.trinkets.api.ITrinket;
 import dev.emi.trinkets.api.SlotGroups;
 import dev.emi.trinkets.api.Slots;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.container.Slot;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.player.PlayerEntity;
@@ -54,11 +52,5 @@ public class TrinketSlot extends Slot {
 	@Override
 	public ItemStack takeStack(int i) {
 		return super.takeStack(i);
-	}
-
-	@Override
-	@Environment(EnvType.CLIENT)
-	public String getBackgroundSprite() {
-		return "trinkets:item/empty";
 	}
 }
