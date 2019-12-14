@@ -26,14 +26,14 @@ public class TrinketFeatureRenderer extends FeatureRenderer<AbstractClientPlayer
 	}
 
 	@Override
-	public void render(MatrixStack arg0, VertexConsumerProvider arg1, int arg2, AbstractClientPlayerEntity player, float a, float b, float c, float d, float headYaw, float headPitch) {
+	public void render(MatrixStack matrixStack, VertexConsumerProvider vertexConsumer, int light, AbstractClientPlayerEntity player, float a, float b, float c, float d, float headYaw, float headPitch) {
 		TrinketComponent comp = TrinketsApi.getTrinketComponent(player);
 		List<String> names = TrinketSlots.getAllSlotNames();
 		for (int i = 0; i < comp.getInventory().getInvSize(); i++) {
 			GlStateManager.pushMatrix();
 			ItemStack stack = comp.getInventory().getInvStack(i);
 			if (stack.getItem() instanceof ITrinket) {
-				((ITrinket) stack.getItem()).render(names.get(i), context.getModel(), player, headYaw, headPitch);
+				((ITrinket) stack.getItem()).render(names.get(i), matrixStack, vertexConsumer, light, context.getModel(), player, headYaw, headPitch);
 			}
 			GlStateManager.popMatrix();
 		}
