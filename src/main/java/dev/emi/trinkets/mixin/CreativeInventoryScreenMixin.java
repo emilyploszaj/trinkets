@@ -196,6 +196,7 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
 
 	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/ingame/CreativeInventoryScreen;drawMouseoverTooltip(II)V"), method = "render")
 	protected void drawMouseoverTooltip(int x, int y, float f, CallbackInfo info) {
+		if (selectedTab != ItemGroup.INVENTORY.getIndex()) return;
 		if (TrinketsClient.slotGroup != null) {
 			TrinketInventoryRenderer.renderGroupFront(this, this.minecraft.getTextureManager(), this.playerInventory,
 					this.x, this.y, TrinketsClient.slotGroup, getGroupX(TrinketsClient.slotGroup),
@@ -211,6 +212,7 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
 
 	@Inject(at = @At(value = "TAIL"), method = "render")
 	protected void render(int x, int y, float f, CallbackInfo info) {
+		if (selectedTab != ItemGroup.INVENTORY.getIndex()) return;
 		mouseX = x;
 		mouseY = y;
 		PlayerInventory inventory = this.minecraft.player.inventory;

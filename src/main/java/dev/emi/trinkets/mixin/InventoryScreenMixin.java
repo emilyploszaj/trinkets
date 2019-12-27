@@ -171,7 +171,7 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreen<Playe
 		for (TrinketSlot ts : invSlots) {
 			int groupX = getGroupX(TrinketSlots.getSlotFromName(ts.group, ts.slot).getSlotGroup());
 			if (ts.keepVisible && groupX < 0) {
-				if (getRecipeBookGui().isOpen()) {
+				if (getRecipeBookWidget().isOpen()) {
 					((SlotMixin) (Object) ts).setXPosition(Integer.MIN_VALUE);
 				} else {
 					((SlotMixin) (Object) ts).setXPosition(groupX + 1);
@@ -185,12 +185,12 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreen<Playe
 		SlotGroup lastGroup = TrinketSlots.slotGroups.get(TrinketSlots.slotGroups.size() - 1);
 		int lastX = getGroupX(lastGroup);
 		int lastY = getGroupY(lastGroup);
-		if (!getRecipeBookGui().isOpen() && lastX < 0) {
+		if (!getRecipeBookWidget().isOpen() && lastX < 0) {
 			TrinketInventoryRenderer.renderExcessSlotGroups(this, this.minecraft.getTextureManager(), this.x, this.y, lastX, lastY);
 		}
 		for (SlotGroup group: TrinketSlots.slotGroups) {
 			if (!group.onReal && group.slots.size() > 0) {
-				if (getRecipeBookGui().isOpen() && getGroupX(group) < 0) continue;
+				if (getRecipeBookWidget().isOpen() && getGroupX(group) < 0) continue;
 				this.minecraft.getTextureManager().bindTexture(TrinketInventoryRenderer.MORE_SLOTS_TEX);
 				this.blit(this.x + getGroupX(group), this.y + getGroupY(group), 4, 4, 18, 18);
 			}
@@ -235,7 +235,7 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreen<Playe
 	}
 
 	public boolean inBounds(SlotGroup group, float x, float y, boolean focused) {
-		if (getRecipeBookGui().isOpen() && getGroupX(group) < 0) return false;
+		if (getRecipeBookWidget().isOpen() && getGroupX(group) < 0) return false;
 		int groupX = getGroupX(group);
 		int groupY = getGroupY(group);
 		if (focused) {

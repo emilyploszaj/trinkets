@@ -1,5 +1,6 @@
 package dev.emi.trinkets.api;
 
+import java.util.Iterator;
 import java.util.List;
 
 import dev.emi.trinkets.TrinketsClient;
@@ -29,9 +30,20 @@ public class PlayerTrinketComponent implements TrinketComponent, EntitySyncedCom
 	@Override
 	public void fromTag(CompoundTag tag) {
 		List<String> keys = TrinketSlots.getAllSlotNames();
-		for (int i = 0; i < keys.size(); i++) {
-			if (tag.contains(keys.get(i))) {
-				inventory.setInvStack(i, ItemStack.fromTag(tag.getCompound(keys.get(i))));
+		Iterator<String> iterator = tag.getKeys().iterator();
+		while (iterator.hasNext()) {
+			String key = iterator.next();
+			if (keys.contains(key)) {
+				int keyPos = keys.indexOf(key);
+				inventory.setInvStack(keyPos, ItemStack.fromTag(tag.getCompound(key)));
+			} else if(!key.equals("componentId")) {
+				System.out.println("[trinkets] Found item in slot that doesn't exist! " + key);
+				ItemStack stack = ItemStack.fromTag(tag.getCompound(key));
+				if (!equip(stack)) {
+					if (!player.giveItemStack(stack)) {
+						player.dropItem(stack, false);
+					}
+				}
 			}
 		}
 	}

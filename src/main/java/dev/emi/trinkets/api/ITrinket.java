@@ -5,7 +5,6 @@ import java.util.UUID;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import com.mojang.blaze3d.platform.GlStateManager;
 
 import net.minecraft.block.DispenserBlock;
 import net.minecraft.block.dispenser.DispenserBehavior;
@@ -14,6 +13,7 @@ import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.model.PlayerEntityModel;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.util.math.Vector3f;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.player.PlayerEntity;
@@ -83,12 +83,12 @@ public interface ITrinket {
 	/**
 	 * Called to render the trinket
 	 * @param slot The {@code group:slot} structured slot the trinket is being rendered in
-	 * @see {@link #translateToFace(PlayerEntityModel, AbstractClientPlayerEntity, float, float)}
-	 * @see {@link #translateToChest(PlayerEntityModel, AbstractClientPlayerEntity, float, float)}
-	 * @see {@link #translateToRightArm(PlayerEntityModel, AbstractClientPlayerEntity, float, float)}
-	 * @see {@link #translateToLeftArm(PlayerEntityModel, AbstractClientPlayerEntity, float, float)}
-	 * @see {@link #translateToRightLeg(PlayerEntityModel, AbstractClientPlayerEntity, float, float)}
-	 * @see {@link #translateToLeftLeg(PlayerEntityModel, AbstractClientPlayerEntity, float, float)}
+	 * @see {@link #translateToFace(MatrixStack, PlayerEntityModel, AbstractClientPlayerEntity, float, float)}
+	 * @see {@link #translateToChest(MatrixStack, PlayerEntityModel, AbstractClientPlayerEntity, float, float)}
+	 * @see {@link #translateToRightArm(MatrixStack, PlayerEntityModel, AbstractClientPlayerEntity, float, float)}
+	 * @see {@link #translateToLeftArm(MatrixStack, PlayerEntityModel, AbstractClientPlayerEntity, float, float)}
+	 * @see {@link #translateToRightLeg(MatrixStack, PlayerEntityModel, AbstractClientPlayerEntity, float, float)}
+	 * @see {@link #translateToLeftLeg(MatrixStack, PlayerEntityModel, AbstractClientPlayerEntity, float, float)}
 	 */
 	public default void render(String slot, MatrixStack matrixStack, VertexConsumerProvider vertexConsumer, int light, PlayerEntityModel<AbstractClientPlayerEntity> model, AbstractClientPlayerEntity player, float headYaw, float headPitch) {
 	}
@@ -131,85 +131,85 @@ public interface ITrinket {
 
 	//Helper stuff for rendering
 	/**
-	 * Translates the rendering context to the center of the player's face, parameters should be passed from {@link #render(PlayerEntityModel, AbstractClientPlayerEntity, float, float)}
+	 * Translates the rendering context to the center of the player's face, parameters should be passed from {@link #render(String, MatrixStack, VertexConsumerProvider, int, PlayerEntityModel, AbstractClientPlayerEntity, float, float)}
 	 */
-	public static void translateToFace(PlayerEntityModel<AbstractClientPlayerEntity> model, AbstractClientPlayerEntity player, float headYaw, float headPitch) {
+	public static void translateToFace(MatrixStack matrixStack, PlayerEntityModel<AbstractClientPlayerEntity> model, AbstractClientPlayerEntity player, float headYaw, float headPitch) {
 		if (player.isInSwimmingPose() || player.isFallFlying()) {
-			GlStateManager.rotatef(model.head.roll, 0.0F, 0.0F, 1.0F);
-			GlStateManager.rotatef(headYaw, 0.0F, 1.0F, 0.0F);
-			GlStateManager.rotatef(-45.0F, 1.0F, 0.0F, 0.0F);
+			matrixStack.multiply(Vector3f.POSITIVE_Z.getDegreesQuaternion(model.head.roll));
+			matrixStack.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(headYaw));
+			matrixStack.multiply(Vector3f.POSITIVE_X.getDegreesQuaternion(-45.0F));
 		} else {
 			if (player.isInSneakingPose() && !model.riding) {
-				GlStateManager.translatef(0.0F, 0.25F, 0.0F);
+				matrixStack.translate(0.0F, 0.25F, 0.0F);
 			}
-			GlStateManager.rotatef(headYaw, 0.0F, 1.0F, 0.0F);
-			GlStateManager.rotatef(headPitch, 1.0F, 0.0F, 0.0F);
+			matrixStack.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(headYaw));
+			matrixStack.multiply(Vector3f.POSITIVE_X.getDegreesQuaternion(headPitch));
 		}
-		GlStateManager.translatef(0.0F, -0.25F, -0.3F);
+		matrixStack.translate(0.0F, -0.25F, -0.3F);
 	}
 	/**
-	 * Translates the rendering context to the center of the player's chest/torso segment, parameters should be passed from {@link #render(PlayerEntityModel, AbstractClientPlayerEntity, float, float)}
+	 * Translates the rendering context to the center of the player's chest/torso segment, parameters should be passed from {@link #render(String, MatrixStack, VertexConsumerProvider, int, PlayerEntityModel, AbstractClientPlayerEntity, float, float)}
 	 */
-	public static void translateToChest(PlayerEntityModel<AbstractClientPlayerEntity> model, AbstractClientPlayerEntity player, float headYaw, float headPitch) {
+	public static void translateToChest(MatrixStack matrixStack, PlayerEntityModel<AbstractClientPlayerEntity> model, AbstractClientPlayerEntity player, float headYaw, float headPitch) {
 		if (player.isInSneakingPose() && !model.riding && !player.isSwimming()) {
-			GlStateManager.translatef(0.0F, 0.2F, 0.0F);
-			GlStateManager.rotatef(model.torso.pitch * 57.5F, 1.0F, 0.0F, 0.0F);
+			matrixStack.translate(0.0F, 0.2F, 0.0F);
+			matrixStack.multiply(Vector3f.POSITIVE_X.getDegreesQuaternion(model.torso.pitch * 57.5F));
 		}
-		GlStateManager.rotatef(model.torso.yaw * 57.5F, 0.0F, 1.0F, 0.0F);
-		GlStateManager.translatef(0.0F, 0.4F, -0.16F);
+		matrixStack.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(model.torso.yaw * 57.5F));
+		matrixStack.translate(0.0F, 0.4F, -0.16F);
 	}
 	/**
-	 * Translates the rendering context to the center of the bottom of the player's right arm, parameters should be passed from {@link #render(PlayerEntityModel, AbstractClientPlayerEntity, float, float)}
+	 * Translates the rendering context to the center of the bottom of the player's right arm, parameters should be passed from {@link #render(String, MatrixStack, VertexConsumerProvider, int, PlayerEntityModel, AbstractClientPlayerEntity, float, float)}
 	 */
-	public static void translateToRightArm(PlayerEntityModel<AbstractClientPlayerEntity> model, AbstractClientPlayerEntity player, float headYaw, float headPitch) {
+	public static void translateToRightArm(MatrixStack matrixStack, PlayerEntityModel<AbstractClientPlayerEntity> model, AbstractClientPlayerEntity player, float headYaw, float headPitch) {
 		if (player.isInSneakingPose() && !model.riding && !player.isSwimming()) {
-			GlStateManager.translatef(0.0F, 0.2F, 0.0F);
+			matrixStack.translate(0.0F, 0.2F, 0.0F);
 		}
-		GlStateManager.rotatef(model.torso.yaw * 57.5F, 0.0F, 1.0F, 0.0F);
-		GlStateManager.translatef(-0.3125F, 0.15625F, 0.0F);
-		GlStateManager.rotatef(model.rightArm.roll * 57.5F, 0.0F, 0.0F, 1.0F);
-		GlStateManager.rotatef(model.rightArm.yaw * 57.5F, 0.0F, 1.0F, 0.0F);
-		GlStateManager.rotatef(model.rightArm.pitch * 57.5F, 1.0F, 0.0F, 0.0F);
-		GlStateManager.translatef(-0.0625F, 0.625F, 0.0F);
+		matrixStack.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(model.torso.yaw * 57.5F));
+		matrixStack.translate(-0.3125F, 0.15625F, 0.0F);
+		matrixStack.multiply(Vector3f.POSITIVE_Z.getDegreesQuaternion(model.rightArm.roll * 57.5F));
+		matrixStack.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(model.rightArm.yaw * 57.5F));
+		matrixStack.multiply(Vector3f.POSITIVE_X.getDegreesQuaternion(model.rightArm.pitch * 57.5F));
+		matrixStack.translate(-0.0625F, 0.625F, 0.0F);
 	}
 	/**
-	 * Translates the rendering context to the center of the bottom of the player's left arm, parameters should be passed from {@link #render(PlayerEntityModel, AbstractClientPlayerEntity, float, float)}
+	 * Translates the rendering context to the center of the bottom of the player's left arm, parameters should be passed from {@link #render(String, MatrixStack, VertexConsumerProvider, int, PlayerEntityModel, AbstractClientPlayerEntity, float, float)}
 	 */
-	public static void translateToLeftArm(PlayerEntityModel<AbstractClientPlayerEntity> model, AbstractClientPlayerEntity player, float headYaw, float headPitch) {
+	public static void translateToLeftArm(MatrixStack matrixStack, PlayerEntityModel<AbstractClientPlayerEntity> model, AbstractClientPlayerEntity player, float headYaw, float headPitch) {
 		if (player.isInSneakingPose() && !model.riding && !player.isSwimming()) {
-			GlStateManager.translatef(0.0F, 0.2F, 0.0F);
+			matrixStack.translate(0.0F, 0.2F, 0.0F);
 		}
-		GlStateManager.rotatef(model.torso.yaw * 57.5F, 0.0F, 1.0F, 0.0F);
-		GlStateManager.translatef(0.3125F, 0.15625F, 0.0F);
-		GlStateManager.rotatef(model.leftArm.roll * 57.5F, 0.0F, 0.0F, 1.0F);
-		GlStateManager.rotatef(model.leftArm.yaw * 57.5F, 0.0F, 1.0F, 0.0F);
-		GlStateManager.rotatef(model.leftArm.pitch * 57.5F, 1.0F, 0.0F, 0.0F);
-		GlStateManager.translatef(0.0625F, 0.625F, 0.0F);
+		matrixStack.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(model.torso.yaw * 57.5F));
+		matrixStack.translate(0.3125F, 0.15625F, 0.0F);
+		matrixStack.multiply(Vector3f.POSITIVE_Z.getDegreesQuaternion(model.leftArm.roll * 57.5F));
+		matrixStack.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(model.leftArm.yaw * 57.5F));
+		matrixStack.multiply(Vector3f.POSITIVE_X.getDegreesQuaternion(model.leftArm.pitch * 57.5F));
+		matrixStack.translate(0.0625F, 0.625F, 0.0F);
 	}
 	/**
-	 * Translates the rendering context to the center of the bottom of the player's right leg, parameters should be passed from {@link #render(PlayerEntityModel, AbstractClientPlayerEntity, float, float)}
+	 * Translates the rendering context to the center of the bottom of the player's right leg, parameters should be passed from {@link #render(String, MatrixStack, VertexConsumerProvider, int, PlayerEntityModel, AbstractClientPlayerEntity, float, float)}
 	 */
-	public static void translateToRightLeg(PlayerEntityModel<AbstractClientPlayerEntity> model, AbstractClientPlayerEntity player, float headYaw, float headPitch) {
+	public static void translateToRightLeg(MatrixStack matrixStack, PlayerEntityModel<AbstractClientPlayerEntity> model, AbstractClientPlayerEntity player, float headYaw, float headPitch) {
 		if (player.isInSneakingPose() && !model.riding && !player.isSwimming()) {
-			GlStateManager.translatef(0.0F, 0.0F, 0.25F);
+			matrixStack.translate(0.0F, 0.0F, 0.25F);
 		}
-		GlStateManager.translatef(-0.125F, 0.75F, 0.0F);
-		GlStateManager.rotatef(model.rightLeg.roll * 57.5F, 0.0F, 0.0F, 1.0F);
-		GlStateManager.rotatef(model.rightLeg.yaw * 57.5F, 0.0F, 1.0F, 0.0F);
-		GlStateManager.rotatef(model.rightLeg.pitch * 57.5F, 1.0F, 0.0F, 0.0F);
-		GlStateManager.translatef(0.0F, 0.75F, 0.0F);
+		matrixStack.translate(-0.125F, 0.75F, 0.0F);
+		matrixStack.multiply(Vector3f.POSITIVE_Z.getDegreesQuaternion(model.rightLeg.roll * 57.5F));
+		matrixStack.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(model.rightLeg.yaw * 57.5F));
+		matrixStack.multiply(Vector3f.POSITIVE_X.getDegreesQuaternion(model.rightLeg.pitch * 57.5F));
+		matrixStack.translate(0.0F, 0.75F, 0.0F);
 	}
 	/**
-	 * Translates the rendering context to the center of the bottom of the player's left leg, parameters should be passed from {@link #render(PlayerEntityModel, AbstractClientPlayerEntity, float, float)}
+	 * Translates the rendering context to the center of the bottom of the player's left leg, parameters should be passed from {@link #render(String, MatrixStack, VertexConsumerProvider, int, PlayerEntityModel, AbstractClientPlayerEntity, float, float)}
 	 */
-	public static void translateToLeftLeg(PlayerEntityModel<AbstractClientPlayerEntity> model, AbstractClientPlayerEntity player, float headYaw, float headPitch) {
+	public static void translateToLeftLeg(MatrixStack matrixStack, PlayerEntityModel<AbstractClientPlayerEntity> model, AbstractClientPlayerEntity player, float headYaw, float headPitch) {
 		if (player.isInSneakingPose() && !model.riding && !player.isSwimming()) {
-			GlStateManager.translatef(0.0F, 0.0F, 0.25F);
+			matrixStack.translate(0.0F, 0.0F, 0.25F);
 		}
-		GlStateManager.translatef(0.125F, 0.75F, 0.0F);
-		GlStateManager.rotatef(model.leftLeg.roll * 57.5F, 0.0F, 0.0F, 1.0F);
-		GlStateManager.rotatef(model.leftLeg.yaw * 57.5F, 0.0F, 1.0F, 0.0F);
-		GlStateManager.rotatef(model.leftLeg.pitch * 57.5F, 1.0F, 0.0F, 0.0F);
-		GlStateManager.translatef(0.0F, 0.75F, 0.0F);
+		matrixStack.translate(0.125F, 0.75F, 0.0F);
+		matrixStack.multiply(Vector3f.POSITIVE_Z.getDegreesQuaternion(model.leftLeg.roll * 57.5F));
+		matrixStack.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(model.leftLeg.yaw * 57.5F));
+		matrixStack.multiply(Vector3f.POSITIVE_X.getDegreesQuaternion(model.leftLeg.pitch * 57.5F));
+		matrixStack.translate(0.0F, 0.75F, 0.0F);
 	}
 }
