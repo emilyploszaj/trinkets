@@ -17,5 +17,9 @@ public interface TrinketComponent extends Component {
 		return getStack(group + ':' + slot);
 	}
 
-	public boolean equip(ItemStack stack);
+	public default boolean equip(ItemStack stack) {
+		return equip(stack, false);
+	}
+
+	public boolean equip(ItemStack stack, boolean shiftClick);
 }

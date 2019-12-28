@@ -1,5 +1,6 @@
 package dev.emi.trinkets;
 
+import dev.emi.trinkets.api.ITrinket;
 import dev.emi.trinkets.api.PlayerTrinketComponent;
 import dev.emi.trinkets.api.SlotGroups;
 import dev.emi.trinkets.api.Slots;
@@ -10,6 +11,7 @@ import nerdhub.cardinal.components.api.util.EntityComponents;
 import nerdhub.cardinal.components.api.util.RespawnCopyStrategy;
 import net.fabricmc.api.ModInitializer;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Items;
 import net.minecraft.util.Identifier;
 
 public class TrinketsMain implements ModInitializer {
@@ -18,7 +20,12 @@ public class TrinketsMain implements ModInitializer {
 	public void onInitialize() {
 		EntityComponentCallback.event(PlayerEntity.class).register((player, components) -> components.put(TrinketsApi.TRINKETS, new PlayerTrinketComponent(player)));
 		EntityComponents.setRespawnCopyStrategy(TrinketsApi.TRINKETS, RespawnCopyStrategy.INVENTORY);
-		TrinketSlots.addSlot(SlotGroups.CHEST, Slots.CAPE, new Identifier("trinkets", "textures/item/empty_trinket_slot_cape.png"));
+		TrinketSlots.addSlot(SlotGroups.CHEST, Slots.CAPE, new Identifier("trinkets", "textures/item/empty_trinket_slot_cape.png"), (slot, stack) -> {
+			if (!(stack.getItem() instanceof ITrinket)) {
+				return stack.getItem() == Items.ELYTRA;
+			}
+			return ((ITrinket) stack.getItem()).canWearInSlot(slot.getSlotGroup().getName(), slot.getName());
+		});
 		//Slots used for testing
 		//TrinketSlots.addSlot("head", "mask", new Identifier("trinkets", "textures/item/empty_trinket_slot_mask.png"));
 		//TrinketSlots.addSlot("chest", "necklace", new Identifier("trinkets", "textures/item/empty_trinket_slot_necklace.png"));

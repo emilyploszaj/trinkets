@@ -2,7 +2,9 @@ package dev.emi.trinkets.api;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiFunction;
 
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 
 /**
@@ -87,6 +89,39 @@ public class TrinketSlots {
 	}
 
 	/**
+	 * Adds a new slot to an existing slot group
+	 * @param groupName Name of the slot group to add the slot to
+	 * @param slotName Name of the new slot
+	 * @param texture The identifier representing the path to the file to be used for rendering the slot's background. Please use {@code new Identifier("trinkets", "textures/gui/blank_back.png")} if you want a blank slot
+	 * @param canEquip Function to be run to test if an ItemStack can be put into this trinket slot
+	 */
+	public static void addSlot(String groupName, String slotName, Identifier texture, BiFunction<Slot, ItemStack, Boolean> canEquip) {
+		if (slotName.matches("^[a-zA-Z0-9]+$")) {
+			for (SlotGroup group: slotGroups) {
+				if (group.name.equals(groupName)) {
+					for (Slot slot: group.slots) {
+						if (slot.name.equals(slotName)) {
+							slot.canEquip = canEquip;
+							return;
+						}
+					}
+					Slot newSlot = new Slot(slotName, texture, group);
+					newSlot.canEquip = canEquip;
+					if (!group.onReal && slotName.equals(group.defaultSlot) && group.slots.size() > 0) {
+						Slot s = group.slots.get(0);
+						group.slots.set(0, newSlot);
+						group.slots.add(s);
+					} else {
+						group.slots.add(newSlot);
+					}
+				}
+			}
+		} else {
+			System.err.println("Failed to register slot " + groupName + ":" + slotName + ", identifiers must only be alpha characters");
+		}
+	}
+
+	/**
 	 * @return List of {@code group:slot} names for all slots currently registered
 	 */
 	public static List<String> getAllSlotNames() {
@@ -154,7 +189,12 @@ public class TrinketSlots {
 	public static class Slot {
 		private SlotGroup group;
 		private String name;
+		public boolean disableQuickMove = false;
 		public Identifier texture;
+		public BiFunction<Slot, ItemStack, Boolean> canEquip = (slot, stack) -> {
+			if (!(stack.getItem() instanceof ITrinket)) return false;
+			return ((ITrinket) stack.getItem()).canWearInSlot(slot.getSlotGroup().getName(), slot.getName());
+		};
 
 		public Slot(String name, Identifier texture, SlotGroup group){
 			this.name = name;

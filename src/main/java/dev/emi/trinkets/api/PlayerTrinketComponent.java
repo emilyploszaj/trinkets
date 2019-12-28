@@ -12,7 +12,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundTag;
 
 /**
@@ -89,32 +88,12 @@ public class PlayerTrinketComponent implements TrinketComponent, EntitySyncedCom
 	 * @return {@code true} if successfully equipped
 	 */
 	@Override
-	public boolean equip(ItemStack stack) {
+	public boolean equip(ItemStack stack, boolean shiftClick) {
 		int i = 0;
-		if (!(stack.getItem() instanceof ITrinket)) {
-			if (stack.getItem() == Items.ELYTRA) {
-				for (SlotGroup group: TrinketSlots.slotGroups) {
-					for (Slot slot: group.slots) {
-						if (group.getName().equals(SlotGroups.CHEST) && slot.getName().equals(Slots.CAPE)) {
-							if (getInventory().getInvStack(i).isEmpty()) {
-								getInventory().setInvStack(i, stack.copy());
-								//Makes a 16 tick popup appear showing the player where their item went when shift clicking
-								TrinketsClient.lastEquipped = group;
-								TrinketsClient.displayEquipped = 16;
-								return true;
-							}
-						}
-						i++;
-					}
-				}
-			}
-			return false;
-		}
-
-		ITrinket trinket = (ITrinket) stack.getItem();
 		for (SlotGroup group: TrinketSlots.slotGroups) {
 			for (Slot slot: group.slots) {
-				if (trinket.canWearInSlot(group.getName(), slot.getName())) {
+				if (shiftClick && slot.disableQuickMove) continue;
+				if (slot.canEquip.apply(slot, stack)) {
 					if (getInventory().getInvStack(i).isEmpty()) {
 						getInventory().setInvStack(i, stack.copy());
 						//Makes a 16 tick popup appear showing the player where their item went when shift clicking

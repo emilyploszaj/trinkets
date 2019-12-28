@@ -1,14 +1,12 @@
 package dev.emi.trinkets;
 
 import dev.emi.trinkets.api.ITrinket;
-import dev.emi.trinkets.api.SlotGroups;
-import dev.emi.trinkets.api.Slots;
+import dev.emi.trinkets.api.TrinketSlots;
 import net.minecraft.container.Slot;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 
 /**
  * A slot for a TrinketInventory, only properly utilized in the survival inventory due to restrictions in the creative inventory
@@ -23,13 +21,9 @@ public class TrinketSlot extends Slot {
 		this.slot = slot;
 	}
 
-	public boolean canInsert(ItemStack itemStack) {
-		if (group.equals(SlotGroups.CHEST) && slot.equals(Slots.CAPE) && itemStack.getItem() == Items.ELYTRA) return true;
-		if (itemStack.getItem() instanceof ITrinket) {
-			ITrinket trinket = (ITrinket) itemStack.getItem();
-			return trinket.canWearInSlot(group, slot) && trinket.canInsert(itemStack);
-		}
-		return false;
+	public boolean canInsert(ItemStack stack) {
+		TrinketSlots.Slot s = TrinketSlots.getSlotFromName(group, slot);
+		return s.canEquip.apply(s, stack);
 	}
 
 	@Override

@@ -72,7 +72,7 @@ public abstract class PlayerContainerMixin extends CraftingContainer<CraftingInv
 		} else if(slot != null && slot.hasStack()) {
 			ItemStack stack = slot.getStack();
 			TrinketComponent comp = TrinketsApi.getTrinketComponent(player);
-			if (comp.equip(stack)) {
+			if (comp.equip(stack, true)) {
 				stack.setCount(0);
 				info.setReturnValue(stack);
 			}
