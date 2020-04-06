@@ -6,22 +6,23 @@
 	"mixins": [
 		"PlayerContainerMixin",
 		"PlayerEntityMixin",
-		"MinecraftServerMixin",
 		"ClientPlayerEntityMixin",
 		"ServerPlayNetworkHandlerMixin",
 		"LivingEntityMixin",
 		"ElytraItemMixin",
 		"MobEntityMixin",
 		"ExperienceOrbEntityMixin",
-		"SlotMixin"
+		"SlotMixin",
+		"PlayerInventoryMixin"
 	],
 	"client": [
 		"InventoryScreenMixin",
-		"AbstractContainerScreenMixin",
+		"ContainerScreenMixin",
 		"ElytraFeatureRendererMixin",
 		"AbstractInventoryScreenMixin",
 		"PlayerEntityRendererMixin",
-		"CreativeInventoryScreenMixin"
+		"CreativeInventoryScreenMixin",
+		"ItemStackMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

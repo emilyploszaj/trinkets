@@ -16,7 +16,6 @@ import dev.emi.trinkets.TrinketsClient;
 import dev.emi.trinkets.api.TrinketInventory;
 import dev.emi.trinkets.api.TrinketSlots;
 import dev.emi.trinkets.api.TrinketSlots.SlotGroup;
-import dev.emi.trinkets.mixin.SlotMixin;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screen.ingame.AbstractInventoryScreen;
@@ -231,7 +230,7 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
 	private void setSelectedTab(ItemGroup itemGroup, CallbackInfo info) {
 		if (itemGroup == ItemGroup.INVENTORY) {
 			creativeSlots.clear();
-			for (int i = 46; i < container.slotList.size(); i++) {
+			for (int i = 46; i < container.slots.size(); i++) {
 				if(container.getSlot(i).inventory instanceof TrinketInventory) creativeSlots.add(container.getSlot(i));
 			}
 			init(info);

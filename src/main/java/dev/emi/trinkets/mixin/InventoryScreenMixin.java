@@ -18,7 +18,6 @@ import dev.emi.trinkets.TrinketsClient;
 import dev.emi.trinkets.api.SlotGroups;
 import dev.emi.trinkets.api.TrinketSlots;
 import dev.emi.trinkets.api.TrinketSlots.SlotGroup;
-import dev.emi.trinkets.mixin.SlotMixin;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screen.ingame.AbstractInventoryScreen;
@@ -54,7 +53,7 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreen<Playe
 	public void init(CallbackInfo info){
 		TrinketsClient.displayEquipped = 0;
 		invSlots = new ArrayList<>();
-		for (Slot slot: this.container.slotList) {
+		for (Slot slot: this.container.slots) {
 			if (slot instanceof TrinketSlot) {
 				TrinketSlot ts = (TrinketSlot) slot;
 				invSlots.add(ts);

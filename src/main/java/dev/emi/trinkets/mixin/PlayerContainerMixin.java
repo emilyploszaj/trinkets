@@ -54,7 +54,7 @@ public abstract class PlayerContainerMixin extends CraftingContainer<CraftingInv
 
 	@Inject(at = @At("HEAD"), method = "transferSlot", cancellable = true)
 	public void transferSlot(PlayerEntity player, int i, CallbackInfoReturnable<ItemStack> info) {
-		net.minecraft.container.Slot slot = (net.minecraft.container.Slot) this.slotList.get(i);
+		net.minecraft.container.Slot slot = (net.minecraft.container.Slot) this.slots.get(i);
 		if (i > 45) {
 			if(slot != null && slot.hasStack()){
 				ItemStack stack = slot.getStack();

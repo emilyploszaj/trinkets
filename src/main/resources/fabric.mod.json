@@ -1,7 +1,7 @@
 {
 	"schemaVersion": 1,
 	"id": "trinkets",
-	"version": "2.4.1",
+	"version": "2.4.2",
 
 	"name": "Trinkets",
 	"description": "Adds a modular accessory system to the game",

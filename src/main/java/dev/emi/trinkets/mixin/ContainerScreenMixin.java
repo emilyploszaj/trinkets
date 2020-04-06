@@ -19,20 +19,20 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ingame.AbstractContainerScreen;
 import net.minecraft.client.gui.screen.ingame.ContainerProvider;
+import net.minecraft.client.gui.screen.ingame.ContainerScreen;
 import net.minecraft.container.Container;
 import net.minecraft.container.Slot;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
 /**
- * Overwrites general AbstractContainerScreen slot hover checking functionality to not let any non-active group slots be interactable 
+ * Overwrites general ContainerScreen slot hover checking functionality to not let any non-active group slots be interactable 
  * as well as render trinket slots properly
  */
 @Environment(EnvType.CLIENT)
-@Mixin(AbstractContainerScreen.class)
-public abstract class AbstractContainerScreenMixin<T extends Container> extends Screen implements ContainerProvider<T> {
+@Mixin(ContainerScreen.class)
+public abstract class ContainerScreenMixin<T extends Container> extends Screen implements ContainerProvider<T> {
 	@Shadow
 	public T container;
 	@Shadow
@@ -40,7 +40,7 @@ public abstract class AbstractContainerScreenMixin<T extends Container> extends 
 	
 	private static final Identifier BLANK_BACK = new Identifier("trinkets", "textures/gui/blank_back.png");
 	
-	protected AbstractContainerScreenMixin(Text text) {
+	protected ContainerScreenMixin(Text text) {
 		super(text);
 	}
 
@@ -75,15 +75,15 @@ public abstract class AbstractContainerScreenMixin<T extends Container> extends 
 	private void drawForeground(int x, int y, CallbackInfo info) {
 		GlStateManager.disableDepthTest();
 		List<TrinketSlots.Slot> trinketSlots = TrinketSlots.getAllSlots();
-		for (int i = 0; i < container.slotList.size(); i++) {
-			if (!(container.slotList.get(i).inventory instanceof TrinketInventory)) continue;
+		for (int i = 0; i < container.slots.size(); i++) {
+			if (!(container.slots.get(i).inventory instanceof TrinketInventory)) continue;
 			Slot ts = container.getSlot(i);
 			TrinketSlots.Slot s = trinketSlots.get(i - 46);
 			if (!(s.getSlotGroup() == TrinketsClient.slotGroup || (s.getSlotGroup() == TrinketsClient.lastEquipped && TrinketsClient.displayEquipped > 0))) renderSlot(ts, s, x, y);
 		}
 		//Redraw only the active group slots so they're always on top
-		for (int i = 0; i < container.slotList.size(); i++) {
-			if (!(container.slotList.get(i).inventory instanceof TrinketInventory)) continue;
+		for (int i = 0; i < container.slots.size(); i++) {
+			if (!(container.slots.get(i).inventory instanceof TrinketInventory)) continue;
 			Slot ts = container.getSlot(i);
 			TrinketSlots.Slot s = trinketSlots.get(i - 46);
 			if (s.getSlotGroup() == TrinketsClient.slotGroup || (s.getSlotGroup() == TrinketsClient.lastEquipped && TrinketsClient.displayEquipped > 0)) renderSlot(ts, s, x, y);
