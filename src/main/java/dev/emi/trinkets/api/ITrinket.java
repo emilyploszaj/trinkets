@@ -58,15 +58,27 @@ public interface ITrinket {
 	}
 
 	/**
-	 * Called when equipped by a player
+	 * Called when equipped by a player (Only called on client side)
 	 */
 	public default void onEquip(PlayerEntity player, ItemStack stack) {
 	}
 
 	/**
-	 * Called when unequipped by a player
+	 * Called when unequipped by a player (Only called on client side)
 	 */
 	public default void onUnequip(PlayerEntity player, ItemStack stack) {
+	}
+
+	/**
+	 * Called when equipped by a player (Only called on server side)
+	 */
+	public default void onEquipServer(PlayerEntity player, ItemStack stack) {
+	}
+
+	/**
+	 * Called when unequipped by a player (Only called on server side)
+	 */
+	public default void onUnequipServer(PlayerEntity player, ItemStack stack) {
 	}
 
 	/**
