@@ -30,12 +30,12 @@ public class TrinketsMain implements ModInitializer {
 		});
 		ServerSidePacketRegistry.INSTANCE.register(ITEM_EQUIPPED_CHANGE_PACKET, TrinketInventory.EQUIP_STACK_HANDLER);
 		//Slots used for testing
-//		TrinketSlots.addSlot("head", "mask", new Identifier("trinkets", "textures/item/empty_trinket_slot_mask.png"));
-//		TrinketSlots.addSlot("chest", "necklace", new Identifier("trinkets", "textures/item/empty_trinket_slot_necklace.png"));
-//		TrinketSlots.addSlot("legs", "belt", new Identifier("trinkets", "textures/item/empty_trinket_slot_belt.png"));
-//		TrinketSlots.addSlot("feet", "aglet", new Identifier("trinkets", "textures/item/empty_trinket_slot_aglet.png"));
-//		TrinketSlots.addSlot("hand", "ring", new Identifier("trinkets", "textures/item/empty_trinket_slot_ring.png"));
-//		TrinketSlots.addSlot("hand", "gloves", new Identifier("trinkets", "textures/item/empty_trinket_slot_gloves.png"));
-//		TrinketSlots.addSlot("offhand", "ring", new Identifier("trinkets", "textures/item/empty_trinket_slot_ring.png"));
+		//TrinketSlots.addSlot("head", "mask", new Identifier("trinkets", "textures/item/empty_trinket_slot_mask.png"));
+		//TrinketSlots.addSlot("chest", "necklace", new Identifier("trinkets", "textures/item/empty_trinket_slot_necklace.png"));
+		//TrinketSlots.addSlot("legs", "belt", new Identifier("trinkets", "textures/item/empty_trinket_slot_belt.png"));
+		//TrinketSlots.addSlot("feet", "aglet", new Identifier("trinkets", "textures/item/empty_trinket_slot_aglet.png"));
+		//TrinketSlots.addSlot("hand", "ring", new Identifier("trinkets", "textures/item/empty_trinket_slot_ring.png"));
+		//TrinketSlots.addSlot("hand", "gloves", new Identifier("trinkets", "textures/item/empty_trinket_slot_gloves.png"));
+		//TrinketSlots.addSlot("offhand", "ring", new Identifier("trinkets", "textures/item/empty_trinket_slot_ring.png"));
 	}
 }
