@@ -5,6 +5,10 @@ import java.util.List;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 
+import net.minecraft.client.gui.screen.ingame.AbstractInventoryScreen;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.screen.PlayerScreenHandler;
+import net.minecraft.screen.slot.Slot;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -20,11 +24,8 @@ import dev.emi.trinkets.api.TrinketSlots;
 import dev.emi.trinkets.api.TrinketSlots.SlotGroup;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.gui.screen.ingame.AbstractInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.client.gui.screen.recipebook.RecipeBookProvider;
-import net.minecraft.container.PlayerContainer;
-import net.minecraft.container.Slot;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
@@ -35,25 +36,25 @@ import net.minecraft.util.Identifier;
  */
 @Environment(EnvType.CLIENT)
 @Mixin(InventoryScreen.class)
-public abstract class InventoryScreenMixin extends AbstractInventoryScreen<PlayerContainer> implements RecipeBookProvider {
+public abstract class InventoryScreenMixin extends AbstractInventoryScreen<PlayerScreenHandler> implements RecipeBookProvider {
 	@Shadow
 	private float mouseX;
 	@Shadow
 	private float mouseY;
 	@Shadow
-	private static final Identifier RECIPE_BUTTON_TEX = new Identifier("textures/gui/recipe_button.png");
+	private static final Identifier RECIPE_BUTTON_TEXTURE = new Identifier("textures/gui/recipe_button.png");
 	
 	private List<TrinketSlot> invSlots;
 
-	public InventoryScreenMixin(PlayerContainer container, PlayerInventory inventory, Text text) {
-		super(container, inventory, text);
+	public InventoryScreenMixin(PlayerScreenHandler screenHandler, PlayerInventory inventory, Text text) {
+		super(screenHandler, inventory, text);
 	}
 
 	@Inject(at = @At("TAIL"), method = "init")
 	public void init(CallbackInfo info){
 		TrinketsClient.displayEquipped = 0;
 		invSlots = new ArrayList<>();
-		for (Slot slot: this.container.slots) {
+		for (Slot slot: this.getScreenHandler().slots) {
 			if (slot instanceof TrinketSlot) {
 				TrinketSlot ts = (TrinketSlot) slot;
 				invSlots.add(ts);
@@ -112,7 +113,7 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreen<Playe
 					}
 					TrinketsClient.activeSlots = new ArrayList<Slot>();
 					if (group.vanillaSlot != -1) {
-						TrinketsClient.activeSlots.add(this.container.getSlot(group.vanillaSlot));
+						TrinketsClient.activeSlots.add(this.getScreenHandler().getSlot(group.vanillaSlot));
 					}
 					for (TrinketSlot ts: tSlots) {
 						TrinketsClient.activeSlots.add(ts);
@@ -153,7 +154,7 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreen<Playe
 					}
 					TrinketsClient.activeSlots = new ArrayList<Slot>();
 					if (group.vanillaSlot != -1) {
-						TrinketsClient.activeSlots.add(this.container.getSlot(group.vanillaSlot));
+						TrinketsClient.activeSlots.add(this.getScreenHandler().getSlot(group.vanillaSlot));
 					}
 					for (TrinketSlot ts: tSlots) {
 						TrinketsClient.activeSlots.add(ts);
@@ -180,42 +181,42 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreen<Playe
 	}
 
 	@Inject(at = @At("TAIL"), method = "drawBackground")
-	protected void drawBackground(float f, int x, int y, CallbackInfo info) {
+	protected void drawBackground(MatrixStack matrices, float f, int x, int y, CallbackInfo info) {
 		SlotGroup lastGroup = TrinketSlots.slotGroups.get(TrinketSlots.slotGroups.size() - 1);
 		int lastX = getGroupX(lastGroup);
 		int lastY = getGroupY(lastGroup);
 		if (!getRecipeBookWidget().isOpen() && lastX < 0) {
-			TrinketInventoryRenderer.renderExcessSlotGroups(this, this.minecraft.getTextureManager(), this.x, this.y, lastX, lastY);
+			TrinketInventoryRenderer.renderExcessSlotGroups(matrices, this, this.client.getTextureManager(), this.x, this.y, lastX, lastY);
 		}
 		for (SlotGroup group: TrinketSlots.slotGroups) {
 			if (!group.onReal && group.slots.size() > 0) {
 				if (getRecipeBookWidget().isOpen() && getGroupX(group) < 0) continue;
-				this.minecraft.getTextureManager().bindTexture(TrinketInventoryRenderer.MORE_SLOTS_TEX);
-				this.blit(this.x + getGroupX(group), this.y + getGroupY(group), 4, 4, 18, 18);
+				this.client.getTextureManager().bindTexture(TrinketInventoryRenderer.MORE_SLOTS_TEX);
+				this.drawTexture(matrices, this.x + getGroupX(group), this.y + getGroupY(group), 4, 4, 18, 18);
 			}
 		}
 	}
 
 	@Inject(at = @At(value = "TAIL"), method = "drawForeground")
-	protected void drawForeground(int x, int y, CallbackInfo info) {
-		super.drawForeground(x, y);
+	protected void drawForeground(MatrixStack matrices, int x, int y, CallbackInfo info) {
+		super.drawForeground(matrices, x, y);
 		GlStateManager.disableLighting();
 	}
 	
-	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/ingame/InventoryScreen;drawMouseoverTooltip(II)V"), method = "render")
-	protected void drawMouseoverTooltip(int x, int y, float f, CallbackInfo info) {
+	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/ingame/InventoryScreen;drawMouseoverTooltip(Lnet/minecraft/client/util/math/MatrixStack;II)V"), method = "render")
+	protected void drawMouseoverTooltip(MatrixStack matrices, int x, int y, float f, CallbackInfo info) {
 		if (TrinketsClient.slotGroup != null) {
-			TrinketInventoryRenderer.renderGroupFront(this, this.minecraft.getTextureManager(), this.playerInventory, this.x, this.y, TrinketsClient.slotGroup, getGroupX(TrinketsClient.slotGroup), getGroupY(TrinketsClient.slotGroup));
+			TrinketInventoryRenderer.renderGroupFront(matrices, this, this.client.getTextureManager(), this.playerInventory, this.x, this.y, TrinketsClient.slotGroup, getGroupX(TrinketsClient.slotGroup), getGroupY(TrinketsClient.slotGroup));
 		} else if (TrinketsClient.displayEquipped > 0 && TrinketsClient.lastEquipped != null) {
-			TrinketInventoryRenderer.renderGroupFront(this, this.minecraft.getTextureManager(), this.playerInventory, this.x, this.y, TrinketsClient.lastEquipped, getGroupX(TrinketsClient.lastEquipped), getGroupY(TrinketsClient.lastEquipped));
+			TrinketInventoryRenderer.renderGroupFront(matrices, this, this.client.getTextureManager(), this.playerInventory, this.x, this.y, TrinketsClient.lastEquipped, getGroupX(TrinketsClient.lastEquipped), getGroupY(TrinketsClient.lastEquipped));
 		} else {
 			return;
 		}
 	}
 	
 	@Inject(at = @At(value = "TAIL"), method = "render")
-	protected void render(int x, int y, float f, CallbackInfo info) {
-		PlayerInventory inventory = this.minecraft.player.inventory;
+	protected void render(MatrixStack matrices, int x, int y, float f, CallbackInfo info) {
+		PlayerInventory inventory = this.client.player.inventory;
 		ItemStack stack = inventory.getCursorStack();
 		if (!stack.isEmpty()) {
 			try {
@@ -291,11 +292,11 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreen<Playe
 
 	public void drawItem(ItemStack stack, int x, int y, String string) {
 		GlStateManager.translatef(0.0F, 0.0F, 32.0F);
-		setBlitOffset(200);
+		this.setZOffset(200);
 		this.itemRenderer.zOffset = 200.0F;
 		this.itemRenderer.renderGuiItem(stack, x, y);
-		this.itemRenderer.renderGuiItemOverlay(this.font, stack, x, y, string);
-		setBlitOffset(0);
+		this.itemRenderer.renderGuiItemOverlay(this.textRenderer, stack, x, y, string);
+		this.setZOffset(0);
 		this.itemRenderer.zOffset = 0.0F;
 	}
 }

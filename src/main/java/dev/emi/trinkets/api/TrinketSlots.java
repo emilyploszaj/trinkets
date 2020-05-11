@@ -8,7 +8,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 
 /**
- * Registry and container of all slot groups and slots
+ * Registry and screenHandler of all slot groups and slots
  */
 public class TrinketSlots {
 	public static List<SlotGroup> slotGroups = new ArrayList<SlotGroup>();

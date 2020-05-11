@@ -4,7 +4,7 @@
 	"compatibilityLevel": "JAVA_8",
 	"plugin": "dev.emi.trinkets.TrinketsMixinPlugin",
 	"mixins": [
-		"PlayerContainerMixin",
+		"PlayerScreenHandlerMixin",
 		"PlayerEntityMixin",
 		"ClientPlayerEntityMixin",
 		"ServerPlayNetworkHandlerMixin",
@@ -17,7 +17,7 @@
 	],
 	"client": [
 		"InventoryScreenMixin",
-		"ContainerScreenMixin",
+		"HandledScreenMixin",
 		"ElytraFeatureRendererMixin",
 		"AbstractInventoryScreenMixin",
 		"PlayerEntityRendererMixin",

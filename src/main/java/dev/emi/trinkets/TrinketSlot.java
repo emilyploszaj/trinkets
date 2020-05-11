@@ -2,11 +2,11 @@ package dev.emi.trinkets;
 
 import dev.emi.trinkets.api.ITrinket;
 import dev.emi.trinkets.api.TrinketSlots;
-import net.minecraft.container.Slot;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.screen.slot.Slot;
 
 /**
  * A slot for a TrinketInventory, only properly utilized in the survival inventory due to restrictions in the creative inventory

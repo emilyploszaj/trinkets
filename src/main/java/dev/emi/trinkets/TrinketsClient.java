@@ -6,7 +6,7 @@ import dev.emi.trinkets.api.TrinketSlots.SlotGroup;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.event.client.ClientSpriteRegistryCallback;
 import net.minecraft.client.texture.SpriteAtlasTexture;
-import net.minecraft.container.Slot;
+import net.minecraft.screen.slot.Slot;
 import net.minecraft.util.Identifier;
 
 public class TrinketsClient extends TrinketsMain implements ClientModInitializer {
