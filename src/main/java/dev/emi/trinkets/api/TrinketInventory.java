@@ -1,13 +1,13 @@
 package dev.emi.trinkets.api;
 
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.BasicInventory;
+import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
 
 /**
  * Inventory that marks its parent PlayerTrinketComponent dirty and syncs with the server when needed
  */
-public class TrinketInventory extends BasicInventory {
+public class TrinketInventory extends SimpleInventory {
 	private PlayerTrinketComponent component;
 
 	public TrinketInventory(PlayerTrinketComponent component, int size) {

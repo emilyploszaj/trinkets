@@ -16,8 +16,8 @@ minecraft {
 allprojects{
 	repositories {
 		maven {
-			name = "NerdHubMC"
-			url = "https://maven.abusedmaster.xyz/"
+			name = "Ladysnake Libs"
+			url = 'https://dl.bintray.com/ladysnake/libs'
 		}
 	}
 }
@@ -34,11 +34,11 @@ dependencies {
 	// You may need to force-disable transitiveness on them.
 	
 	//Base
-	modCompile "com.github.NerdHubMC.Cardinal-Components-API:cardinal-components-base:2.0.3"
-	include "com.github.NerdHubMC.Cardinal-Components-API:cardinal-components-base:2.0.3"
+	modCompile "io.github.onyxstudios.Cardinal-Components-API:cardinal-components-base:2.4.0-nightly.20w21a"
+	include "io.github.onyxstudios.Cardinal-Components-API:cardinal-components-base:2.4.0-nightly.20w21a"
 	//Entity
-	modCompile "com.github.NerdHubMC.Cardinal-Components-API:cardinal-components-entity:2.0.3"
-	include "com.github.NerdHubMC.Cardinal-Components-API:cardinal-components-entity:2.0.3"
+	modCompile "io.github.onyxstudios.Cardinal-Components-API:cardinal-components-entity:2.4.0-nightly.20w21a"
+	include "io.github.onyxstudios.Cardinal-Components-API:cardinal-components-entity:2.4.0-nightly.20w21a"
 }
 processResources {
 	inputs.property "version", project.version
