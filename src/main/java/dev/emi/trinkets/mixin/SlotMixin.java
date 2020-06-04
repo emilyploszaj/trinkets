@@ -1,9 +1,8 @@
 package dev.emi.trinkets.mixin;
 
+import net.minecraft.screen.slot.Slot;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
-
-import net.minecraft.container.Slot;
 
 /**
  * Accessor mixin for changing slot x and y positions
@@ -11,15 +10,15 @@ import net.minecraft.container.Slot;
 @Mixin(Slot.class)
 public interface SlotMixin {
 
-	@Accessor("xPosition")
+	@Accessor("x")
 	public abstract int getXPosition();
 
-	@Accessor("xPosition")
+	@Accessor("x")
 	public abstract void setXPosition(int xPosition);
 
-	@Accessor("yPosition")
+	@Accessor("y")
 	public abstract int getYPosition();
 
-	@Accessor("yPosition")
+	@Accessor("y")
 	public abstract void setYPosition(int yPosition);
 }

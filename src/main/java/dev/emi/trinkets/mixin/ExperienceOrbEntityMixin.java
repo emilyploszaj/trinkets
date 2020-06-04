@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.Predicate;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -33,14 +34,14 @@ public abstract class ExperienceOrbEntityMixin extends Entity {
 		super(type, world);
 	}
 
-	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/enchantment/EnchantmentHelper;getRandomEnchantedEquipment(Lnet/minecraft/enchantment/Enchantment;Lnet/minecraft/entity/LivingEntity;)Ljava/util/Map$Entry;"), method = "onPlayerCollision")
-	private Entry<EquipmentSlot, ItemStack> getRandomEnchantedEquipment(Enchantment ench, LivingEntity entity) {
+	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/enchantment/EnchantmentHelper;chooseEquipmentWith(Lnet/minecraft/enchantment/Enchantment;Lnet/minecraft/entity/LivingEntity;Ljava/util/function/Predicate;)Ljava/util/Map$Entry;"), method = "onPlayerCollision")
+	private Entry<EquipmentSlot, ItemStack> chooseEquipmentWith(Enchantment ench, LivingEntity entity, Predicate<ItemStack> condition) {
 		Map<EquipmentSlot, ItemStack> map = ench.getEquipment(entity);
 		List<ItemStack> stacks = new ArrayList<ItemStack>();
 		if (entity instanceof PlayerEntity) {//Should be
 			TrinketComponent comp = TrinketsApi.getTrinketComponent((PlayerEntity) entity);
-			for (int i = 0; i < comp.getInventory().getInvSize(); i++) {
-				ItemStack stack = comp.getInventory().getInvStack(i);
+			for (int i = 0; i < comp.getInventory().size(); i++) {
+				ItemStack stack = comp.getInventory().getStack(i);
 				if (!stack.isEmpty() && EnchantmentHelper.getLevel(ench, stack) > 0) {
 					stacks.add(stack);
 				}

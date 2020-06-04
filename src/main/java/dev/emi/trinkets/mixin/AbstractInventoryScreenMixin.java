@@ -1,5 +1,8 @@
 package dev.emi.trinkets.mixin;
 
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.screen.ScreenHandler;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -7,8 +10,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screen.ingame.AbstractInventoryScreen;
-import net.minecraft.client.gui.screen.ingame.ContainerScreen;
-import net.minecraft.container.Container;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.text.Text;
 
@@ -17,16 +18,16 @@ import net.minecraft.text.Text;
  */
 @Environment(EnvType.CLIENT)
 @Mixin(AbstractInventoryScreen.class)
-public abstract class AbstractInventoryScreenMixin<T extends Container> extends ContainerScreen<T> {
+public abstract class AbstractInventoryScreenMixin<T extends ScreenHandler> extends HandledScreen<T> {
 	@Shadow
-	protected boolean offsetGuiForEffects;
+	protected boolean drawStatusEffects;
 	
-	public AbstractInventoryScreenMixin(T container, PlayerInventory inventory, Text text) {
-		super(container, inventory, text);
+	public AbstractInventoryScreenMixin(T screenHandler, PlayerInventory inventory, Text text) {
+		super(screenHandler, inventory, text);
 	}
 	
 	@Shadow
-	protected abstract void drawStatusEffects();
+	protected abstract void drawStatusEffects(MatrixStack matrices);
 
 	/**
 	 * I was getting compiler warnings without this comment
@@ -34,10 +35,10 @@ public abstract class AbstractInventoryScreenMixin<T extends Container> extends 
 	 * @reason Had to change render order
 	 */
 	@Overwrite
-	public void render(int left, int top, float f) {
-		if (this.offsetGuiForEffects) {
-		   this.drawStatusEffects();
+	public void render(MatrixStack matrices, int left, int top, float f) {
+		if (this.drawStatusEffects) {
+		   this.drawStatusEffects(matrices);
 		}
-		super.render(left, top, f);
+		super.render(matrices, left, top, f);
 	 }
 }

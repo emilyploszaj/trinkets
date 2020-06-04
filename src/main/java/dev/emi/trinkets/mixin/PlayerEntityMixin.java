@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import com.google.common.collect.Multimap;
 
+import net.minecraft.entity.attribute.EntityAttribute;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -44,7 +45,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 	@Shadow
 	public abstract ItemEntity dropItem(ItemStack stack, boolean b1, boolean b2);
 
-	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;getEquippedStack(Lnet/minecraft/entity/EquipmentSlot;)Lnet/minecraft/item/ItemStack;"), method = "method_23668")
+	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;getEquippedStack(Lnet/minecraft/entity/EquipmentSlot;)Lnet/minecraft/item/ItemStack;"), method = "checkFallFlying")
 	public ItemStack getEquippedStackProxy(PlayerEntity entity, EquipmentSlot slot) {
 		if (entity instanceof PlayerEntity) {
 			PlayerEntity player = (PlayerEntity) entity;
@@ -59,8 +60,8 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 	protected void dropInventory(CallbackInfo info) {
 		if (!this.world.getGameRules().getBoolean(GameRules.KEEP_INVENTORY)) {
 			Inventory inv = TrinketsApi.TRINKETS.get(this).getInventory();
-			for (int i = 0; i < inv.getInvSize(); i++) {
-				ItemStack stack = inv.getInvStack(i);
+			for (int i = 0; i < inv.size(); i++) {
+				ItemStack stack = inv.getStack(i);
 				if (!stack.isEmpty()) {
 					this.dropItem(stack, true, false);
 				}
@@ -73,14 +74,14 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 	public void tick(CallbackInfo info) {
 		if(world.isClient) return;
 		Inventory inv = TrinketsApi.getTrinketsInventory((PlayerEntity) (LivingEntity) this);
-		if (oldStacks.size() < inv.getInvSize()){
-			for (int i = oldStacks.size(); i < inv.getInvSize(); i++) {
+		if (oldStacks.size() < inv.size()){
+			for (int i = oldStacks.size(); i < inv.size(); i++) {
 				oldStacks.add(ItemStack.EMPTY);
 			}
 		}
-		for (int i = 0; i < inv.getInvSize(); i++) {
+		for (int i = 0; i < inv.size(); i++) {
 			ItemStack old = oldStacks.get(i);
-			ItemStack current = inv.getInvStack(i);
+			ItemStack current = inv.getStack(i);
 			if (!old.isItemEqualIgnoreDamage(current)) {
 				if (old.getItem() instanceof ITrinket){
 					removeAttributes((PlayerEntity) (LivingEntity) this, old, i);
@@ -98,9 +99,9 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 			TrinketSlots.Slot slot = TrinketSlots.getAllSlots().get(i);
 			TrinketSlots.SlotGroup group = slot.getSlotGroup();
 			ITrinket trinket = (ITrinket) stack.getItem();
-			Multimap<String, EntityAttributeModifier> eams;
+			Multimap<EntityAttribute, EntityAttributeModifier> eams;
 			eams = trinket.getTrinketModifiers(group.getName(), slot.getName(), UUID.nameUUIDFromBytes((slot.getName() + ":" + group.getName()).getBytes()), stack);
-			player.getAttributes().replaceAll(eams);
+			player.getAttributes().addTemporaryModifiers(eams);
 		}
 	}
 	
@@ -109,9 +110,9 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 			TrinketSlots.Slot slot = TrinketSlots.getAllSlots().get(i);
 			TrinketSlots.SlotGroup group = slot.getSlotGroup();
 			ITrinket trinket = (ITrinket) stack.getItem();
-			Multimap<String, EntityAttributeModifier> eams;
+			Multimap<EntityAttribute, EntityAttributeModifier> eams;
 			eams = trinket.getTrinketModifiers(group.getName(), slot.getName(), UUID.nameUUIDFromBytes((slot.getName() + ":" + group.getName()).getBytes()), stack);
-			player.getAttributes().removeAll(eams);
+			player.getAttributes().removeModifiers(eams);
 		}
 	}
 }

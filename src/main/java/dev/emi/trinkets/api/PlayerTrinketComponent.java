@@ -34,7 +34,7 @@ public class PlayerTrinketComponent implements TrinketComponent, EntitySyncedCom
 			String key = iterator.next();
 			if (keys.contains(key)) {
 				int keyPos = keys.indexOf(key);
-				inventory.setInvStack(keyPos, ItemStack.fromTag(tag.getCompound(key)));
+				inventory.setStack(keyPos, ItemStack.fromTag(tag.getCompound(key)));
 			} else if(!key.equals("componentId")) {
 				System.out.println("[trinkets] Found item in slot that doesn't exist! " + key);
 				ItemStack stack = ItemStack.fromTag(tag.getCompound(key));
@@ -51,7 +51,7 @@ public class PlayerTrinketComponent implements TrinketComponent, EntitySyncedCom
 	public CompoundTag toTag(CompoundTag tag) {
 		List<String> keys = TrinketSlots.getAllSlotNames();
 		for (int i = 0; i < keys.size(); i++) {
-			tag.put(keys.get(i), inventory.getInvStack(i).toTag(new CompoundTag()));
+			tag.put(keys.get(i), inventory.getStack(i).toTag(new CompoundTag()));
 		}
 		return tag;
 	}
@@ -68,7 +68,7 @@ public class PlayerTrinketComponent implements TrinketComponent, EntitySyncedCom
 	public ItemStack getStack(String slot) {
 		int i = 0;
 		for (String s: TrinketSlots.getAllSlotNames()) {
-			if (s.equals(slot)) return getInventory().getInvStack(i);
+			if (s.equals(slot)) return getInventory().getStack(i);
 			i++;
 		}
 		return ItemStack.EMPTY;
@@ -94,8 +94,8 @@ public class PlayerTrinketComponent implements TrinketComponent, EntitySyncedCom
 			for (Slot slot: group.slots) {
 				if (shiftClick && slot.disableQuickMove) continue;
 				if (slot.canEquip.apply(slot, stack)) {
-					if (getInventory().getInvStack(i).isEmpty()) {
-						getInventory().setInvStack(i, stack.copy());
+					if (getInventory().getStack(i).isEmpty()) {
+						getInventory().setStack(i, stack.copy());
 						//Makes a 16 tick popup appear showing the player where their item went when shift clicking
 						TrinketsClient.lastEquipped = group;
 						TrinketsClient.displayEquipped = 16;

@@ -1,5 +1,9 @@
 package dev.emi.trinkets.mixin;
 
+import net.minecraft.screen.AbstractRecipeScreenHandler;
+import net.minecraft.screen.CraftingScreenHandler;
+import net.minecraft.screen.PlayerScreenHandler;
+import net.minecraft.screen.ScreenHandlerType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -14,9 +18,6 @@ import dev.emi.trinkets.api.TrinketSlots;
 import dev.emi.trinkets.api.TrinketsApi;
 import dev.emi.trinkets.api.TrinketSlots.Slot;
 import dev.emi.trinkets.api.TrinketSlots.SlotGroup;
-import net.minecraft.container.ContainerType;
-import net.minecraft.container.CraftingContainer;
-import net.minecraft.container.PlayerContainer;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.CraftingInventory;
@@ -26,10 +27,10 @@ import net.minecraft.item.ItemStack;
 /**
  * Adds trinket slots to the PlayerContainer on initialization
  */
-@Mixin(PlayerContainer.class)
-public abstract class PlayerContainerMixin extends CraftingContainer<CraftingInventory> {
+@Mixin(PlayerScreenHandler.class)
+public abstract class PlayerScreenHandlerMixin extends AbstractRecipeScreenHandler<CraftingInventory> {
 
-	public PlayerContainerMixin(ContainerType<?> type, int i) {
+	public PlayerScreenHandlerMixin(ScreenHandlerType<?> type, int i) {
 		super(type, i);
 	}
 
@@ -54,7 +55,7 @@ public abstract class PlayerContainerMixin extends CraftingContainer<CraftingInv
 
 	@Inject(at = @At("HEAD"), method = "transferSlot", cancellable = true)
 	public void transferSlot(PlayerEntity player, int i, CallbackInfoReturnable<ItemStack> info) {
-		net.minecraft.container.Slot slot = (net.minecraft.container.Slot) this.slots.get(i);
+		net.minecraft.screen.slot.Slot slot = (net.minecraft.screen.slot.Slot) this.slots.get(i);
 		if (i > 45) {
 			if(slot != null && slot.hasStack()){
 				ItemStack stack = slot.getStack();

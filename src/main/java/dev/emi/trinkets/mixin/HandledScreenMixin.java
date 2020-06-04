@@ -4,6 +4,11 @@ import java.util.List;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.client.gui.screen.ingame.ScreenHandlerProvider;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.screen.ScreenHandler;
+import net.minecraft.screen.slot.Slot;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -19,10 +24,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ingame.ContainerProvider;
-import net.minecraft.client.gui.screen.ingame.ContainerScreen;
-import net.minecraft.container.Container;
-import net.minecraft.container.Slot;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
@@ -31,16 +32,16 @@ import net.minecraft.util.Identifier;
  * as well as render trinket slots properly
  */
 @Environment(EnvType.CLIENT)
-@Mixin(ContainerScreen.class)
-public abstract class ContainerScreenMixin<T extends Container> extends Screen implements ContainerProvider<T> {
+@Mixin(HandledScreen.class)
+public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen implements ScreenHandlerProvider<T> {
 	@Shadow
-	public T container;
+	public T handler;
 	@Shadow
 	protected Slot focusedSlot;
 	
 	private static final Identifier BLANK_BACK = new Identifier("trinkets", "textures/gui/blank_back.png");
 	
-	protected ContainerScreenMixin(Text text) {
+	protected HandledScreenMixin(Text text) {
 		super(text);
 	}
 
@@ -48,7 +49,7 @@ public abstract class ContainerScreenMixin<T extends Container> extends Screen i
 	protected abstract boolean isPointWithinBounds(int x, int y, int width, int height, double a, double b);
 	
 	@Shadow
-	protected abstract void drawSlot(Slot slot);
+	protected abstract void drawSlot(MatrixStack matrices, Slot slot);
 
 	@Shadow
 	protected abstract boolean isPointOverSlot(Slot slot, double a, double b);
@@ -63,7 +64,7 @@ public abstract class ContainerScreenMixin<T extends Container> extends Screen i
 			for (Slot s: TrinketsClient.activeSlots) {
 				if (s == null) continue;
 				if (s == slot) {
-					this.isPointWithinBounds(slot.xPosition, slot.yPosition, 16, 16, a, b);
+					this.isPointWithinBounds(slot.x, slot.y, 16, 16, a, b);
 					return;
 				}
 			}
@@ -72,42 +73,42 @@ public abstract class ContainerScreenMixin<T extends Container> extends Screen i
 	}
 	
 	@Inject(at = @At("HEAD"), method = "drawForeground")
-	private void drawForeground(int x, int y, CallbackInfo info) {
+	private void drawForeground(MatrixStack matrices, int x, int y, CallbackInfo info) {
 		GlStateManager.disableDepthTest();
 		List<TrinketSlots.Slot> trinketSlots = TrinketSlots.getAllSlots();
-		for (int i = 0; i < container.slots.size(); i++) {
-			if (!(container.slots.get(i).inventory instanceof TrinketInventory)) continue;
-			Slot ts = container.getSlot(i);
+		for (int i = 0; i < handler.slots.size(); i++) {
+			if (!(handler.slots.get(i).inventory instanceof TrinketInventory)) continue;
+			Slot ts = handler.getSlot(i);
 			TrinketSlots.Slot s = trinketSlots.get(i - 46);
-			if (!(s.getSlotGroup() == TrinketsClient.slotGroup || (s.getSlotGroup() == TrinketsClient.lastEquipped && TrinketsClient.displayEquipped > 0))) renderSlot(ts, s, x, y);
+			if (!(s.getSlotGroup() == TrinketsClient.slotGroup || (s.getSlotGroup() == TrinketsClient.lastEquipped && TrinketsClient.displayEquipped > 0))) renderSlot(matrices, ts, s, x, y);
 		}
 		//Redraw only the active group slots so they're always on top
-		for (int i = 0; i < container.slots.size(); i++) {
-			if (!(container.slots.get(i).inventory instanceof TrinketInventory)) continue;
-			Slot ts = container.getSlot(i);
+		for (int i = 0; i < handler.slots.size(); i++) {
+			if (!(handler.slots.get(i).inventory instanceof TrinketInventory)) continue;
+			Slot ts = handler.getSlot(i);
 			TrinketSlots.Slot s = trinketSlots.get(i - 46);
-			if (s.getSlotGroup() == TrinketsClient.slotGroup || (s.getSlotGroup() == TrinketsClient.lastEquipped && TrinketsClient.displayEquipped > 0)) renderSlot(ts, s, x, y);
+			if (s.getSlotGroup() == TrinketsClient.slotGroup || (s.getSlotGroup() == TrinketsClient.lastEquipped && TrinketsClient.displayEquipped > 0)) renderSlot(matrices, ts, s, x, y);
 		}
 		GlStateManager.enableDepthTest();
 	}
 
-	public void renderSlot(Slot ts, TrinketSlots.Slot s, int x, int y){
+	public void renderSlot(MatrixStack matrices, Slot ts, TrinketSlots.Slot s, int x, int y){
 		GlStateManager.pushMatrix();
 		GlStateManager.disableLighting();
 		GlStateManager.disableDepthTest();
 		if (ts.getStack().isEmpty()) {
-			this.minecraft.getTextureManager().bindTexture(s.texture);
+			this.client.getTextureManager().bindTexture(s.texture);
 		} else {
-			this.minecraft.getTextureManager().bindTexture(BLANK_BACK);
+			this.client.getTextureManager().bindTexture(BLANK_BACK);
 		}
-		DrawableHelper.blit(ts.xPosition, ts.yPosition, 0, 0, 0, 16, 16, 16, 16);
-		drawSlot(ts);
+		DrawableHelper.drawTexture(matrices, ts.x, ts.y, 0, 0, 0, 16, 16, 16, 16);
+		drawSlot(matrices, ts);
 		if (this.isPointOverSlot(ts, x, y) && ts.doDrawHoveringEffect()) {
 			this.focusedSlot = ts;
 			GlStateManager.disableDepthTest();
 			GlStateManager.disableLighting();
 			GlStateManager.colorMask(true, true, true, false);
-			this.fillGradient(ts.xPosition, ts.yPosition, ts.xPosition + 16, ts.yPosition + 16, -2130706433, -2130706433);
+			this.fillGradient(matrices, ts.x, ts.y, ts.x + 16, ts.y + 16, -2130706433, -2130706433);
 			GlStateManager.colorMask(true, true, true, true);
 			GlStateManager.enableLighting();
 		}
