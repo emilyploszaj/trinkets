@@ -1,7 +1,6 @@
 package dev.emi.trinkets.mixin;
 
 import net.minecraft.screen.AbstractRecipeScreenHandler;
-import net.minecraft.screen.CraftingScreenHandler;
 import net.minecraft.screen.PlayerScreenHandler;
 import net.minecraft.screen.ScreenHandlerType;
 import org.spongepowered.asm.mixin.Mixin;
@@ -11,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import dev.emi.trinkets.TrinketSlot;
-import dev.emi.trinkets.api.ITrinket;
+import dev.emi.trinkets.api.TrinketBase;
 import dev.emi.trinkets.api.PlayerTrinketComponent;
 import dev.emi.trinkets.api.TrinketComponent;
 import dev.emi.trinkets.api.TrinketSlots;
@@ -63,9 +62,9 @@ public abstract class PlayerScreenHandlerMixin extends AbstractRecipeScreenHandl
 				if(!this.insertItem(stack, 9, 45, false)){
 					info.setReturnValue(ItemStack.EMPTY);
 				}else{
-					if(copy.getItem() instanceof ITrinket){
+					if(copy.getItem() instanceof TrinketBase){
 						TrinketComponent comp = TrinketsApi.getTrinketComponent(player);
-						((ITrinket) copy.getItem()).onUnequip((PlayerEntity) ((PlayerTrinketComponent) comp).getEntity(), copy);
+						((TrinketBase) copy.getItem()).onUnequip((PlayerEntity) ((PlayerTrinketComponent) comp).getEntity(), copy);
 					}
 					info.setReturnValue(stack);
 				}

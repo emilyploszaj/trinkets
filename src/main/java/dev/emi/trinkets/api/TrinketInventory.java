@@ -21,19 +21,19 @@ public class TrinketInventory extends SimpleInventory {
 
 	@Override
 	public void setStack(int i, ItemStack stack) {
-		if (getStack(i).getItem() instanceof ITrinket) {
-			((ITrinket) getStack(i).getItem()).onUnequip((PlayerEntity) component.getEntity(), getStack(i));
+		if (getStack(i).getItem() instanceof TrinketBase) {
+			((TrinketBase) getStack(i).getItem()).onUnequip((PlayerEntity) component.getEntity(), getStack(i));
 		}
 		super.setStack(i, stack);
-		if(getStack(i).getItem() instanceof ITrinket) {
-			((ITrinket) getStack(i).getItem()).onEquip((PlayerEntity) component.getEntity(), getStack(i));
+		if(getStack(i).getItem() instanceof TrinketBase) {
+			((TrinketBase) getStack(i).getItem()).onEquip((PlayerEntity) component.getEntity(), getStack(i));
 		}
 	}
 
 	@Override
 	public ItemStack removeStack(int i) {
-		if(getStack(i).getItem() instanceof ITrinket){
-			((ITrinket) getStack(i).getItem()).onUnequip((PlayerEntity) component.getEntity(), getStack(i));
+		if(getStack(i).getItem() instanceof TrinketBase){
+			((TrinketBase) getStack(i).getItem()).onUnequip((PlayerEntity) component.getEntity(), getStack(i));
 		}
 		return super.removeStack(i);
 	}
@@ -41,14 +41,14 @@ public class TrinketInventory extends SimpleInventory {
 	@Override
 	public ItemStack removeStack(int i, int count) {
 		ItemStack stack = super.removeStack(i, count);
-		if (!stack.isEmpty() && getStack(i).isEmpty() && stack.getItem() instanceof ITrinket) {
-			((ITrinket) stack.getItem()).onUnequip((PlayerEntity) component.getEntity(), stack);
+		if (!stack.isEmpty() && getStack(i).isEmpty() && stack.getItem() instanceof TrinketBase) {
+			((TrinketBase) stack.getItem()).onUnequip((PlayerEntity) component.getEntity(), stack);
 		}
 		return stack;
 	}
 
 	@Override
 	public void markDirty() {
-		component.markDirty();
+		component.sync();
 	}
 }

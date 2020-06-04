@@ -17,7 +17,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import dev.emi.trinkets.api.ITrinket;
+import dev.emi.trinkets.api.TrinketBase;
 import dev.emi.trinkets.api.TrinketSlots;
 import dev.emi.trinkets.api.TrinketSlots.Slot;
 import net.minecraft.client.item.TooltipContext;
@@ -45,8 +45,8 @@ public abstract class ItemStackMixin {
 			ItemStack stack = ((ItemStack) (Object) this);
 			if (s.canEquip.apply(s, stack)) {
 				slots.add(s);
-				if (stack.getItem() instanceof ITrinket) {
-					ITrinket trinket = (ITrinket) stack.getItem();
+				if (stack.getItem() instanceof TrinketBase) {
+					TrinketBase trinket = (TrinketBase) stack.getItem();
 					Multimap<EntityAttribute, EntityAttributeModifier> e = trinket.getTrinketModifiers(s.getSlotGroup().getName(), s.getName(), uuid, stack);
 					if (e.size() > 0) {
 						eams.add(Pair.of(s, e));

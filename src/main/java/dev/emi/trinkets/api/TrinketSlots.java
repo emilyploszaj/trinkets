@@ -192,8 +192,8 @@ public class TrinketSlots {
 		public boolean disableQuickMove = false;
 		public Identifier texture;
 		public BiFunction<Slot, ItemStack, Boolean> canEquip = (slot, stack) -> {
-			if (!(stack.getItem() instanceof ITrinket)) return false;
-			return ((ITrinket) stack.getItem()).canWearInSlot(slot.getSlotGroup().getName(), slot.getName());
+			if (!(stack.getItem() instanceof TrinketBase)) return false;
+			return ((TrinketBase) stack.getItem()).canWearInSlot(slot.getSlotGroup().getName(), slot.getName());
 		};
 
 		public Slot(String name, Identifier texture, SlotGroup group){

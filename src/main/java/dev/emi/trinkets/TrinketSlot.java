@@ -1,6 +1,6 @@
 package dev.emi.trinkets;
 
-import dev.emi.trinkets.api.ITrinket;
+import dev.emi.trinkets.api.TrinketBase;
 import dev.emi.trinkets.api.TrinketSlots;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.player.PlayerEntity;
@@ -32,8 +32,8 @@ public class TrinketSlot extends Slot {
 		if (EnchantmentHelper.hasBindingCurse(stack)) {
 			return false;
 		}
-		if (stack.getItem() instanceof ITrinket) {
-			return ((ITrinket) stack.getItem()).canTake(stack);
+		if (stack.getItem() instanceof TrinketBase) {
+			return ((TrinketBase) stack.getItem()).canTake(stack);
 		}
 		return super.canTakeItems(player);
 	}

@@ -1,42 +1,32 @@
 package dev.emi.trinkets.api;
 
-import java.util.List;
 import java.util.UUID;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
-import net.minecraft.block.DispenserBlock;
-import net.minecraft.block.dispenser.DispenserBehavior;
-import net.minecraft.block.dispenser.ItemDispenserBehavior;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.model.PlayerEntityModel;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.util.math.Vector3f;
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
-import net.minecraft.util.math.BlockPointer;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Direction;
 
 /**
- * Trinkets should extend this interface to be usable in trinket slots
+ * Trinkets should generally extend Trinket for uniform behavior, but implementing TrinketBase is what identifies an item as a Trinket
  */
-public interface ITrinket {
+public interface TrinketBase {
 	
 	/**
 	 * @return Whether the provided slot is valid for this item
 	 */
-	public boolean canWearInSlot(String group, String slot);
+	public abstract boolean canWearInSlot(String group, String slot);
 
 	/**
 	 * Called once per tick while being worn by a player
@@ -92,31 +82,6 @@ public interface ITrinket {
 	 * @see {@link #translateToLeftLeg(MatrixStack, PlayerEntityModel, AbstractClientPlayerEntity, float, float)}
 	 */
 	public default void render(String slot, MatrixStack matrixStack, VertexConsumerProvider vertexConsumer, int light, PlayerEntityModel<AbstractClientPlayerEntity> model, AbstractClientPlayerEntity player, float headYaw, float headPitch) {
-	}
-	
-	//Helper stuff for creating trinkets that interact with vanilla behavior properly
-	public static final DispenserBehavior TRINKET_DISPENSER_BEHAVIOR = new ItemDispenserBehavior() {
-		protected ItemStack dispenseSilently(BlockPointer pointer, ItemStack stack) {
-			ItemStack newStack = dispenseTrinket(pointer, stack);
-			return newStack.isEmpty() ? super.dispenseSilently(pointer, stack) : newStack;
-		}
-	};
-
-	public static ItemStack dispenseTrinket(BlockPointer pointer, ItemStack stack) {
-		BlockPos pos = pointer.getBlockPos().offset((Direction) pointer.getBlockState().get(DispenserBlock.FACING));
-		List<LivingEntity> entities = pointer.getWorld().getEntities(LivingEntity.class, new Box(pos), EntityPredicates.EXCEPT_SPECTATOR.and(new EntityPredicates.CanPickup(stack)));
-		if (entities.isEmpty()) {
-			return ItemStack.EMPTY;
-		} else {
-			LivingEntity entity = (LivingEntity) entities.get(0);
-			if(entity instanceof PlayerEntity) {
-				TrinketComponent comp = TrinketsApi.getTrinketComponent((PlayerEntity) entity);
-				if(comp.equip(stack)) {
-					stack.setCount(0);
-				}
-			}
-			return stack;
-		}
 	}
 
 	public static TypedActionResult<ItemStack> equipTrinket(PlayerEntity player, Hand hand) {

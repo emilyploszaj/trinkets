@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import dev.emi.trinkets.api.ITrinket;
+import dev.emi.trinkets.api.TrinketBase;
 import dev.emi.trinkets.api.SlotGroups;
 import dev.emi.trinkets.api.Slots;
 import dev.emi.trinkets.api.TrinketComponent;
@@ -83,10 +83,10 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 			ItemStack old = oldStacks.get(i);
 			ItemStack current = inv.getStack(i);
 			if (!old.isItemEqualIgnoreDamage(current)) {
-				if (old.getItem() instanceof ITrinket){
+				if (old.getItem() instanceof TrinketBase){
 					removeAttributes((PlayerEntity) (LivingEntity) this, old, i);
 				}
-				if (current.getItem() instanceof ITrinket) {
+				if (current.getItem() instanceof TrinketBase) {
 					addAttributes((PlayerEntity) (LivingEntity) this, current, i);
 				}
 				oldStacks.set(i, current.copy());
@@ -95,10 +95,10 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 	}
 	
 	public void addAttributes(PlayerEntity player, ItemStack stack, int i) {
-		if (stack.getItem() instanceof ITrinket) {
+		if (stack.getItem() instanceof TrinketBase) {
 			TrinketSlots.Slot slot = TrinketSlots.getAllSlots().get(i);
 			TrinketSlots.SlotGroup group = slot.getSlotGroup();
-			ITrinket trinket = (ITrinket) stack.getItem();
+			TrinketBase trinket = (TrinketBase) stack.getItem();
 			Multimap<EntityAttribute, EntityAttributeModifier> eams;
 			eams = trinket.getTrinketModifiers(group.getName(), slot.getName(), UUID.nameUUIDFromBytes((slot.getName() + ":" + group.getName()).getBytes()), stack);
 			player.getAttributes().addTemporaryModifiers(eams);
@@ -106,10 +106,10 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 	}
 	
 	public void removeAttributes(PlayerEntity player, ItemStack stack, int i) {
-		if (stack.getItem() instanceof ITrinket) {
+		if (stack.getItem() instanceof TrinketBase) {
 			TrinketSlots.Slot slot = TrinketSlots.getAllSlots().get(i);
 			TrinketSlots.SlotGroup group = slot.getSlotGroup();
-			ITrinket trinket = (ITrinket) stack.getItem();
+			TrinketBase trinket = (TrinketBase) stack.getItem();
 			Multimap<EntityAttribute, EntityAttributeModifier> eams;
 			eams = trinket.getTrinketModifiers(group.getName(), slot.getName(), UUID.nameUUIDFromBytes((slot.getName() + ":" + group.getName()).getBytes()), stack);
 			player.getAttributes().removeModifiers(eams);

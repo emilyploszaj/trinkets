@@ -40,7 +40,7 @@ dependencies {
 	modImplementation "com.github.emilyploszaj:trinkets:{trinkets version}"
 }
 ```
-All you need to get started with Trinkets is to register a slot and add an item to the game that implementes `ITrinket`, here is a short example:
+All you need to get started with Trinkets is to register a slot and add an item to the game that extends `Trinket`, here is a short example:
 ```java
 //Inside your ModMain
 public void onInitialize() {
@@ -51,19 +51,11 @@ public void onInitialize() {
 ```
 ```java
 //A class for your trinket
-public class RingItem extends Item implements ITrinket {
+public class RingItem extends Trinket {
 
 	public RingItem() {
 		//Adding the trinket to the TOOLS group and making it not stack
 		super(new Settings().group(ItemGroup.TOOLS).maxCount(1));
-		//Adding dispenser equip behavior to the new trinket
-		DispenserBlock.registerBehavior(this, TRINKET_DISPENSER_BEHAVIOR);
-	}
-
- 	@Override
-	public TypedActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
-		//Overriding the use method to equip the trinket when it's used
-		return ITrinket.equipTrinket(player, hand);
 	}
 
 	@Override
@@ -74,7 +66,7 @@ public class RingItem extends Item implements ITrinket {
 
 	@Override
 	public void tick(PlayerEntity player, ItemStack stack) {
-		//Just one of the methods you can override in ITrinket, the ring gives you the speed effect while wearing it
+		//Just one of the methods you can override in Trinket, the ring gives you the speed effect while wearing it
 		//Though you probably shouldn't give the player a status effect every tick
 		player.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, 19, 0));
 	}
