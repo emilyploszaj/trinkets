@@ -22,8 +22,10 @@ public class TrinketsMixinPlugin implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
+		// Yes really, two on the same class
 		if (mixinClassName.equals("dev.emi.trinkets.mixin.ExperienceOrbEntityMixin")) {
-			return !FabricLoader.getInstance().isModLoaded("smartermending");
+			return !(FabricLoader.getInstance().isModLoaded("smartermending")
+					|| FabricLoader.getInstance().isModLoaded("sewing-machine"));
 		}
 		return true;
     }

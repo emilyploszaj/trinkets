@@ -23,6 +23,7 @@ import dev.emi.trinkets.api.TrinketSlots.SlotGroup;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
@@ -42,6 +43,11 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
 
 	public CreativeInventoryScreenMixin(CreativeInventoryScreen.CreativeScreenHandler screenHandler, PlayerInventory inventory, Text text) {
 		super(screenHandler, inventory, text);
+	}
+
+	@Inject(at = @At("RETURN"), method = "<init>")
+	public void constructor(PlayerEntity player, CallbackInfo info) {
+		this.playerInventoryTitleX = -100000;
 	}
 
 	@Inject(at = @At("TAIL"), method = "init")
@@ -297,7 +303,7 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
 		GlStateManager.translatef(0.0F, 0.0F, 32.0F);
 		this.setZOffset(200);
 		this.itemRenderer.zOffset = 200.0F;
-		this.itemRenderer.renderGuiItem(stack, x, y);
+		this.itemRenderer.renderGuiItemIcon(stack, x, y);
 		this.itemRenderer.renderGuiItemOverlay(this.textRenderer, stack, x, y, string);
 		this.setZOffset(0);
 		this.itemRenderer.zOffset = 0.0F;

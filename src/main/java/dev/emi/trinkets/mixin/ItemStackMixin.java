@@ -17,7 +17,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import dev.emi.trinkets.api.TrinketBase;
+import dev.emi.trinkets.api.TrinketItem;
 import dev.emi.trinkets.api.TrinketSlots;
 import dev.emi.trinkets.api.TrinketSlots.Slot;
 import net.minecraft.client.item.TooltipContext;
@@ -45,8 +45,8 @@ public abstract class ItemStackMixin {
 			ItemStack stack = ((ItemStack) (Object) this);
 			if (s.canEquip.apply(s, stack)) {
 				slots.add(s);
-				if (stack.getItem() instanceof TrinketBase) {
-					TrinketBase trinket = (TrinketBase) stack.getItem();
+				if (stack.getItem() instanceof TrinketItem) {
+					TrinketItem trinket = (TrinketItem) stack.getItem();
 					Multimap<EntityAttribute, EntityAttributeModifier> e = trinket.getTrinketModifiers(s.getSlotGroup().getName(), s.getName(), uuid, stack);
 					if (e.size() > 0) {
 						eams.add(Pair.of(s, e));
@@ -63,13 +63,13 @@ public abstract class ItemStackMixin {
 			} else if (slots.size() == 1) {
 				list.add((new LiteralText("")));
 				list.add((new LiteralText("Equippable in the ")).formatted(Formatting.GRAY)
-					.append(new LiteralText(StringUtils.capitalize(slots.get(0).getName())).formatted(Formatting.BLUE))
+					.append(new TranslatableText("trinkets.slot." + slots.get(0).getSlotGroup().getName() + "." + slots.get(0).getName()).formatted(Formatting.BLUE))
 					.append(new LiteralText(" trinket slot")));
 			} else {
 				list.add((new LiteralText("")));
 				list.add((new LiteralText("Equippable in trinket slots:")).formatted(Formatting.GRAY));
 				for (Slot s : slots) {
-					list.add((new LiteralText(StringUtils.capitalize(s.getName())).formatted(Formatting.BLUE)));
+					list.add((new LiteralText("trinkets.slot." + s.getSlotGroup().getName() + "." + s.getName()).formatted(Formatting.BLUE)));
 				}
 			}
 		}

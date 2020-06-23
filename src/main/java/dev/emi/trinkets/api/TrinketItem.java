@@ -21,7 +21,7 @@ import net.minecraft.util.TypedActionResult;
 /**
  * Trinkets should generally extend Trinket for uniform behavior, but implementing TrinketBase is what identifies an item as a Trinket
  */
-public interface TrinketBase {
+public interface TrinketItem {
 	
 	/**
 	 * @return Whether the provided slot is valid for this item

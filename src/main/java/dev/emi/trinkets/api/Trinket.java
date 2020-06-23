@@ -18,7 +18,7 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 
-public abstract class Trinket extends Item implements TrinketBase {
+public abstract class Trinket extends Item implements TrinketItem {
 	public static final DispenserBehavior TRINKET_DISPENSER_BEHAVIOR = new ItemDispenserBehavior() {
 		protected ItemStack dispenseSilently(BlockPointer pointer, ItemStack stack) {
 			BlockPos pos = pointer.getBlockPos().offset((Direction) pointer.getBlockState().get(DispenserBlock.FACING));
@@ -46,6 +46,6 @@ public abstract class Trinket extends Item implements TrinketBase {
 	@Override
 	public TypedActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
 		//Overriding the use method to equip the trinket when it's used
-		return TrinketBase.equipTrinket(player, hand);
+		return TrinketItem.equipTrinket(player, hand);
 	}
 }

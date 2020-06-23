@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import dev.emi.trinkets.TrinketSlot;
-import dev.emi.trinkets.api.TrinketBase;
+import dev.emi.trinkets.api.TrinketItem;
 import dev.emi.trinkets.api.PlayerTrinketComponent;
 import dev.emi.trinkets.api.TrinketComponent;
 import dev.emi.trinkets.api.TrinketSlots;
@@ -62,9 +62,9 @@ public abstract class PlayerScreenHandlerMixin extends AbstractRecipeScreenHandl
 				if(!this.insertItem(stack, 9, 45, false)){
 					info.setReturnValue(ItemStack.EMPTY);
 				}else{
-					if(copy.getItem() instanceof TrinketBase){
+					if(copy.getItem() instanceof TrinketItem){
 						TrinketComponent comp = TrinketsApi.getTrinketComponent(player);
-						((TrinketBase) copy.getItem()).onUnequip((PlayerEntity) ((PlayerTrinketComponent) comp).getEntity(), copy);
+						((TrinketItem) copy.getItem()).onUnequip((PlayerEntity) ((PlayerTrinketComponent) comp).getEntity(), copy);
 					}
 					info.setReturnValue(stack);
 				}
