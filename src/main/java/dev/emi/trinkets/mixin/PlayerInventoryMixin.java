@@ -7,7 +7,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import dev.emi.trinkets.api.TrinketItem;
+import dev.emi.trinkets.api.Trinket;
 import dev.emi.trinkets.api.TrinketsApi;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -28,8 +28,8 @@ public class PlayerInventoryMixin {
 		Inventory inv = TrinketsApi.getTrinketsInventory(player);
 		for (int i = 0; i < inv.size(); i++) {
 			ItemStack stack = inv.getStack(i);
-			if (stack.getItem() instanceof TrinketItem) {
-				TrinketItem trinket = (TrinketItem) stack.getItem();
+			if (stack.getItem() instanceof Trinket) {
+				Trinket trinket = (Trinket) stack.getItem();
 				trinket.tick(player, stack);
 			}
 		}

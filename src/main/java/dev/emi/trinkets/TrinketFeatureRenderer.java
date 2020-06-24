@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 
-import dev.emi.trinkets.api.TrinketItem;
+import dev.emi.trinkets.api.Trinket;
 import dev.emi.trinkets.api.TrinketComponent;
 import dev.emi.trinkets.api.TrinketSlots;
 import dev.emi.trinkets.api.TrinketsApi;
@@ -32,8 +32,8 @@ public class TrinketFeatureRenderer extends FeatureRenderer<AbstractClientPlayer
 		for (int i = 0; i < comp.getInventory().size(); i++) {
 			GlStateManager.pushMatrix();
 			ItemStack stack = comp.getInventory().getStack(i);
-			if (stack.getItem() instanceof TrinketItem) {
-				((TrinketItem) stack.getItem()).render(names.get(i), matrixStack, vertexConsumer, light, context.getModel(), player, headYaw, headPitch);
+			if (stack.getItem() instanceof Trinket) {
+				((Trinket) stack.getItem()).render(names.get(i), matrixStack, vertexConsumer, light, context.getModel(), player, headYaw, headPitch);
 			}
 			GlStateManager.popMatrix();
 		}

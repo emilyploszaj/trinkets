@@ -1,6 +1,6 @@
 package dev.emi.trinkets;
 
-import dev.emi.trinkets.api.TrinketItem;
+import dev.emi.trinkets.api.Trinket;
 import dev.emi.trinkets.api.PlayerTrinketComponent;
 import dev.emi.trinkets.api.SlotGroups;
 import dev.emi.trinkets.api.Slots;
@@ -21,10 +21,10 @@ public class TrinketsMain implements ModInitializer {
 		EntityComponentCallback.event(PlayerEntity.class).register((player, components) -> components.put(TrinketsApi.TRINKETS, new PlayerTrinketComponent(player)));
 		EntityComponents.setRespawnCopyStrategy(TrinketsApi.TRINKETS, RespawnCopyStrategy.INVENTORY);
 		TrinketSlots.addSlot(SlotGroups.CHEST, Slots.CAPE, new Identifier("trinkets", "textures/item/empty_trinket_slot_cape.png"), (slot, stack) -> {
-			if (!(stack.getItem() instanceof TrinketItem)) {
+			if (!(stack.getItem() instanceof Trinket)) {
 				return stack.getItem() == Items.ELYTRA;
 			}
-			return ((TrinketItem) stack.getItem()).canWearInSlot(slot.getSlotGroup().getName(), slot.getName());
+			return ((Trinket) stack.getItem()).canWearInSlot(slot.getSlotGroup().getName(), slot.getName());
 		});
 		//Slots used for testing
 		//TrinketSlots.addSlot("head", "mask", new Identifier("trinkets", "textures/item/empty_trinket_slot_mask.png"));

@@ -6,7 +6,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import dev.emi.trinkets.api.Trinket;
+import dev.emi.trinkets.api.TrinketItem;
 import dev.emi.trinkets.api.TrinketComponent;
 import dev.emi.trinkets.api.TrinketsApi;
 import net.minecraft.block.DispenserBlock;
@@ -28,7 +28,7 @@ public abstract class ElytraItemMixin {
 
 	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/block/DispenserBlock;registerBehavior(Lnet/minecraft/item/ItemConvertible;Lnet/minecraft/block/dispenser/DispenserBehavior;)V"), method = "<init>")
 	private void registerBehaviorProxy(ItemConvertible item, DispenserBehavior behavior) {
-		DispenserBlock.registerBehavior(item, Trinket.TRINKET_DISPENSER_BEHAVIOR);
+		DispenserBlock.registerBehavior(item, TrinketItem.TRINKET_DISPENSER_BEHAVIOR);
 	}
 
 	@Inject(at = @At("HEAD"), method = "use", cancellable = true)
