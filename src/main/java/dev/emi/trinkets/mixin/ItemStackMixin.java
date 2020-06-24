@@ -96,10 +96,10 @@ public abstract class ItemStackMixin {
 						d = d * 100.0D;
 					}
 					if (d > 0.0D) {
-						list.add((new TranslatableText("attribute.modifier.plus." + eam.getOperation().getId(), new Object[]{ItemStack.MODIFIER_FORMAT.format(d), new TranslatableText("attribute.name." + entry.getKey(), new Object[0])})).formatted(Formatting.BLUE));
+						list.add((new TranslatableText("attribute.modifier.plus." + eam.getOperation().getId(), new Object[]{ItemStack.MODIFIER_FORMAT.format(d), new TranslatableText(entry.getKey().getTranslationKey())})).formatted(Formatting.BLUE));
 					} else if (d < 0.0D) {
 						d *= -1.0D;
-						list.add((new TranslatableText("attribute.modifier.take." + eam.getOperation().getId(), new Object[]{ItemStack.MODIFIER_FORMAT.format(d), new TranslatableText("attribute.name." + entry.getKey(), new Object[0])})).formatted(Formatting.RED));
+						list.add((new TranslatableText("attribute.modifier.take." + eam.getOperation().getId(), new Object[]{ItemStack.MODIFIER_FORMAT.format(d), new TranslatableText(entry.getKey().getTranslationKey())})).formatted(Formatting.RED));
 					}
 				}
 			} else {
