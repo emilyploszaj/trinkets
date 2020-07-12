@@ -2,7 +2,7 @@ package dev.emi.trinkets.mixin;
 
 import java.util.List;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.screen.ingame.ScreenHandlerProvider;
@@ -13,6 +13,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -38,6 +39,10 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
 	public T handler;
 	@Shadow
 	protected Slot focusedSlot;
+	@Shadow
+	protected int x;
+	@Shadow
+	protected int y;
 	
 	private static final Identifier BLANK_BACK = new Identifier("trinkets", "textures/gui/blank_back.png");
 	
@@ -72,15 +77,36 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
 		info.setReturnValue(false);
 	}
 	
-	@Inject(at = @At("HEAD"), method = "drawForeground")
-	private void drawForeground(MatrixStack matrices, int x, int y, CallbackInfo info) {
-		GlStateManager.disableDepthTest();
+	@Inject(at = @At(value = "INVOKE", shift = Shift.AFTER, target = "Lnet/minecraft/client/gui/screen/ingame/HandledScreen;drawBackground(Lnet/minecraft/client/util/math/MatrixStack;FII)V"), method = "render")
+	private void drawBackground(MatrixStack matrices, int x, int y, float delta, CallbackInfo info) {
+		RenderSystem.pushMatrix();
+		RenderSystem.disableDepthTest();
 		List<TrinketSlots.Slot> trinketSlots = TrinketSlots.getAllSlots();
-		for (int i = 0; i < handler.slots.size(); i++) {
+		this.setZOffset(100);
+		this.itemRenderer.zOffset = 100.0F;
+		for (int i = 46; i < handler.slots.size(); i++) {
 			if (!(handler.slots.get(i).inventory instanceof TrinketInventory)) continue;
 			Slot ts = handler.getSlot(i);
 			TrinketSlots.Slot s = trinketSlots.get(i - 46);
-			if (!(s.getSlotGroup() == TrinketsClient.slotGroup || (s.getSlotGroup() == TrinketsClient.lastEquipped && TrinketsClient.displayEquipped > 0))) renderSlot(matrices, ts, s, x, y);
+			if (!s.getSlotGroup().onReal && s.getSlotGroup().defaultSlot.equals(s.getName())){
+				renderSlotBack(matrices, ts, s, this.x, this.y);
+			}
+		}
+		this.setZOffset(0);
+		this.itemRenderer.zOffset = 0.0F;
+		RenderSystem.enableDepthTest();
+		RenderSystem.popMatrix();
+	}
+	
+	@Inject(at = @At("HEAD"), method = "drawForeground")
+	private void drawForeground(MatrixStack matrices, int x, int y, CallbackInfo info) {
+		RenderSystem.disableDepthTest();
+		List<TrinketSlots.Slot> trinketSlots = TrinketSlots.getAllSlots();
+		for (int i = 46; i < handler.slots.size(); i++) {
+			if (!(handler.slots.get(i).inventory instanceof TrinketInventory)) continue;
+			Slot ts = handler.getSlot(i);
+			TrinketSlots.Slot s = trinketSlots.get(i - 46);
+			if (!(s.getSlotGroup() == TrinketsClient.slotGroup || !(s.getSlotGroup() == TrinketsClient.lastEquipped && TrinketsClient.displayEquipped > 0))) renderSlot(matrices, ts, s, x, y);
 		}
 		//Redraw only the active group slots so they're always on top
 		for (int i = 0; i < handler.slots.size(); i++) {
@@ -89,13 +115,23 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
 			TrinketSlots.Slot s = trinketSlots.get(i - 46);
 			if (s.getSlotGroup() == TrinketsClient.slotGroup || (s.getSlotGroup() == TrinketsClient.lastEquipped && TrinketsClient.displayEquipped > 0)) renderSlot(matrices, ts, s, x, y);
 		}
-		GlStateManager.enableDepthTest();
+		RenderSystem.enableDepthTest();
+	}
+
+	public void renderSlotBack(MatrixStack matrices, Slot ts, TrinketSlots.Slot s, int x, int y) {
+		RenderSystem.disableLighting();
+		if (ts.getStack().isEmpty()) {
+			this.client.getTextureManager().bindTexture(s.texture);
+		} else {
+			this.client.getTextureManager().bindTexture(BLANK_BACK);
+		}
+		DrawableHelper.drawTexture(matrices, x + ts.x, y + ts.y, 0, 0, 0, 16, 16, 16, 16);
 	}
 
 	public void renderSlot(MatrixStack matrices, Slot ts, TrinketSlots.Slot s, int x, int y){
-		GlStateManager.pushMatrix();
-		GlStateManager.disableLighting();
-		GlStateManager.disableDepthTest();
+		matrices.push();
+		RenderSystem.disableLighting();
+		RenderSystem.disableDepthTest();
 		if (ts.getStack().isEmpty()) {
 			this.client.getTextureManager().bindTexture(s.texture);
 		} else {
@@ -105,13 +141,11 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
 		drawSlot(matrices, ts);
 		if (this.isPointOverSlot(ts, x, y) && ts.doDrawHoveringEffect()) {
 			this.focusedSlot = ts;
-			GlStateManager.disableDepthTest();
-			GlStateManager.disableLighting();
-			GlStateManager.colorMask(true, true, true, false);
+			RenderSystem.disableDepthTest();
+			RenderSystem.colorMask(true, true, true, false);
 			this.fillGradient(matrices, ts.x, ts.y, ts.x + 16, ts.y + 16, -2130706433, -2130706433);
-			GlStateManager.colorMask(true, true, true, true);
-			GlStateManager.enableLighting();
+			RenderSystem.colorMask(true, true, true, true);
 		}
-		GlStateManager.popMatrix();
+		matrices.pop();
 	}
 }

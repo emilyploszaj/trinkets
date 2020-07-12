@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.gui.screen.ingame.AbstractInventoryScreen;
 import net.minecraft.client.util.math.MatrixStack;
@@ -26,7 +27,6 @@ import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 
 /**
@@ -190,8 +190,19 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
 	@Inject(at = @At(value = "TAIL"), method = "drawForeground")
 	protected void drawForeground(MatrixStack matrices, int x, int y, CallbackInfo info) {
 		if (selectedTab != ItemGroup.INVENTORY.getIndex()) return;
+		if (TrinketsClient.slotGroup != null) {
+			TrinketInventoryRenderer.renderGroupFront(matrices, this, this.client.getTextureManager(), this.playerInventory,
+					0, 0, TrinketsClient.slotGroup, getGroupX(TrinketsClient.slotGroup),
+					getGroupY(TrinketsClient.slotGroup));
+		} else if (TrinketsClient.displayEquipped > 0 && TrinketsClient.lastEquipped != null) {
+			TrinketInventoryRenderer.renderGroupFront(matrices, this, this.client.getTextureManager(), this.playerInventory,
+					0, 0, TrinketsClient.lastEquipped, getGroupX(TrinketsClient.lastEquipped),
+					getGroupY(TrinketsClient.lastEquipped));
+		} else {
+			return;
+		}
 		super.drawForeground(matrices, x, y);
-		GlStateManager.disableLighting();
+		RenderSystem.disableLighting();
 		for (SlotGroup group : TrinketSlots.slotGroups) {
 			if (!group.onReal && group.slots.size() > 0) {
 				this.client.getTextureManager().bindTexture(TrinketInventoryRenderer.MORE_SLOTS_TEX);
@@ -200,37 +211,11 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
 		}
 	}
 
-	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/ingame/CreativeInventoryScreen;drawMouseoverTooltip(Lnet/minecraft/client/util/math/MatrixStack;II)V"), method = "render")
-	protected void drawMouseoverTooltip(MatrixStack matrices, int x, int y, float f, CallbackInfo info) {
-		if (selectedTab != ItemGroup.INVENTORY.getIndex()) return;
-		if (TrinketsClient.slotGroup != null) {
-			TrinketInventoryRenderer.renderGroupFront(matrices, this, this.client.getTextureManager(), this.playerInventory,
-					this.x, this.y, TrinketsClient.slotGroup, getGroupX(TrinketsClient.slotGroup),
-					getGroupY(TrinketsClient.slotGroup));
-		} else if (TrinketsClient.displayEquipped > 0 && TrinketsClient.lastEquipped != null) {
-			TrinketInventoryRenderer.renderGroupFront(matrices, this, this.client.getTextureManager(), this.playerInventory,
-					this.x, this.y, TrinketsClient.lastEquipped, getGroupX(TrinketsClient.lastEquipped),
-					getGroupY(TrinketsClient.lastEquipped));
-		} else {
-			return;
-		}
-	}
-
 	@Inject(at = @At(value = "TAIL"), method = "render")
 	protected void render(MatrixStack matrices, int x, int y, float f, CallbackInfo info) {
 		if (selectedTab != ItemGroup.INVENTORY.getIndex()) return;
 		mouseX = x;
 		mouseY = y;
-		PlayerInventory inventory = this.client.player.inventory;
-		ItemStack stack = inventory.getCursorStack();
-		if (!stack.isEmpty()) {
-			try {
-				drawItem(stack, x - 8, y - 8, null);
-			} catch (Exception e) {
-				e.printStackTrace();
-				// Nice
-			}
-		}
 	}
 
 	@Inject(at = @At(value = "TAIL"), method = "setSelectedTab")
@@ -297,15 +282,5 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
 			} else if (TrinketSlots.slotGroups.get(i).slots.size() == 0) j--;
 		}
 		return 0;
-	}
-
-	public void drawItem(ItemStack stack, int x, int y, String string) {
-		GlStateManager.translatef(0.0F, 0.0F, 32.0F);
-		this.setZOffset(200);
-		this.itemRenderer.zOffset = 200.0F;
-		this.itemRenderer.renderGuiItemIcon(stack, x, y);
-		this.itemRenderer.renderGuiItemOverlay(this.textRenderer, stack, x, y, string);
-		this.setZOffset(0);
-		this.itemRenderer.zOffset = 0.0F;
 	}
 }

@@ -19,6 +19,7 @@ allprojects{
 			name = "Ladysnake Libs"
 			url = 'https://dl.bintray.com/ladysnake/libs'
 		}
+		maven { url = "https://jitpack.io" }
 	}
 }
 dependencies {
@@ -39,6 +40,10 @@ dependencies {
 	//Entity
 	modCompile "io.github.onyxstudios.Cardinal-Components-API:cardinal-components-entity:2.4.0-nightly.1.16-rc1.build.2"
 	include "io.github.onyxstudios.Cardinal-Components-API:cardinal-components-entity:2.4.0-nightly.1.16-rc1.build.2"
+
+	modRuntime ("com.github.SuperCoder7979:databreaker:0.2.5") {
+		exclude module : "fabric-loader"
+	}
 }
 processResources {
 	inputs.property "version", project.version
