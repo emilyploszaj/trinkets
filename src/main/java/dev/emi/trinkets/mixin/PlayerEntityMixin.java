@@ -102,7 +102,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 			for (TrinketSlots.Slot slot : TrinketSlots.getAllSlots()) {
 				if (slot.canEquip.apply(slot, stack)) {
 					cir.setReturnValue(comp.getStack(slot.getName()).isEmpty());
-					return;
+					cir.cancel();
 				}
 			}
 		}
