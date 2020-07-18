@@ -7,7 +7,6 @@ import java.util.UUID;
 import com.google.common.collect.Multimap;
 
 import net.minecraft.entity.attribute.EntityAttribute;
-import net.minecraft.item.SuspiciousStewItem;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
