@@ -7,6 +7,7 @@ import java.util.UUID;
 import com.google.common.collect.Multimap;
 
 import net.minecraft.entity.attribute.EntityAttribute;
+import net.minecraft.item.SuspiciousStewItem;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -30,6 +31,7 @@ import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
  * Drops trinkets on death if other items are dropping, elytra check redirect, and handling attributes
@@ -90,6 +92,19 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 					addAttributes((PlayerEntity) (LivingEntity) this, current, i);
 				}
 				oldStacks.set(i, current.copy());
+			}
+		}
+	}
+
+	@Inject(at = @At("HEAD"), method = "canPickUp(Lnet/minecraft/item/ItemStack;)Z", cancellable = true)
+	public void canPickUp(ItemStack stack, CallbackInfoReturnable<Boolean> cir) {
+		if (stack.getItem() instanceof Trinket) {
+			TrinketComponent comp = TrinketsApi.getTrinketComponent((PlayerEntity) (LivingEntity) this);
+			for (TrinketSlots.Slot slot : TrinketSlots.getAllSlots()) {
+				if (slot.canEquip.apply(slot, stack)) {
+					cir.setReturnValue(comp.getStack(slot.getName()).isEmpty());
+					return;
+				}
 			}
 		}
 	}
