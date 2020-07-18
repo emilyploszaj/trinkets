@@ -22,19 +22,18 @@ public abstract class TrinketItem extends Item implements Trinket {
 	public static final DispenserBehavior TRINKET_DISPENSER_BEHAVIOR = new ItemDispenserBehavior() {
 		protected ItemStack dispenseSilently(BlockPointer pointer, ItemStack stack) {
 			BlockPos pos = pointer.getBlockPos().offset((Direction) pointer.getBlockState().get(DispenserBlock.FACING));
-			List<LivingEntity> entities = pointer.getWorld().getEntities(LivingEntity.class, new Box(pos), EntityPredicates.EXCEPT_SPECTATOR.and(new EntityPredicates.CanPickup(stack)));
-			if (entities.isEmpty()) {
-				return ItemStack.EMPTY;
-			} else {
-				LivingEntity entity = (LivingEntity) entities.get(0);
-				if(entity instanceof PlayerEntity) {
-					TrinketComponent comp = TrinketsApi.getTrinketComponent((PlayerEntity) entity);
-					if(comp.equip(stack)) {
-						stack.setCount(0);
+			List<LivingEntity> entities = pointer.getWorld().getEntities(LivingEntity.class, new Box(pos), EntityPredicates.EXCEPT_SPECTATOR.and(new EntityPredicates.CanPickup(stack)));if (!entities.isEmpty()) {
+				LivingEntity entity = entities.get(0);
+				if (entity instanceof PlayerEntity) {
+					TrinketComponent comp = TrinketsApi.getTrinketComponent((PlayerEntity)entity);
+					ItemStack test = stack.copy().split(1);
+					if (comp.equip(test)) {
+						stack.decrement(1);
+						return stack;
 					}
 				}
 			}
-			return stack.isEmpty() ? super.dispenseSilently(pointer, stack) : stack;
+			return super.dispenseSilently(pointer, stack);
 		}
 	};
 
