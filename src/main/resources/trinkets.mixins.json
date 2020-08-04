@@ -6,7 +6,6 @@
 	"mixins": [
 		"PlayerScreenHandlerMixin",
 		"PlayerEntityMixin",
-		"ClientPlayerEntityMixin",
 		"ServerPlayNetworkHandlerMixin",
 		"LivingEntityMixin",
 		"ElytraItemMixin",
@@ -16,6 +15,7 @@
 		"PlayerInventoryMixin"
 	],
 	"client": [
+		"ClientPlayerEntityMixin",
 		"InventoryScreenMixin",
 		"HandledScreenMixin",
 		"ElytraFeatureRendererMixin",

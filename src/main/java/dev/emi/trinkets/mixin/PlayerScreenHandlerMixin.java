@@ -56,20 +56,20 @@ public abstract class PlayerScreenHandlerMixin extends AbstractRecipeScreenHandl
 	public void transferSlot(PlayerEntity player, int i, CallbackInfoReturnable<ItemStack> info) {
 		net.minecraft.screen.slot.Slot slot = (net.minecraft.screen.slot.Slot) this.slots.get(i);
 		if (i > 45) {
-			if(slot != null && slot.hasStack()){
+			if (slot != null && slot.hasStack()) {
 				ItemStack stack = slot.getStack();
 				ItemStack copy = stack.copy();
-				if(!this.insertItem(stack, 9, 45, false)){
+				if (!this.insertItem(stack, 9, 45, false)) {
 					info.setReturnValue(ItemStack.EMPTY);
-				}else{
-					if(copy.getItem() instanceof Trinket){
+				} else {
+					if (copy.getItem() instanceof Trinket) {
 						TrinketComponent comp = TrinketsApi.getTrinketComponent(player);
 						((Trinket) copy.getItem()).onUnequip((PlayerEntity) ((PlayerTrinketComponent) comp).getEntity(), copy);
 					}
 					info.setReturnValue(stack);
 				}
 			}
-		} else if(slot != null && slot.hasStack()) {
+		} else if (slot != null && slot.hasStack()) {
 			ItemStack stack = slot.getStack();
 			TrinketComponent comp = TrinketsApi.getTrinketComponent(player);
 			if (comp.equip(stack, true)) {

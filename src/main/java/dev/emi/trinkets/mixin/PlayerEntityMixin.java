@@ -28,6 +28,7 @@ import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 
@@ -36,6 +37,7 @@ import net.minecraft.world.World;
  */
 @Mixin(PlayerEntity.class)
 public abstract class PlayerEntityMixin extends LivingEntity {
+	float addHealth = 0f;
 	public List<ItemStack> oldStacks = new ArrayList<ItemStack>();
 
 	protected PlayerEntityMixin(EntityType<? extends LivingEntity> type, World world) {
@@ -70,6 +72,13 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 		}
 	}
 
+	@Inject(at = @At("TAIL"), method = "readCustomDataFromTag")
+	public void readCustomDataFromTag(CompoundTag tag, CallbackInfo info) {
+		if (tag.contains("Health", 99)) { // Health is applied before attributes are calculated, mojbug, we store the difference and add it once they are
+			addHealth = tag.getFloat("Health") - this.getHealth();
+		}
+	}
+
 	@Inject(at = @At("TAIL"), method = "tick")
 	public void tick(CallbackInfo info) {
 		if(world.isClient) return;
@@ -82,7 +91,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 		for (int i = 0; i < inv.size(); i++) {
 			ItemStack old = oldStacks.get(i);
 			ItemStack current = inv.getStack(i);
-			if (!old.isItemEqualIgnoreDamage(current)) {
+			if (!old.isItemEqualIgnoreDamage(current) || old.getCount() != current.getCount()) {
 				if (old.getItem() instanceof Trinket){
 					removeAttributes((PlayerEntity) (LivingEntity) this, old, i);
 				}
@@ -91,6 +100,10 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 				}
 				oldStacks.set(i, current.copy());
 			}
+		}
+		if (addHealth > 0f) {
+			this.setHealth(this.getHealth() + addHealth);
+			addHealth = 0f;
 		}
 	}
 	
