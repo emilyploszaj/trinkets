@@ -1,14 +1,12 @@
 package dev.emi.trinkets.mixin;
 
+import dev.emi.trinkets.api.*;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import dev.emi.trinkets.api.TrinketItem;
-import dev.emi.trinkets.api.TrinketComponent;
-import dev.emi.trinkets.api.TrinketsApi;
 import net.minecraft.block.DispenserBlock;
 import net.minecraft.block.dispenser.DispenserBehavior;
 import net.minecraft.entity.player.PlayerEntity;
@@ -24,7 +22,7 @@ import net.minecraft.world.World;
  * Changes dispenser and right click equipping to use trinket slots
  */
 @Mixin(ElytraItem.class)
-public abstract class ElytraItemMixin {
+public abstract class ElytraItemMixin implements Trinket {
 
 	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/block/DispenserBlock;registerBehavior(Lnet/minecraft/item/ItemConvertible;Lnet/minecraft/block/dispenser/DispenserBehavior;)V"), method = "<init>")
 	private void registerBehaviorProxy(ItemConvertible item, DispenserBehavior behavior) {
@@ -42,4 +40,8 @@ public abstract class ElytraItemMixin {
 			info.setReturnValue(new TypedActionResult<ItemStack>(ActionResult.FAIL, stack));
 		}
 	 }
+
+	public boolean canWearInSlot(String group, String slot) {
+		return group.equals(SlotGroups.CHEST) && slot.equals(Slots.CAPE);
+	}
 }

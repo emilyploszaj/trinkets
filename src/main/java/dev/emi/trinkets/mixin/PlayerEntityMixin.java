@@ -31,6 +31,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
  * Drops trinkets on death if other items are dropping, elytra check redirect, and handling attributes
@@ -104,6 +105,19 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 		if (addHealth > 0f) {
 			this.setHealth(this.getHealth() + addHealth);
 			addHealth = 0f;
+		}
+	}
+
+	@Inject(at = @At("HEAD"), method = "canPickUp(Lnet/minecraft/item/ItemStack;)Z", cancellable = true)
+	public void canPickUp(ItemStack stack, CallbackInfoReturnable<Boolean> cir) {
+		if (stack.getItem() instanceof Trinket) {
+			TrinketComponent comp = TrinketsApi.getTrinketComponent((PlayerEntity) (LivingEntity) this);
+			for (TrinketSlots.Slot slot : TrinketSlots.getAllSlots()) {
+				if (slot.canEquip.apply(slot, stack)) {
+					cir.setReturnValue(comp.getStack(slot.getName()).isEmpty());
+					cir.cancel();
+				}
+			}
 		}
 	}
 	
