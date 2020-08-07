@@ -84,10 +84,12 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
 		List<TrinketSlots.Slot> trinketSlots = TrinketSlots.getAllSlots();
 		this.setZOffset(100);
 		this.itemRenderer.zOffset = 100.0F;
+		int trinketOffset = -1;
 		for (int i = 46; i < handler.slots.size(); i++) {
 			if (!(handler.slots.get(i).inventory instanceof TrinketInventory)) continue;
+			if (trinketOffset == -1) { trinketOffset = i; }
 			Slot ts = handler.getSlot(i);
-			TrinketSlots.Slot s = trinketSlots.get(i - 46);
+			TrinketSlots.Slot s = trinketSlots.get(i - trinketOffset);
 			if (!s.getSlotGroup().onReal && s.getSlotGroup().defaultSlot.equals(s.getName())){
 				renderSlotBack(matrices, ts, s, this.x, this.y);
 			}
@@ -102,17 +104,21 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
 	private void drawForeground(MatrixStack matrices, int x, int y, CallbackInfo info) {
 		RenderSystem.disableDepthTest();
 		List<TrinketSlots.Slot> trinketSlots = TrinketSlots.getAllSlots();
+		int trinketOffset = -1;
 		for (int i = 46; i < handler.slots.size(); i++) {
 			if (!(handler.slots.get(i).inventory instanceof TrinketInventory)) continue;
+			if (trinketOffset == -1) { trinketOffset = i; }
 			Slot ts = handler.getSlot(i);
-			TrinketSlots.Slot s = trinketSlots.get(i - 46);
+			TrinketSlots.Slot s = trinketSlots.get(i - trinketOffset);
 			if (!(s.getSlotGroup() == TrinketsClient.slotGroup || !(s.getSlotGroup() == TrinketsClient.lastEquipped && TrinketsClient.displayEquipped > 0))) renderSlot(matrices, ts, s, x, y);
 		}
 		//Redraw only the active group slots so they're always on top
+		trinketOffset = -1;
 		for (int i = 0; i < handler.slots.size(); i++) {
 			if (!(handler.slots.get(i).inventory instanceof TrinketInventory)) continue;
+			if (trinketOffset == -1) { trinketOffset = i; }
 			Slot ts = handler.getSlot(i);
-			TrinketSlots.Slot s = trinketSlots.get(i - 46);
+			TrinketSlots.Slot s = trinketSlots.get(i - trinketOffset);
 			if (s.getSlotGroup() == TrinketsClient.slotGroup || (s.getSlotGroup() == TrinketsClient.lastEquipped && TrinketsClient.displayEquipped > 0)) renderSlot(matrices, ts, s, x, y);
 		}
 		RenderSystem.enableDepthTest();
