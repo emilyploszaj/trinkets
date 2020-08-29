@@ -108,8 +108,8 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 		}
 	}
 
-	@Inject(at = @At("HEAD"), method = "canPickUp(Lnet/minecraft/item/ItemStack;)Z", cancellable = true)
-	public void canPickUp(ItemStack stack, CallbackInfoReturnable<Boolean> cir) {
+	@Inject(at = @At("HEAD"), method = "canEquip(Lnet/minecraft/item/ItemStack;)Z", cancellable = true)
+	public void canEquip(ItemStack stack, CallbackInfoReturnable<Boolean> cir) {
 		if (stack.getItem() instanceof Trinket) {
 			TrinketComponent comp = TrinketsApi.getTrinketComponent((PlayerEntity) (LivingEntity) this);
 			for (TrinketSlots.Slot slot : TrinketSlots.getAllSlots()) {

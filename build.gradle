@@ -35,15 +35,15 @@ dependencies {
 	// You may need to force-disable transitiveness on them.
 	
 	//Base
-	modCompile "io.github.onyxstudios.Cardinal-Components-API:cardinal-components-base:2.4.0-nightly.1.16-rc1.build.2"
-	include "io.github.onyxstudios.Cardinal-Components-API:cardinal-components-base:2.4.0-nightly.1.16-rc1.build.2"
+	modCompile "io.github.onyxstudios.Cardinal-Components-API:cardinal-components-base:2.5.0"
+	include "io.github.onyxstudios.Cardinal-Components-API:cardinal-components-base:2.5.0"
 	//Entity
-	modCompile "io.github.onyxstudios.Cardinal-Components-API:cardinal-components-entity:2.4.0-nightly.1.16-rc1.build.2"
-	include "io.github.onyxstudios.Cardinal-Components-API:cardinal-components-entity:2.4.0-nightly.1.16-rc1.build.2"
+	modCompile "io.github.onyxstudios.Cardinal-Components-API:cardinal-components-entity:2.5.0"
+	include "io.github.onyxstudios.Cardinal-Components-API:cardinal-components-entity:2.5.0"
 
-	modRuntime ("com.github.SuperCoder7979:databreaker:0.2.5") {
-		exclude module : "fabric-loader"
-	}
+	//modRuntime ("com.github.SuperCoder7979:databreaker:0.2.5") {
+	//	exclude module : "fabric-loader"
+	//}
 }
 processResources {
 	inputs.property "version", project.version
