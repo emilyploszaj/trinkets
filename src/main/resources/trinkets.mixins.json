@@ -2,27 +2,9 @@
 	"required": true,
 	"package": "dev.emi.trinkets.mixin",
 	"compatibilityLevel": "JAVA_8",
-	"plugin": "dev.emi.trinkets.TrinketsMixinPlugin",
 	"mixins": [
-		"PlayerScreenHandlerMixin",
-		"PlayerEntityMixin",
-		"ServerPlayNetworkHandlerMixin",
-		"LivingEntityMixin",
-		"ElytraItemMixin",
-		"MobEntityMixin",
-		"ExperienceOrbEntityMixin",
-		"SlotMixin",
-		"PlayerInventoryMixin"
 	],
 	"client": [
-		"ClientPlayerEntityMixin",
-		"InventoryScreenMixin",
-		"HandledScreenMixin",
-		"ElytraFeatureRendererMixin",
-		"AbstractInventoryScreenMixin",
-		"PlayerEntityRendererMixin",
-		"CreativeInventoryScreenMixin",
-		"ItemStackMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

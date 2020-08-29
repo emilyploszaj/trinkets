@@ -1,19 +1,24 @@
 {
 	"schemaVersion": 1,
 	"id": "trinkets",
-	"version": "2.6.4",
+	"version": "${version}",
 
 	"name": "Trinkets",
-	"description": "Adds a modular accessory system to the game",
+	"description": "Adds a data-driven accessory system to Minecraft",
 	"authors": [
-		"Emi"
+		{
+			"name": "Emi",
+			"contact": {
+				"github": "https://github.com/emilyploszaj"
+			}
+		}
 	],
 	"contact": {
 		"homepage": "https://emi.dev/",
 		"sources": "https://github.com/emilyploszaj/trinkets"
 	},
 
-	"license": "MIT-1.0",
+	"license": "MIT",
 	"icon": "assets/trinkets/icon.png",
 
 	"environment": "*",
