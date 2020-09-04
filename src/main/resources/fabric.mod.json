@@ -34,6 +34,14 @@
 		],
 		"client": [
 			"dev.emi.trinkets.TrinketsClient"
+		],
+		"cardinal-components-entity": [
+			"dev.emi.trinkets.TrinketsMain"
+		]
+	},
+	"custom": {
+		"cardinal-components": [
+			"trinkets:trinkets"
 		]
 	},
 	"mixins": [
