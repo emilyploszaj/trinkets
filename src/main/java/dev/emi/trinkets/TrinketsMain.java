@@ -1,5 +1,6 @@
 package dev.emi.trinkets;
 
+import dev.emi.trinkets.data.EntitySlotLoader;
 import dev.emi.trinkets.data.SlotLoader;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
@@ -14,6 +15,9 @@ public class TrinketsMain implements ModInitializer {
 
   @Override
   public void onInitialize() {
-    ResourceManagerHelper.get(ResourceType.SERVER_DATA).registerReloadListener(SlotLoader.INSTANCE);
+    ResourceManagerHelper resourceManagerHelper = ResourceManagerHelper
+        .get(ResourceType.SERVER_DATA);
+    resourceManagerHelper.registerReloadListener(SlotLoader.INSTANCE);
+    resourceManagerHelper.registerReloadListener(EntitySlotLoader.INSTANCE);
   }
 }

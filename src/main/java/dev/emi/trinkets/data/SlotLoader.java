@@ -7,6 +7,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import dev.emi.trinkets.TrinketsMain;
+import dev.emi.trinkets.api.SlotType;
 import dev.emi.trinkets.api.TrinketEnums.DropRule;
 import dev.emi.trinkets.data.SlotLoader.GroupData;
 import java.io.IOException;
@@ -15,6 +16,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.resource.SinglePreparationResourceReloadListener;
@@ -28,9 +30,10 @@ public class SlotLoader extends
 
   public static final SlotLoader INSTANCE = new SlotLoader();
 
+  static final Identifier ID = new Identifier(TrinketsMain.MOD_ID, "slots");
+
   private static final Gson GSON = (new GsonBuilder()).setPrettyPrinting().disableHtmlEscaping()
       .create();
-  private static final Identifier ID = new Identifier(TrinketsMain.MOD_ID, "slots");
   private static final int FILE_SUFFIX_LENGTH = ".json".length();
 
   private Map<String, GroupData> slots = new HashMap<>();
@@ -91,6 +94,14 @@ public class SlotLoader extends
     void read(JsonObject jsonObject) {
       defaultSlot = JsonHelper.getString(jsonObject, "default_slot", defaultSlot);
     }
+
+    String getDefaultSlot() {
+      return defaultSlot;
+    }
+
+    SlotData getSlot(String name) {
+      return slots.get(name);
+    }
   }
 
   static class SlotData {
@@ -102,6 +113,14 @@ public class SlotLoader extends
     private boolean transferable = false;
     private Set<String> validators = new HashSet<>();
     private String dropRule = DropRule.DEFAULT.toString();
+
+    SlotType create(String name) {
+      Identifier finalIcon = new Identifier(icon);
+      Set<Identifier> finalValidators = validators.stream().map(Identifier::new)
+          .collect(Collectors.toSet());
+      return new SlotType(name, order, amount, locked, finalIcon, transferable, finalValidators,
+          DropRule.valueOf(dropRule));
+    }
 
     void read(JsonObject jsonObject) {
       boolean replace = JsonHelper.getBoolean(jsonObject, "replace", false);
