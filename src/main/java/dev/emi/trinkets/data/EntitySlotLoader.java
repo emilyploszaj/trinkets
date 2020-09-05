@@ -15,7 +15,9 @@ import java.io.InputStreamReader;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.minecraft.entity.EntityType;
 import net.minecraft.resource.ResourceManager;
@@ -26,7 +28,7 @@ import net.minecraft.util.profiler.Profiler;
 import net.minecraft.util.registry.Registry;
 
 public class EntitySlotLoader extends
-    SinglePreparationResourceReloadListener<Map<String, Map<String, SlotGroup>>> implements
+    SinglePreparationResourceReloadListener<Map<String, Map<String, Set<String>>>> implements
     IdentifiableResourceReloadListener {
 
   public static final EntitySlotLoader INSTANCE = new EntitySlotLoader();
@@ -39,9 +41,9 @@ public class EntitySlotLoader extends
   private Map<EntityType<?>, Map<String, SlotGroup>> entitySlots = new HashMap<>();
 
   @Override
-  protected Map<String, Map<String, SlotGroup>> prepare(ResourceManager resourceManager,
+  protected Map<String, Map<String, Set<String>>> prepare(ResourceManager resourceManager,
       Profiler profiler) {
-    Map<String, Map<String, SlotGroup>> map = new HashMap<>();
+    Map<String, Map<String, Set<String>>> map = new HashMap<>();
     String dataType = "entities";
 
     for (Identifier identifier : resourceManager
@@ -54,8 +56,7 @@ public class EntitySlotLoader extends
         if (jsonObject != null) {
           boolean replace = JsonHelper.getBoolean(jsonObject, "replace", false);
           JsonArray assignedSlots = JsonHelper.getArray(jsonObject, "slots", new JsonArray());
-          Map<String, GroupData> slots = SlotLoader.INSTANCE.getSlots();
-          Map<String, SlotGroup.Builder> groupBuilders = new HashMap<>();
+          Map<String, Set<String>> groups = new HashMap<>();
 
           if (assignedSlots != null) {
 
@@ -63,33 +64,23 @@ public class EntitySlotLoader extends
               String[] parsedSlot = assignedSlot.getAsString().split("/", 2);
               String group = parsedSlot[0];
               String name = parsedSlot[1];
-              GroupData groupData = slots.get(group);
-
-              if (groupData != null) {
-                SlotGroup.Builder builder = groupBuilders.computeIfAbsent(group,
-                    (k) -> new SlotGroup.Builder(groupData.getDefaultSlot()));
-                SlotData slotData = groupData.getSlot(name);
-
-                if (slotData != null) {
-                  builder.addSlot(name, slotData.create(name));
-                }
-              }
+              groups.computeIfAbsent(group, (k) -> new HashSet<>()).add(name);
             }
           }
           JsonArray entities = JsonHelper.getArray(jsonObject, "entities", new JsonArray());
 
-          if (!groupBuilders.isEmpty() && entities != null) {
+          if (!groups.isEmpty() && entities != null) {
 
             for (JsonElement entity : entities) {
               String name = entity.getAsString();
-              Map<String, SlotGroup> createdEntitySlots = map
-                  .computeIfAbsent(name, (k) -> new HashMap<>());
+              Map<String, Set<String>> slots = map.computeIfAbsent(name, (k) -> new HashMap<>());
 
               if (replace) {
-                createdEntitySlots.clear();
+                slots.clear();
               }
-              groupBuilders.forEach((groupName, builder) -> createdEntitySlots
-                  .putIfAbsent(groupName, builder.build()));
+              groups.forEach(
+                  (groupName, slotNames) -> slots.computeIfAbsent(groupName, (k) -> new HashSet<>())
+                      .addAll(slotNames));
             }
           }
         }
@@ -101,17 +92,44 @@ public class EntitySlotLoader extends
   }
 
   @Override
-  protected void apply(Map<String, Map<String, SlotGroup>> loader, ResourceManager manager,
+  protected void apply(Map<String, Map<String, Set<String>>> loader, ResourceManager manager,
       Profiler profiler) {
+    Map<String, GroupData> slots = SlotLoader.INSTANCE.getSlots();
+    Map<String, Map<String, SlotGroup.Builder>> groupBuilders = new HashMap<>();
+
     loader.forEach((entityName, groups) -> {
-      if (entityName.equals("player")) {
-        this.playerSlots.putAll(groups);
-      } else {
-        Registry.ENTITY_TYPE.getOrEmpty(new Identifier(entityName))
-            .ifPresent(entityType -> this.entitySlots.putIfAbsent(entityType, groups));
+      Map<String, SlotGroup.Builder> builders = groupBuilders
+          .computeIfAbsent(entityName, (k) -> new HashMap<>());
+      groups.forEach((groupName, slotNames) -> {
+        GroupData group = slots.get(groupName);
+
+        if (group != null) {
+          SlotGroup.Builder builder = builders
+              .computeIfAbsent(groupName, (k) -> new SlotGroup.Builder(group.getDefaultSlot()));
+          slotNames.forEach(slotName -> {
+            SlotData slotData = group.getSlot(slotName);
+
+            if (slotData != null) {
+              builder.addSlot(slotName, slotData.create(slotName));
+            }
+          });
+        }
+      });
+    });
+    this.playerSlots.clear();
+    this.entitySlots.clear();
+
+    groupBuilders.forEach((entityName, groups) -> {
+      Map<String, SlotGroup> existing = entityName.equals("player") ? this.playerSlots
+          : Registry.ENTITY_TYPE.getOrEmpty(new Identifier(entityName))
+              .map(type -> this.entitySlots.computeIfAbsent(type, (k) -> new HashMap<>()))
+              .orElse(null);
+
+      if (existing != null) {
+        groups.forEach(
+            (groupName, groupBuilder) -> existing.putIfAbsent(groupName, groupBuilder.build()));
       }
     });
-    TrinketsMain.LOGGER.info("Done");
   }
 
   public Map<String, SlotGroup> getPlayerSlots() {
