@@ -5,6 +5,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.nbt.CompoundTag;
 
 public class LivingEntityTrinketComponent implements TrinketComponent, AutoSyncedComponent {
+
 	public LivingEntity entity;
 
 	public LivingEntityTrinketComponent(LivingEntity entity) {
@@ -18,6 +19,6 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 
 	@Override
 	public void writeToNbt(CompoundTag tag) {
-		
+
 	}
 }
