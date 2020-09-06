@@ -1,10 +1,8 @@
 package dev.emi.trinkets.api;
 
-import java.util.Optional;
-
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-
+import java.util.Optional;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.EntityAttribute;
@@ -25,16 +23,16 @@ public interface Trinket {
 
 	/**
 	 * Called when an entity equips a trinket
-	 * 
-	 * @param stack		The stack being equipped
+	 *
+	 * @param stack The stack being equipped
 	 */
 	public default void onEquip(ItemStack stack, TrinketSlot slot, LivingEntity entity) {
 	}
-	
+
 	/**
 	 * Called when an entity equips a trinket
-	 * 
-	 * @param stack		The stack being unequipped
+	 *
+	 * @param stack The stack being unequipped
 	 */
 	public default void onUnequip(ItemStack stack, TrinketSlot slot, LivingEntity entity) {
 	}
@@ -48,22 +46,26 @@ public interface Trinket {
 	}
 
 	/**
-	 * Returns the Entity Attribute Modifiers for a stack in a slot.
-	 * Super implementations should remain pure
+	 * Returns the Entity Attribute Modifiers for a stack in a slot. Super implementations should
+	 * remain pure
 	 */
-	public default Multimap<EntityAttribute, EntityAttributeModifier> getModifiers(ItemStack stack, TrinketSlot slot, LivingEntity entity) {
+	public default Multimap<EntityAttribute, EntityAttributeModifier> getModifiers(ItemStack stack,
+			TrinketSlot slot, LivingEntity entity) {
 		Multimap<EntityAttribute, EntityAttributeModifier> map = HashMultimap.create();
 		if (stack.hasTag() && stack.getTag().contains("TrinketAttributeModifiers", 9)) {
 			ListTag list = stack.getTag().getList("TrinketAttributeModifiers", 10);
 
-			for(int i = 0; i < list.size(); ++i) {
+			for (int i = 0; i < list.size(); ++i) {
 				CompoundTag tag = list.getCompound(i);
 				// TODO Determine and setup a slot naming scheme for tags, probably just group:slot, and uncomment the second condition
 				if (!tag.contains("Slot", 8)/* || tag.getString("Slot").equals(equipmentSlot.getName())*/) {
-					Optional<EntityAttribute> optional = Registry.ATTRIBUTE.getOrEmpty(Identifier.tryParse(tag.getString("AttributeName")));
+					Optional<EntityAttribute> optional = Registry.ATTRIBUTE
+							.getOrEmpty(Identifier.tryParse(tag.getString("AttributeName")));
 					if (optional.isPresent()) {
 						EntityAttributeModifier entityAttributeModifier = EntityAttributeModifier.fromTag(tag);
-						if (entityAttributeModifier != null && entityAttributeModifier.getId().getLeastSignificantBits() != 0L && entityAttributeModifier.getId().getMostSignificantBits() != 0L) {
+						if (entityAttributeModifier != null
+								&& entityAttributeModifier.getId().getLeastSignificantBits() != 0L
+								&& entityAttributeModifier.getId().getMostSignificantBits() != 0L) {
 							map.put(optional.get(), entityAttributeModifier);
 						}
 					}

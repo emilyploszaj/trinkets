@@ -28,125 +28,125 @@ import net.minecraft.util.profiler.Profiler;
 import net.minecraft.util.registry.Registry;
 
 public class EntitySlotLoader extends
-    SinglePreparationResourceReloadListener<Map<String, Map<String, Set<String>>>> implements
-    IdentifiableResourceReloadListener {
+		SinglePreparationResourceReloadListener<Map<String, Map<String, Set<String>>>> implements
+		IdentifiableResourceReloadListener {
 
-  public static final EntitySlotLoader INSTANCE = new EntitySlotLoader();
+	public static final EntitySlotLoader INSTANCE = new EntitySlotLoader();
 
-  private static final Gson GSON = (new GsonBuilder()).setPrettyPrinting().disableHtmlEscaping()
-      .create();
-  private static final Identifier ID = new Identifier(TrinketsMain.MOD_ID, "entities");
+	private static final Gson GSON = (new GsonBuilder()).setPrettyPrinting().disableHtmlEscaping()
+			.create();
+	private static final Identifier ID = new Identifier(TrinketsMain.MOD_ID, "entities");
 
-  private Map<String, SlotGroup> playerSlots = new HashMap<>();
-  private Map<EntityType<?>, Map<String, SlotGroup>> entitySlots = new HashMap<>();
+	private Map<String, SlotGroup> playerSlots = new HashMap<>();
+	private Map<EntityType<?>, Map<String, SlotGroup>> entitySlots = new HashMap<>();
 
-  @Override
-  protected Map<String, Map<String, Set<String>>> prepare(ResourceManager resourceManager,
-      Profiler profiler) {
-    Map<String, Map<String, Set<String>>> map = new HashMap<>();
-    String dataType = "entities";
+	@Override
+	protected Map<String, Map<String, Set<String>>> prepare(ResourceManager resourceManager,
+			Profiler profiler) {
+		Map<String, Map<String, Set<String>>> map = new HashMap<>();
+		String dataType = "entities";
 
-    for (Identifier identifier : resourceManager
-        .findResources(dataType, (stringx) -> stringx.endsWith(".json"))) {
-      try {
-        InputStreamReader reader = new InputStreamReader(
-            resourceManager.getResource(identifier).getInputStream());
-        JsonObject jsonObject = JsonHelper.deserialize(GSON, reader, JsonObject.class);
+		for (Identifier identifier : resourceManager
+				.findResources(dataType, (stringx) -> stringx.endsWith(".json"))) {
+			try {
+				InputStreamReader reader = new InputStreamReader(
+						resourceManager.getResource(identifier).getInputStream());
+				JsonObject jsonObject = JsonHelper.deserialize(GSON, reader, JsonObject.class);
 
-        if (jsonObject != null) {
-          boolean replace = JsonHelper.getBoolean(jsonObject, "replace", false);
-          JsonArray assignedSlots = JsonHelper.getArray(jsonObject, "slots", new JsonArray());
-          Map<String, Set<String>> groups = new HashMap<>();
+				if (jsonObject != null) {
+					boolean replace = JsonHelper.getBoolean(jsonObject, "replace", false);
+					JsonArray assignedSlots = JsonHelper.getArray(jsonObject, "slots", new JsonArray());
+					Map<String, Set<String>> groups = new HashMap<>();
 
-          if (assignedSlots != null) {
+					if (assignedSlots != null) {
 
-            for (JsonElement assignedSlot : assignedSlots) {
-              String[] parsedSlot = assignedSlot.getAsString().split("/", 2);
-              String group = parsedSlot[0];
-              String name = parsedSlot[1];
-              groups.computeIfAbsent(group, (k) -> new HashSet<>()).add(name);
-            }
-          }
-          JsonArray entities = JsonHelper.getArray(jsonObject, "entities", new JsonArray());
+						for (JsonElement assignedSlot : assignedSlots) {
+							String[] parsedSlot = assignedSlot.getAsString().split("/", 2);
+							String group = parsedSlot[0];
+							String name = parsedSlot[1];
+							groups.computeIfAbsent(group, (k) -> new HashSet<>()).add(name);
+						}
+					}
+					JsonArray entities = JsonHelper.getArray(jsonObject, "entities", new JsonArray());
 
-          if (!groups.isEmpty() && entities != null) {
+					if (!groups.isEmpty() && entities != null) {
 
-            for (JsonElement entity : entities) {
-              String name = entity.getAsString();
-              Map<String, Set<String>> slots = map.computeIfAbsent(name, (k) -> new HashMap<>());
+						for (JsonElement entity : entities) {
+							String name = entity.getAsString();
+							Map<String, Set<String>> slots = map.computeIfAbsent(name, (k) -> new HashMap<>());
 
-              if (replace) {
-                slots.clear();
-              }
-              groups.forEach(
-                  (groupName, slotNames) -> slots.computeIfAbsent(groupName, (k) -> new HashSet<>())
-                      .addAll(slotNames));
-            }
-          }
-        }
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
-    }
-    return map;
-  }
+							if (replace) {
+								slots.clear();
+							}
+							groups.forEach(
+									(groupName, slotNames) -> slots.computeIfAbsent(groupName, (k) -> new HashSet<>())
+											.addAll(slotNames));
+						}
+					}
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		return map;
+	}
 
-  @Override
-  protected void apply(Map<String, Map<String, Set<String>>> loader, ResourceManager manager,
-      Profiler profiler) {
-    Map<String, GroupData> slots = SlotLoader.INSTANCE.getSlots();
-    Map<String, Map<String, SlotGroup.Builder>> groupBuilders = new HashMap<>();
+	@Override
+	protected void apply(Map<String, Map<String, Set<String>>> loader, ResourceManager manager,
+			Profiler profiler) {
+		Map<String, GroupData> slots = SlotLoader.INSTANCE.getSlots();
+		Map<String, Map<String, SlotGroup.Builder>> groupBuilders = new HashMap<>();
 
-    loader.forEach((entityName, groups) -> {
-      Map<String, SlotGroup.Builder> builders = groupBuilders
-          .computeIfAbsent(entityName, (k) -> new HashMap<>());
-      groups.forEach((groupName, slotNames) -> {
-        GroupData group = slots.get(groupName);
+		loader.forEach((entityName, groups) -> {
+			Map<String, SlotGroup.Builder> builders = groupBuilders
+					.computeIfAbsent(entityName, (k) -> new HashMap<>());
+			groups.forEach((groupName, slotNames) -> {
+				GroupData group = slots.get(groupName);
 
-        if (group != null) {
-          SlotGroup.Builder builder = builders
-              .computeIfAbsent(groupName, (k) -> new SlotGroup.Builder(group.getDefaultSlot()));
-          slotNames.forEach(slotName -> {
-            SlotData slotData = group.getSlot(slotName);
+				if (group != null) {
+					SlotGroup.Builder builder = builders
+							.computeIfAbsent(groupName, (k) -> new SlotGroup.Builder(group.getDefaultSlot()));
+					slotNames.forEach(slotName -> {
+						SlotData slotData = group.getSlot(slotName);
 
-            if (slotData != null) {
-              builder.addSlot(slotName, slotData.create(slotName));
-            }
-          });
-        }
-      });
-    });
-    this.playerSlots.clear();
-    this.entitySlots.clear();
+						if (slotData != null) {
+							builder.addSlot(slotName, slotData.create(slotName));
+						}
+					});
+				}
+			});
+		});
+		this.playerSlots.clear();
+		this.entitySlots.clear();
 
-    groupBuilders.forEach((entityName, groups) -> {
-      Map<String, SlotGroup> existing = entityName.equals("player") ? this.playerSlots
-          : Registry.ENTITY_TYPE.getOrEmpty(new Identifier(entityName))
-              .map(type -> this.entitySlots.computeIfAbsent(type, (k) -> new HashMap<>()))
-              .orElse(null);
+		groupBuilders.forEach((entityName, groups) -> {
+			Map<String, SlotGroup> existing = entityName.equals("player") ? this.playerSlots
+					: Registry.ENTITY_TYPE.getOrEmpty(new Identifier(entityName))
+							.map(type -> this.entitySlots.computeIfAbsent(type, (k) -> new HashMap<>()))
+							.orElse(null);
 
-      if (existing != null) {
-        groups.forEach(
-            (groupName, groupBuilder) -> existing.putIfAbsent(groupName, groupBuilder.build()));
-      }
-    });
-  }
+			if (existing != null) {
+				groups.forEach(
+						(groupName, groupBuilder) -> existing.putIfAbsent(groupName, groupBuilder.build()));
+			}
+		});
+	}
 
-  public Map<String, SlotGroup> getPlayerSlots() {
-    return ImmutableMap.copyOf(this.playerSlots);
-  }
+	public Map<String, SlotGroup> getPlayerSlots() {
+		return ImmutableMap.copyOf(this.playerSlots);
+	}
 
-  public Map<String, SlotGroup> getEntitySlots(EntityType<?> entityType) {
-    return ImmutableMap.copyOf(this.entitySlots.get(entityType));
-  }
+	public Map<String, SlotGroup> getEntitySlots(EntityType<?> entityType) {
+		return ImmutableMap.copyOf(this.entitySlots.get(entityType));
+	}
 
-  @Override
-  public Identifier getFabricId() {
-    return ID;
-  }
+	@Override
+	public Identifier getFabricId() {
+		return ID;
+	}
 
-  @Override
-  public Collection<Identifier> getFabricDependencies() {
-    return Collections.singletonList(SlotLoader.ID);
-  }
+	@Override
+	public Collection<Identifier> getFabricDependencies() {
+		return Collections.singletonList(SlotLoader.ID);
+	}
 }

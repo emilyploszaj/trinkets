@@ -18,22 +18,22 @@ import org.apache.logging.log4j.Logger;
 
 public class TrinketsMain implements ModInitializer, EntityComponentInitializer {
 
-  public static final String MOD_ID = "trinkets";
-  public static final Logger LOGGER = LogManager.getLogger();
+	public static final String MOD_ID = "trinkets";
+	public static final Logger LOGGER = LogManager.getLogger();
 
-  public static final ComponentKey<TrinketComponent> TRINKETS = ComponentRegistryV3.INSTANCE
-      .getOrCreate(new Identifier("trinkets:trinkets"), TrinketComponent.class);
+	public static final ComponentKey<TrinketComponent> TRINKETS = ComponentRegistryV3.INSTANCE
+			.getOrCreate(new Identifier("trinkets:trinkets"), TrinketComponent.class);
+
+	@Override
+	public void onInitialize() {
+		ResourceManagerHelper resourceManagerHelper = ResourceManagerHelper
+				.get(ResourceType.SERVER_DATA);
+		resourceManagerHelper.registerReloadListener(SlotLoader.INSTANCE);
+		resourceManagerHelper.registerReloadListener(EntitySlotLoader.INSTANCE);
+	}
 
   @Override
-  public void onInitialize() {
-    ResourceManagerHelper resourceManagerHelper = ResourceManagerHelper
-        .get(ResourceType.SERVER_DATA);
-    resourceManagerHelper.registerReloadListener(SlotLoader.INSTANCE);
-    resourceManagerHelper.registerReloadListener(EntitySlotLoader.INSTANCE);
-  }
-
-  @Override
-  public void registerEntityComponentFactories(EntityComponentFactoryRegistry registry) {
-    registry.registerFor(LivingEntity.class, TRINKETS, LivingEntityTrinketComponent::new);
-  }
+	public void registerEntityComponentFactories(EntityComponentFactoryRegistry registry) {
+		registry.registerFor(LivingEntity.class, TRINKETS, LivingEntityTrinketComponent::new);
+	}
 }
