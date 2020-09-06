@@ -11,6 +11,12 @@
 			"contact": {
 				"github": "https://github.com/emilyploszaj"
 			}
+		},
+		{
+			"name": "C4",
+			"contact": {
+				"github": "https://github.com/TheIllusiveC4"
+			}
 		}
 	],
 	"contact": {
@@ -28,6 +34,14 @@
 		],
 		"client": [
 			"dev.emi.trinkets.TrinketsClient"
+		],
+		"cardinal-components-entity": [
+			"dev.emi.trinkets.TrinketsMain"
+		]
+	},
+	"custom": {
+		"cardinal-components": [
+			"trinkets:trinkets"
 		]
 	},
 	"mixins": [
