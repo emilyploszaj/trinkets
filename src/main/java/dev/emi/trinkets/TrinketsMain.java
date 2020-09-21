@@ -1,9 +1,7 @@
 package dev.emi.trinkets;
 
 import dev.emi.trinkets.api.LivingEntityTrinketComponent;
-import dev.emi.trinkets.api.Trinket;
 import dev.emi.trinkets.api.TrinketComponent;
-import dev.emi.trinkets.api.TrinketsApi;
 import dev.emi.trinkets.data.EntitySlotLoader;
 import dev.emi.trinkets.data.SlotLoader;
 import dev.onyxstudios.cca.api.v3.component.ComponentKey;
@@ -14,8 +12,6 @@ import nerdhub.cardinal.components.api.util.RespawnCopyStrategy;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.resource.ResourceType;
 import net.minecraft.util.Identifier;
 import org.apache.logging.log4j.LogManager;
@@ -35,13 +31,13 @@ public class TrinketsMain implements ModInitializer, EntityComponentInitializer 
 				.get(ResourceType.SERVER_DATA);
 		resourceManagerHelper.registerReloadListener(SlotLoader.INSTANCE);
 		resourceManagerHelper.registerReloadListener(EntitySlotLoader.INSTANCE);
-		TrinketsApi.registerTrinket(Items.DIAMOND, new Trinket(){
+		/*TrinketsApi.registerTrinket(Items.DIAMOND, new Trinket(){
 			
 			@Override
 			public void tick(ItemStack stack, SlotReference slot, LivingEntity entity) {
 				System.out.println(slot.slot.getName());
 			}
-		});
+		});*/
 	}
 
   	@Override
