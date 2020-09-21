@@ -35,11 +35,11 @@ dependencies {
 	// You may need to force-disable transitiveness on them.
 	
 	// Base
-	modCompile "io.github.onyxstudios.Cardinal-Components-API:cardinal-components-base:2.5.3"
-	include "io.github.onyxstudios.Cardinal-Components-API:cardinal-components-base:2.5.3"
+	modCompile "io.github.onyxstudios.Cardinal-Components-API:cardinal-components-base:2.5.4"
+	include "io.github.onyxstudios.Cardinal-Components-API:cardinal-components-base:2.5.4"
 	// Entity
-	modCompile "io.github.onyxstudios.Cardinal-Components-API:cardinal-components-entity:2.5.3"
-	include "io.github.onyxstudios.Cardinal-Components-API:cardinal-components-entity:2.5.3"
+	modCompile "io.github.onyxstudios.Cardinal-Components-API:cardinal-components-entity:2.5.4"
+	include "io.github.onyxstudios.Cardinal-Components-API:cardinal-components-entity:2.5.4"
 
 	//modRuntime ("com.github.SuperCoder7979:databreaker:0.2.5") {
 	//	exclude module : "fabric-loader"

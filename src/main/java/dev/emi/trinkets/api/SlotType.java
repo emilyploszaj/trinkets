@@ -6,6 +6,7 @@ import net.minecraft.util.Identifier;
 
 public class SlotType {
 
+	private final String group;
 	private final String name;
 	private final int order;
 	private final int amount;
@@ -15,8 +16,9 @@ public class SlotType {
 	private final Set<Identifier> validators;
 	private final DropRule dropRule;
 
-	public SlotType(String name, int order, int amount, int locked, Identifier icon,
+	public SlotType(String group, String name, int order, int amount, int locked, Identifier icon,
 			boolean transferable, Set<Identifier> validators, DropRule dropRule) {
+		this.group = group;
 		this.name = name;
 		this.order = order;
 		this.amount = amount;
@@ -25,6 +27,10 @@ public class SlotType {
 		this.transferable = transferable;
 		this.validators = validators;
 		this.dropRule = dropRule;
+	}
+
+	public String getGroup() {
+		return group;
 	}
 
 	public String getName() {

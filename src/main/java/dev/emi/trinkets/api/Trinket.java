@@ -18,7 +18,7 @@ public interface Trinket {
 	/**
 	 * Called every tick on the client and server side
 	 */
-	public default void tick(ItemStack stack, TrinketSlot slot, LivingEntity entity) {
+	public default void tick(ItemStack stack, SlotReference slot, LivingEntity entity) {
 	}
 
 	/**
@@ -26,7 +26,7 @@ public interface Trinket {
 	 *
 	 * @param stack The stack being equipped
 	 */
-	public default void onEquip(ItemStack stack, TrinketSlot slot, LivingEntity entity) {
+	public default void onEquip(ItemStack stack, SlotReference slot, LivingEntity entity) {
 	}
 
 	/**
@@ -34,14 +34,14 @@ public interface Trinket {
 	 *
 	 * @param stack The stack being unequipped
 	 */
-	public default void onUnequip(ItemStack stack, TrinketSlot slot, LivingEntity entity) {
+	public default void onUnequip(ItemStack stack, SlotReference slot, LivingEntity entity) {
 	}
 
-	public default boolean canEquip(ItemStack stack, TrinketSlot slot, LivingEntity entity) {
+	public default boolean canEquip(ItemStack stack, SlotReference slot, LivingEntity entity) {
 		return true;
 	}
 
-	public default boolean canUnequip(ItemStack stack, TrinketSlot slot, LivingEntity entity) {
+	public default boolean canUnequip(ItemStack stack, SlotReference slot, LivingEntity entity) {
 		return !EnchantmentHelper.hasBindingCurse(stack);
 	}
 
@@ -50,7 +50,7 @@ public interface Trinket {
 	 * remain pure
 	 */
 	public default Multimap<EntityAttribute, EntityAttributeModifier> getModifiers(ItemStack stack,
-			TrinketSlot slot, LivingEntity entity) {
+			SlotReference slot, LivingEntity entity) {
 		Multimap<EntityAttribute, EntityAttributeModifier> map = HashMultimap.create();
 		if (stack.hasTag() && stack.getTag().contains("TrinketAttributeModifiers", 9)) {
 			ListTag list = stack.getTag().getList("TrinketAttributeModifiers", 10);
@@ -75,13 +75,21 @@ public interface Trinket {
 		return map;
 	}
 
-	public default void onBreak(ItemStack stack, TrinketSlot slot, LivingEntity entity) {
+	public default void onBreak(ItemStack stack, SlotReference slot, LivingEntity entity) {
 		// TODO
 	}
 
-	// TODO getDropRule
+	public default TrinketEnums.DropRule getDropRule(ItemStack stack, SlotReference slot, LivingEntity entity) {
+		return TrinketEnums.DropRule.DEFAULT;
+	}
 
-	class TrinketSlot {
-		// Temporary dummy type 
+	public static class SlotReference {
+		public SlotType slot;
+		public int index; 
+
+		public SlotReference(SlotType slot, int index) {
+			this.slot = slot;
+			this.index = index;
+		}
 	}
 }
