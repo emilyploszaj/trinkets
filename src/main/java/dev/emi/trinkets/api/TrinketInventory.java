@@ -2,8 +2,6 @@ package dev.emi.trinkets.api;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventories;
 import net.minecraft.inventory.Inventory;
@@ -12,6 +10,7 @@ import net.minecraft.util.Pair;
 import net.minecraft.util.collection.DefaultedList;
 
 public class TrinketInventory implements Inventory {
+
 	public LivingEntityTrinketComponent component;
 	public DefaultedList<ItemStack> stacks;
 	// This is a really weird solution to the problem of quickly getting slots, I plan on changing it to something more reasonable
@@ -21,12 +20,7 @@ public class TrinketInventory implements Inventory {
 
 	public TrinketInventory(LivingEntityTrinketComponent comp) {
 		this.component = comp;
-		Map<String, SlotGroup> groups;
-		if (comp.entity.getType() == EntityType.PLAYER) { // TODO potentially change this logic if getEntitySlots starts to supports players
-			groups = TrinketSlots.getPlayerSlots();
-		} else {
-			groups = TrinketSlots.getEntitySlots(comp.entity.getType());
-		}
+		Map<String, SlotGroup> groups = TrinketsApi.getEntitySlots(comp.entity.getType());
 		int i = 0;
 		for (Map.Entry<String, SlotGroup> group : groups.entrySet()) {
 			Map<String, SlotType> slots = group.getValue().getSlots();
@@ -68,12 +62,12 @@ public class TrinketInventory implements Inventory {
 	public ItemStack getStack(int slot) {
 		return stacks.get(slot);
 	}
-	
+
 	@Override
 	public ItemStack removeStack(int slot, int amount) {
 		return Inventories.splitStack(stacks, slot, amount);
 	}
-	
+
 	@Override
 	public ItemStack removeStack(int slot) {
 		return Inventories.removeStack(stacks, slot);
