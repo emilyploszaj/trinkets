@@ -8,6 +8,7 @@ import dev.onyxstudios.cca.api.v3.component.ComponentKey;
 import dev.onyxstudios.cca.api.v3.component.ComponentRegistryV3;
 import dev.onyxstudios.cca.api.v3.entity.EntityComponentFactoryRegistry;
 import dev.onyxstudios.cca.api.v3.entity.EntityComponentInitializer;
+import nerdhub.cardinal.components.api.util.RespawnCopyStrategy;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.minecraft.entity.LivingEntity;
@@ -30,10 +31,22 @@ public class TrinketsMain implements ModInitializer, EntityComponentInitializer 
 				.get(ResourceType.SERVER_DATA);
 		resourceManagerHelper.registerReloadListener(SlotLoader.INSTANCE);
 		resourceManagerHelper.registerReloadListener(EntitySlotLoader.INSTANCE);
+		/*TrinketsApi.registerTrinket(Items.DIAMOND, new Trinket(){
+			
+			@Override
+			public void tick(ItemStack stack, SlotReference slot, LivingEntity entity) {
+				System.out.println(slot.slot.getName());
+			}
+		});*/
 	}
 
-  @Override
+  	@Override
 	public void registerEntityComponentFactories(EntityComponentFactoryRegistry registry) {
-		registry.registerFor(LivingEntity.class, TRINKETS, LivingEntityTrinketComponent::new);
+		registry.registerForPlayers(TRINKETS, entity -> {
+			return new LivingEntityTrinketComponent(entity);
+		}, RespawnCopyStrategy.ALWAYS_COPY);
+		registry.registerFor(LivingEntity.class, TRINKETS, entity -> {
+			return new LivingEntityTrinketComponent(entity);
+		});
 	}
 }

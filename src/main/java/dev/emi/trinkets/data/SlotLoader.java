@@ -114,11 +114,11 @@ public class SlotLoader extends
 		private Set<String> validators = new HashSet<>();
 		private String dropRule = DropRule.DEFAULT.toString();
 
-		SlotType create(String name) {
+		SlotType create(String group, String name) {
 			Identifier finalIcon = new Identifier(icon);
 			Set<Identifier> finalValidators = validators.stream().map(Identifier::new)
 					.collect(Collectors.toSet());
-			return new SlotType(name, order, amount, locked, finalIcon, transferable, finalValidators,
+			return new SlotType(group, name, order, amount, locked, finalIcon, transferable, finalValidators,
 					DropRule.valueOf(dropRule));
 		}
 

@@ -110,7 +110,7 @@ public class EntitySlotLoader extends
 						SlotData slotData = group.getSlot(slotName);
 
 						if (slotData != null) {
-							builder.addSlot(slotName, slotData.create(slotName));
+							builder.addSlot(slotName, slotData.create(groupName, slotName));
 						}
 					});
 				}
@@ -137,7 +137,10 @@ public class EntitySlotLoader extends
 	}
 
 	public Map<String, SlotGroup> getEntitySlots(EntityType<?> entityType) {
-		return ImmutableMap.copyOf(this.entitySlots.get(entityType));
+		if (this.entitySlots.containsKey(entityType)) {
+			return ImmutableMap.copyOf(this.entitySlots.get(entityType));
+		}
+		return ImmutableMap.of();
 	}
 
 	@Override
