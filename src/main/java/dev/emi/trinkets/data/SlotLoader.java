@@ -6,6 +6,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonSyntaxException;
 import dev.emi.trinkets.TrinketsMain;
 import dev.emi.trinkets.api.SlotType;
 import dev.emi.trinkets.api.TrinketEnums.DropRule;
@@ -45,6 +46,7 @@ public class SlotLoader extends
 
 		for (Identifier identifier : resourceManager
 				.findResources(dataType, (stringx) -> stringx.endsWith(".json"))) {
+
 			try {
 				InputStreamReader reader = new InputStreamReader(
 						resourceManager.getResource(identifier).getInputStream());
@@ -53,19 +55,25 @@ public class SlotLoader extends
 				if (jsonObject != null) {
 					String path = identifier.getPath();
 					String[] parsed = path
-							.substring(dataType.length() + 1, path.length() - FILE_SUFFIX_LENGTH).split("/", 2);
+							.substring(dataType.length() + 1, path.length() - FILE_SUFFIX_LENGTH).split("/");
 					String groupName = parsed[0];
-					String fileName = parsed[1];
+					String fileName = parsed[parsed.length - 1];
 					GroupData group = map.computeIfAbsent(groupName, (k) -> new GroupData());
 
-					if (fileName.equals("group")) {
-						group.read(jsonObject);
-					} else {
-						SlotData slot = group.slots.computeIfAbsent(fileName, (k) -> new SlotData());
-						slot.read(jsonObject);
+					try {
+						if (fileName.equals("group")) {
+							group.read(jsonObject);
+						} else {
+							SlotData slot = group.slots.computeIfAbsent(fileName, (k) -> new SlotData());
+							slot.read(jsonObject);
+						}
+					} catch (JsonSyntaxException e) {
+						TrinketsMain.LOGGER.error("[trinkets] Syntax error while reading data for " + path);
+						e.printStackTrace();
 					}
 				}
 			} catch (IOException e) {
+				TrinketsMain.LOGGER.error("[trinkets] Unknown IO error while reading slot data!");
 				e.printStackTrace();
 			}
 		}
@@ -118,8 +126,8 @@ public class SlotLoader extends
 			Identifier finalIcon = new Identifier(icon);
 			Set<Identifier> finalValidators = validators.stream().map(Identifier::new)
 					.collect(Collectors.toSet());
-			return new SlotType(group, name, order, amount, locked, finalIcon, transferable, finalValidators,
-					DropRule.valueOf(dropRule));
+			return new SlotType(group, name, order, amount, locked, finalIcon, transferable,
+					finalValidators, DropRule.valueOf(dropRule));
 		}
 
 		void read(JsonObject jsonObject) {
