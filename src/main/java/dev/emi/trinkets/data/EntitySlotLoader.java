@@ -28,29 +28,23 @@ import net.minecraft.util.JsonHelper;
 import net.minecraft.util.profiler.Profiler;
 import net.minecraft.util.registry.Registry;
 
-public class EntitySlotLoader extends
-		SinglePreparationResourceReloadListener<Map<String, Map<String, Set<String>>>> implements
-		IdentifiableResourceReloadListener {
+public class EntitySlotLoader extends SinglePreparationResourceReloadListener<Map<String, Map<String, Set<String>>>> implements IdentifiableResourceReloadListener {
 
 	public static final EntitySlotLoader INSTANCE = new EntitySlotLoader();
 
-	private static final Gson GSON = (new GsonBuilder()).setPrettyPrinting().disableHtmlEscaping()
-			.create();
+	private static final Gson GSON = (new GsonBuilder()).setPrettyPrinting().disableHtmlEscaping().create();
 	private static final Identifier ID = new Identifier(TrinketsMain.MOD_ID, "entities");
 
 	private Map<EntityType<?>, Map<String, SlotGroup>> slots = new HashMap<>();
 
 	@Override
-	protected Map<String, Map<String, Set<String>>> prepare(ResourceManager resourceManager,
-			Profiler profiler) {
+	protected Map<String, Map<String, Set<String>>> prepare(ResourceManager resourceManager, Profiler profiler) {
 		Map<String, Map<String, Set<String>>> map = new HashMap<>();
 		String dataType = "entities";
 
-		for (Identifier identifier : resourceManager
-				.findResources(dataType, (stringx) -> stringx.endsWith(".json"))) {
+		for (Identifier identifier : resourceManager.findResources(dataType, (stringx) -> stringx.endsWith(".json"))) {
 			try {
-				InputStreamReader reader = new InputStreamReader(
-						resourceManager.getResource(identifier).getInputStream());
+				InputStreamReader reader = new InputStreamReader(resourceManager.getResource(identifier).getInputStream());
 				JsonObject jsonObject = JsonHelper.deserialize(GSON, reader, JsonObject.class);
 
 				if (jsonObject != null) {
@@ -87,13 +81,12 @@ public class EntitySlotLoader extends
 								if (replace) {
 									slots.clear();
 								}
-								groups.forEach((groupName, slotNames) -> slots
-										.computeIfAbsent(groupName, (k) -> new HashSet<>()).addAll(slotNames));
+								groups.forEach((groupName, slotNames) -> slots.computeIfAbsent(groupName, (k) -> new HashSet<>())
+										.addAll(slotNames));
 							}
 						}
 					} catch (JsonSyntaxException e) {
-						TrinketsMain.LOGGER
-								.error("[trinkets] Syntax error while reading data for " + identifier.getPath());
+						TrinketsMain.LOGGER.error("[trinkets] Syntax error while reading data for " + identifier.getPath());
 						e.printStackTrace();
 					}
 				}
@@ -106,20 +99,17 @@ public class EntitySlotLoader extends
 	}
 
 	@Override
-	protected void apply(Map<String, Map<String, Set<String>>> loader, ResourceManager manager,
-			Profiler profiler) {
+	protected void apply(Map<String, Map<String, Set<String>>> loader, ResourceManager manager, Profiler profiler) {
 		Map<String, GroupData> slots = SlotLoader.INSTANCE.getSlots();
 		Map<String, Map<String, SlotGroup.Builder>> groupBuilders = new HashMap<>();
 
 		loader.forEach((entityName, groups) -> {
-			Map<String, SlotGroup.Builder> builders = groupBuilders
-					.computeIfAbsent(entityName, (k) -> new HashMap<>());
+			Map<String, SlotGroup.Builder> builders = groupBuilders.computeIfAbsent(entityName, (k) -> new HashMap<>());
 			groups.forEach((groupName, slotNames) -> {
 				GroupData group = slots.get(groupName);
 
 				if (group != null) {
-					SlotGroup.Builder builder = builders
-							.computeIfAbsent(groupName, (k) -> new SlotGroup.Builder(group.getDefaultSlot()));
+					SlotGroup.Builder builder = builders.computeIfAbsent(groupName, (k) -> new SlotGroup.Builder(group.getDefaultSlot()));
 					slotNames.forEach(slotName -> {
 						SlotData slotData = group.getSlot(slotName);
 
@@ -130,8 +120,7 @@ public class EntitySlotLoader extends
 						}
 					});
 				} else {
-					TrinketsMain.LOGGER
-							.error("[trinkets] Attempted to assign slot from unknown group " + groupName);
+					TrinketsMain.LOGGER.error("[trinkets] Attempted to assign slot from unknown group " + groupName);
 				}
 			});
 		});
@@ -141,13 +130,10 @@ public class EntitySlotLoader extends
 			EntityType<?> type = Registry.ENTITY_TYPE.getOrEmpty(new Identifier(entityName)).orElse(null);
 
 			if (type != null) {
-				Map<String, SlotGroup> entitySlots = this.slots
-						.computeIfAbsent(type, (k) -> new HashMap<>());
-				groups.forEach(
-						(groupName, groupBuilder) -> entitySlots.putIfAbsent(groupName, groupBuilder.build()));
+				Map<String, SlotGroup> entitySlots = this.slots.computeIfAbsent(type, (k) -> new HashMap<>());
+				groups.forEach((groupName, groupBuilder) -> entitySlots.putIfAbsent(groupName, groupBuilder.build()));
 			} else {
-				TrinketsMain.LOGGER
-						.error("[trinkets] Attempted to assign slots to unknown entity " + entityName);
+				TrinketsMain.LOGGER.error("[trinkets] Attempted to assign slots to unknown entity " + entityName);
 			}
 		});
 	}
