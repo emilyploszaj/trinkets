@@ -13,6 +13,7 @@ public interface TrinketRenderer {
 	void render(ItemStack stack, Trinket.SlotReference slot, MatrixStack matrixStack, VertexConsumerProvider vertexConsumer, int light,
 			PlayerEntityModel<AbstractClientPlayerEntity> model, AbstractClientPlayerEntity player, float headYaw, float headPitch);
 
+	// todo: Review these translation methods before release
 	/**
 	 * Translates the rendering context to the center of the player's face
 	 */
