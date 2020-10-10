@@ -90,7 +90,7 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
 			if (trinketOffset == -1) { trinketOffset = i; }
 			Slot ts = handler.getSlot(i);
 			TrinketSlots.Slot s = trinketSlots.get(i - trinketOffset);
-			if (!s.getSlotGroup().onReal && s.getSlotGroup().defaultSlot.equals(s.getName())){
+			if (!s.getSlotGroup().onReal && s.getSlotGroup().slots.get(0) == s) {
 				renderSlotBack(matrices, ts, s, this.x, this.y);
 			}
 		}
