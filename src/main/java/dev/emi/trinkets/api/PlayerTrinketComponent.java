@@ -1,23 +1,21 @@
 package dev.emi.trinkets.api;
 
-import java.util.Iterator;
-import java.util.List;
-
 import dev.emi.trinkets.TrinketsClient;
 import dev.emi.trinkets.api.TrinketSlots.Slot;
 import dev.emi.trinkets.api.TrinketSlots.SlotGroup;
-import nerdhub.cardinal.components.api.ComponentType;
-import nerdhub.cardinal.components.api.util.sync.EntitySyncedComponent;
-import net.minecraft.entity.Entity;
+import dev.onyxstudios.cca.api.v3.component.sync.AutoSyncedComponent;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
 
+import java.util.Iterator;
+import java.util.List;
+
 /**
  * TrinketComponent implemented for players
  */
-public class PlayerTrinketComponent implements TrinketComponent, EntitySyncedComponent {
+public class PlayerTrinketComponent implements TrinketComponent, AutoSyncedComponent {
 	private Inventory inventory;
 	private PlayerEntity player;
 
@@ -27,7 +25,7 @@ public class PlayerTrinketComponent implements TrinketComponent, EntitySyncedCom
 	}
 
 	@Override
-	public void fromTag(CompoundTag tag) {
+	public void readFromNbt(CompoundTag tag) {
 		List<String> keys = TrinketSlots.getAllSlotNames();
 		Iterator<String> iterator = tag.getKeys().iterator();
 		while (iterator.hasNext()) {
@@ -48,17 +46,20 @@ public class PlayerTrinketComponent implements TrinketComponent, EntitySyncedCom
 	}
 
 	@Override
-	public CompoundTag toTag(CompoundTag tag) {
+	public void writeToNbt(CompoundTag tag) {
 		List<String> keys = TrinketSlots.getAllSlotNames();
 		for (int i = 0; i < keys.size(); i++) {
 			tag.put(keys.get(i), inventory.getStack(i).toTag(new CompoundTag()));
 		}
-		return tag;
 	}
 
 	@Override
 	public Inventory getInventory() {
 		return inventory;
+	}
+
+	public PlayerEntity getPlayer() {
+		return player;
 	}
 
 	/**
@@ -106,15 +107,5 @@ public class PlayerTrinketComponent implements TrinketComponent, EntitySyncedCom
 			}
 		}
 		return false;
-	}
-
-	@Override
-	public ComponentType<?> getComponentType() {
-		return TrinketsApi.TRINKETS;
-	}
-
-	@Override
-	public Entity getEntity() {
-		return player;
 	}
 }

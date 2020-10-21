@@ -1,6 +1,5 @@
 package dev.emi.trinkets.api;
 
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
 
@@ -8,7 +7,7 @@ import net.minecraft.item.ItemStack;
  * Inventory that marks its parent PlayerTrinketComponent dirty and syncs with the server when needed
  */
 public class TrinketInventory extends SimpleInventory {
-	private PlayerTrinketComponent component;
+	private final PlayerTrinketComponent component;
 
 	public TrinketInventory(PlayerTrinketComponent component, int size) {
 		super(size);
@@ -22,18 +21,18 @@ public class TrinketInventory extends SimpleInventory {
 	@Override
 	public void setStack(int i, ItemStack stack) {
 		if (getStack(i).getItem() instanceof Trinket) {
-			((Trinket) getStack(i).getItem()).onUnequip((PlayerEntity) component.getEntity(), getStack(i));
+			((Trinket) getStack(i).getItem()).onUnequip(component.getPlayer(), getStack(i));
 		}
 		super.setStack(i, stack);
 		if(getStack(i).getItem() instanceof Trinket) {
-			((Trinket) getStack(i).getItem()).onEquip((PlayerEntity) component.getEntity(), getStack(i));
+			((Trinket) getStack(i).getItem()).onEquip(component.getPlayer(), getStack(i));
 		}
 	}
 
 	@Override
 	public ItemStack removeStack(int i) {
 		if(getStack(i).getItem() instanceof Trinket){
-			((Trinket) getStack(i).getItem()).onUnequip((PlayerEntity) component.getEntity(), getStack(i));
+			((Trinket) getStack(i).getItem()).onUnequip(component.getPlayer(), getStack(i));
 		}
 		return super.removeStack(i);
 	}
@@ -42,13 +41,13 @@ public class TrinketInventory extends SimpleInventory {
 	public ItemStack removeStack(int i, int count) {
 		ItemStack stack = super.removeStack(i, count);
 		if (!stack.isEmpty() && getStack(i).isEmpty() && stack.getItem() instanceof Trinket) {
-			((Trinket) stack.getItem()).onUnequip((PlayerEntity) component.getEntity(), stack);
+			((Trinket) stack.getItem()).onUnequip(component.getPlayer(), stack);
 		}
 		return stack;
 	}
 
 	@Override
 	public void markDirty() {
-		component.sync();
+		TrinketsApi.TRINKETS.sync(component.getPlayer());
 	}
 }

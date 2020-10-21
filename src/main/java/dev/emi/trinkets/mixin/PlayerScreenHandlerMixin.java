@@ -1,5 +1,14 @@
 package dev.emi.trinkets.mixin;
 
+import dev.emi.trinkets.TrinketSlot;
+import dev.emi.trinkets.api.*;
+import dev.emi.trinkets.api.TrinketSlots.Slot;
+import dev.emi.trinkets.api.TrinketSlots.SlotGroup;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.inventory.CraftingInventory;
+import net.minecraft.inventory.Inventory;
+import net.minecraft.item.ItemStack;
 import net.minecraft.screen.AbstractRecipeScreenHandler;
 import net.minecraft.screen.PlayerScreenHandler;
 import net.minecraft.screen.ScreenHandlerType;
@@ -8,20 +17,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-
-import dev.emi.trinkets.TrinketSlot;
-import dev.emi.trinkets.api.Trinket;
-import dev.emi.trinkets.api.PlayerTrinketComponent;
-import dev.emi.trinkets.api.TrinketComponent;
-import dev.emi.trinkets.api.TrinketSlots;
-import dev.emi.trinkets.api.TrinketsApi;
-import dev.emi.trinkets.api.TrinketSlots.Slot;
-import dev.emi.trinkets.api.TrinketSlots.SlotGroup;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.CraftingInventory;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.item.ItemStack;
 
 /**
  * Adds trinket slots to the PlayerContainer on initialization
@@ -64,7 +59,7 @@ public abstract class PlayerScreenHandlerMixin extends AbstractRecipeScreenHandl
 				} else {
 					if (copy.getItem() instanceof Trinket) {
 						TrinketComponent comp = TrinketsApi.getTrinketComponent(player);
-						((Trinket) copy.getItem()).onUnequip((PlayerEntity) ((PlayerTrinketComponent) comp).getEntity(), copy);
+						((Trinket) copy.getItem()).onUnequip(((PlayerTrinketComponent) comp).getPlayer(), copy);
 					}
 					info.setReturnValue(stack);
 				}

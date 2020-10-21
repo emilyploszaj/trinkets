@@ -1,6 +1,6 @@
 package dev.emi.trinkets.api;
 
-import nerdhub.cardinal.components.api.ComponentRegistry;
+import dev.onyxstudios.cca.api.v3.component.ComponentRegistry;
 import nerdhub.cardinal.components.api.ComponentType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventory;
@@ -10,7 +10,8 @@ import net.minecraft.util.Identifier;
  * Basic Trinkets calls to get information about players and their trinkets
  */
 public class TrinketsApi {
-	public static final ComponentType<TrinketComponent> TRINKETS = ComponentRegistry.INSTANCE.registerIfAbsent(new Identifier("trinkets:trinkets"), TrinketComponent.class);
+	// TODO replace ComponentType with ComponentKey when binary compatibility is not an issue
+	public static final ComponentType<TrinketComponent> TRINKETS = (ComponentType<TrinketComponent>) ComponentRegistry.getOrCreate(new Identifier("trinkets:trinkets"), TrinketComponent.class);
 
 	/**
 	 * @return An inventory holding all trinket slots indexed numerically

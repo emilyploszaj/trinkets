@@ -23,11 +23,19 @@
 		],
 		"client": [
 			"dev.emi.trinkets.TrinketsClient"
+		],
+		"cardinal-components-entity": [
+			"dev.emi.trinkets.TrinketsMain"
 		]
 	},
 	"mixins": [
 		"trinkets.mixins.json"
 	],
+	"custom": {
+		"cardinal-components": [
+			"trinkets:trinkets"
+		]
+	},
 
 	"depends": {
 		"fabricloader": ">=0.4.0",
