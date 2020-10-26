@@ -69,7 +69,7 @@ public abstract class PlayerScreenHandlerMixin extends AbstractRecipeScreenHandl
 					info.setReturnValue(stack);
 				}
 			}
-		} else if (slot != null && slot.hasStack()) {
+		} else if (slot != null && slot.hasStack() && i > 4) {
 			ItemStack stack = slot.getStack();
 			TrinketComponent comp = TrinketsApi.getTrinketComponent(player);
 			if (comp.equip(stack, true)) {
