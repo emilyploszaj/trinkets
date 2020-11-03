@@ -30,12 +30,12 @@ public class TrinketFeatureRenderer extends FeatureRenderer<AbstractClientPlayer
 		TrinketComponent comp = TrinketsApi.getTrinketComponent(player);
 		List<String> names = TrinketSlots.getAllSlotNames();
 		for (int i = 0; i < comp.getInventory().size(); i++) {
-			GlStateManager.pushMatrix();
+			matrixStack.push();
 			ItemStack stack = comp.getInventory().getStack(i);
 			if (stack.getItem() instanceof Trinket) {
 				((Trinket) stack.getItem()).render(names.get(i), matrixStack, vertexConsumer, light, context.getModel(), player, headYaw, headPitch);
 			}
-			GlStateManager.popMatrix();
+			matrixStack.pop();
 		}
 	}
 }
