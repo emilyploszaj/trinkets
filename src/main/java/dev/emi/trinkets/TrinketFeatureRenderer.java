@@ -2,8 +2,6 @@ package dev.emi.trinkets;
 
 import java.util.List;
 
-import com.mojang.blaze3d.platform.GlStateManager;
-
 import dev.emi.trinkets.api.Trinket;
 import dev.emi.trinkets.api.TrinketComponent;
 import dev.emi.trinkets.api.TrinketSlots;
