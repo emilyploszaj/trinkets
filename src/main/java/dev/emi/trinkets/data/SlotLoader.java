@@ -91,11 +91,15 @@ public class SlotLoader extends SinglePreparationResourceReloadListener<Map<Stri
 	static class GroupData {
 
 		private String defaultSlot = "";
+		private int slotId = -1;
 		private Map<String, SlotData> slots = new HashMap<>();
 
 		void read(JsonObject jsonObject) {
 			defaultSlot = JsonHelper.getString(jsonObject, "default_slot", defaultSlot);
+			slotId = JsonHelper.getInt(jsonObject, "slot_id", slotId);
 		}
+
+		int getSlotId() { return slotId; }
 
 		String getDefaultSlot() {
 			return defaultSlot;

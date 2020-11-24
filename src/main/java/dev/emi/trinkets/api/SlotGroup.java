@@ -7,11 +7,17 @@ import java.util.Map;
 public final class SlotGroup {
 
 	private final String defaultSlot;
+	private final int slotId;
 	private final Map<String, SlotType> slots;
 
 	private SlotGroup(Builder builder) {
 		this.defaultSlot = builder.defaultSlot;
 		this.slots = builder.slots;
+		this.slotId = builder.slotId;
+	}
+
+	public int getSlotId() {
+		return slotId;
 	}
 
 	public String getDefaultSlot() {
@@ -25,10 +31,17 @@ public final class SlotGroup {
 	public static class Builder {
 
 		private final String defaultSlot;
+		private final int slotId;
 		private final Map<String, SlotType> slots = new HashMap<>();
 
 		public Builder(String defaultSlot) {
 			this.defaultSlot = defaultSlot;
+			this.slotId = -1;
+		}
+
+		public Builder(int slotId) {
+			this.slotId = slotId;
+			this.defaultSlot = "";
 		}
 
 		public Builder addSlot(String name, SlotType slot) {
