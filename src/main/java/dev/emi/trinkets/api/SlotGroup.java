@@ -47,7 +47,8 @@ public final class SlotGroup {
 			this.slotId = -1;
 		}
 
-		public Builder(int slotId) {
+		public Builder(String name, int slotId) {
+			this.name = name;
 			this.slotId = slotId;
 			this.defaultSlot = "";
 		}
