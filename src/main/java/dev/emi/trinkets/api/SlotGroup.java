@@ -6,12 +6,18 @@ import java.util.Map;
 
 public final class SlotGroup {
 
+	private final String name;
 	private final String defaultSlot;
 	private final Map<String, SlotType> slots;
 
 	private SlotGroup(Builder builder) {
+		this.name = builder.name;
 		this.defaultSlot = builder.defaultSlot;
 		this.slots = builder.slots;
+	}
+
+	public String getName() {
+		return name;
 	}
 
 	public String getDefaultSlot() {
@@ -24,10 +30,12 @@ public final class SlotGroup {
 
 	public static class Builder {
 
+		private final String name;
 		private final String defaultSlot;
 		private final Map<String, SlotType> slots = new HashMap<>();
 
-		public Builder(String defaultSlot) {
+		public Builder(String name, String defaultSlot) {
+			this.name = name;
 			this.defaultSlot = defaultSlot;
 		}
 

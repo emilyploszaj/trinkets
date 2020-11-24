@@ -105,7 +105,7 @@ public class EntitySlotLoader extends
 
 				if (group != null) {
 					SlotGroup.Builder builder = builders
-							.computeIfAbsent(groupName, (k) -> new SlotGroup.Builder(group.getDefaultSlot()));
+							.computeIfAbsent(groupName, (k) -> new SlotGroup.Builder(groupName, group.getDefaultSlot()));
 					slotNames.forEach(slotName -> {
 						SlotData slotData = group.getSlot(slotName);
 

@@ -46,7 +46,7 @@ public interface Trinket {
 	}
 
 	/**
-	 * Returns the Entity Attribute Modifiers for a stack in a slot. Super implementations should
+	 * Returns the Entity Attribute Modifiers for a stack in a slot. Child implementations should
 	 * remain pure
 	 */
 	public default Multimap<EntityAttribute, EntityAttributeModifier> getModifiers(ItemStack stack,
