@@ -10,6 +10,7 @@
 	"client": [
 		"InventoryScreenMixin",
 		"HandledScreenMixin"
+		"PlayerEntityRendererMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

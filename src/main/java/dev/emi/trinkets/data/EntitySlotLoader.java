@@ -6,6 +6,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonSyntaxException;
 import dev.emi.trinkets.TrinketsMain;
 import dev.emi.trinkets.api.SlotGroup;
 import dev.emi.trinkets.data.SlotLoader.GroupData;
@@ -27,64 +28,70 @@ import net.minecraft.util.JsonHelper;
 import net.minecraft.util.profiler.Profiler;
 import net.minecraft.util.registry.Registry;
 
-public class EntitySlotLoader extends
-		SinglePreparationResourceReloadListener<Map<String, Map<String, Set<String>>>> implements
-		IdentifiableResourceReloadListener {
+public class EntitySlotLoader extends SinglePreparationResourceReloadListener<Map<String, Map<String, Set<String>>>> implements IdentifiableResourceReloadListener {
 
 	public static final EntitySlotLoader INSTANCE = new EntitySlotLoader();
 
-	private static final Gson GSON = (new GsonBuilder()).setPrettyPrinting().disableHtmlEscaping()
-			.create();
+	private static final Gson GSON = (new GsonBuilder()).setPrettyPrinting().disableHtmlEscaping().create();
 	private static final Identifier ID = new Identifier(TrinketsMain.MOD_ID, "entities");
 
-	private Map<String, SlotGroup> playerSlots = new HashMap<>();
-	private Map<EntityType<?>, Map<String, SlotGroup>> entitySlots = new HashMap<>();
+	private Map<EntityType<?>, Map<String, SlotGroup>> slots = new HashMap<>();
 
 	@Override
-	protected Map<String, Map<String, Set<String>>> prepare(ResourceManager resourceManager,
-			Profiler profiler) {
+	protected Map<String, Map<String, Set<String>>> prepare(ResourceManager resourceManager, Profiler profiler) {
 		Map<String, Map<String, Set<String>>> map = new HashMap<>();
 		String dataType = "entities";
 
-		for (Identifier identifier : resourceManager
-				.findResources(dataType, (stringx) -> stringx.endsWith(".json"))) {
+		for (Identifier identifier : resourceManager.findResources(dataType, (stringx) -> stringx.endsWith(".json"))) {
 			try {
-				InputStreamReader reader = new InputStreamReader(
-						resourceManager.getResource(identifier).getInputStream());
+				InputStreamReader reader = new InputStreamReader(resourceManager.getResource(identifier).getInputStream());
 				JsonObject jsonObject = JsonHelper.deserialize(GSON, reader, JsonObject.class);
 
 				if (jsonObject != null) {
-					boolean replace = JsonHelper.getBoolean(jsonObject, "replace", false);
-					JsonArray assignedSlots = JsonHelper.getArray(jsonObject, "slots", new JsonArray());
-					Map<String, Set<String>> groups = new HashMap<>();
 
-					if (assignedSlots != null) {
+					try {
+						boolean replace = JsonHelper.getBoolean(jsonObject, "replace", false);
+						JsonArray assignedSlots = JsonHelper.getArray(jsonObject, "slots", new JsonArray());
+						Map<String, Set<String>> groups = new HashMap<>();
 
-						for (JsonElement assignedSlot : assignedSlots) {
-							String[] parsedSlot = assignedSlot.getAsString().split("/", 2);
-							String group = parsedSlot[0];
-							String name = parsedSlot[1];
-							groups.computeIfAbsent(group, (k) -> new HashSet<>()).add(name);
-						}
-					}
-					JsonArray entities = JsonHelper.getArray(jsonObject, "entities", new JsonArray());
+						if (assignedSlots != null) {
 
-					if (!groups.isEmpty() && entities != null) {
+							for (JsonElement assignedSlot : assignedSlots) {
+								String slot = assignedSlot.getAsString();
+								String[] parsedSlot = slot.split("/");
 
-						for (JsonElement entity : entities) {
-							String name = entity.getAsString();
-							Map<String, Set<String>> slots = map.computeIfAbsent(name, (k) -> new HashMap<>());
-
-							if (replace) {
-								slots.clear();
+								if (parsedSlot.length > 2) {
+									TrinketsMain.LOGGER.error("Detected malformed slot assignment " + slot
+											+ "! Slots should be in the format 'group/slot'.");
+									continue;
+								}
+								String group = parsedSlot[0];
+								String name = parsedSlot[1];
+								groups.computeIfAbsent(group, (k) -> new HashSet<>()).add(name);
 							}
-							groups.forEach(
-									(groupName, slotNames) -> slots.computeIfAbsent(groupName, (k) -> new HashSet<>())
-											.addAll(slotNames));
 						}
+						JsonArray entities = JsonHelper.getArray(jsonObject, "entities", new JsonArray());
+
+						if (!groups.isEmpty() && entities != null) {
+
+							for (JsonElement entity : entities) {
+								String name = entity.getAsString();
+								Map<String, Set<String>> slots = map.computeIfAbsent(name, (k) -> new HashMap<>());
+
+								if (replace) {
+									slots.clear();
+								}
+								groups.forEach((groupName, slotNames) -> slots.computeIfAbsent(groupName, (k) -> new HashSet<>())
+										.addAll(slotNames));
+							}
+						}
+					} catch (JsonSyntaxException e) {
+						TrinketsMain.LOGGER.error("[trinkets] Syntax error while reading data for " + identifier.getPath());
+						e.printStackTrace();
 					}
 				}
 			} catch (IOException e) {
+				TrinketsMain.LOGGER.error("[trinkets] Unknown IO error while reading slot data!");
 				e.printStackTrace();
 			}
 		}
@@ -92,14 +99,12 @@ public class EntitySlotLoader extends
 	}
 
 	@Override
-	protected void apply(Map<String, Map<String, Set<String>>> loader, ResourceManager manager,
-			Profiler profiler) {
+	protected void apply(Map<String, Map<String, Set<String>>> loader, ResourceManager manager, Profiler profiler) {
 		Map<String, GroupData> slots = SlotLoader.INSTANCE.getSlots();
 		Map<String, Map<String, SlotGroup.Builder>> groupBuilders = new HashMap<>();
 
 		loader.forEach((entityName, groups) -> {
-			Map<String, SlotGroup.Builder> builders = groupBuilders
-					.computeIfAbsent(entityName, (k) -> new HashMap<>());
+			Map<String, SlotGroup.Builder> builders = groupBuilders.computeIfAbsent(entityName, (k) -> new HashMap<>());
 			groups.forEach((groupName, slotNames) -> {
 				GroupData group = slots.get(groupName);
 
@@ -111,34 +116,32 @@ public class EntitySlotLoader extends
 
 						if (slotData != null) {
 							builder.addSlot(slotName, slotData.create(groupName, slotName));
+						} else {
+							TrinketsMain.LOGGER.error("[trinkets] Attempted to assign unknown slot " + slotName);
 						}
 					});
+				} else {
+					TrinketsMain.LOGGER.error("[trinkets] Attempted to assign slot from unknown group " + groupName);
 				}
 			});
 		});
-		this.playerSlots.clear();
-		this.entitySlots.clear();
+		this.slots.clear();
 
 		groupBuilders.forEach((entityName, groups) -> {
-			Map<String, SlotGroup> existing = entityName.equals("player") ? this.playerSlots
-					: Registry.ENTITY_TYPE.getOrEmpty(new Identifier(entityName))
-							.map(type -> this.entitySlots.computeIfAbsent(type, (k) -> new HashMap<>()))
-							.orElse(null);
+			EntityType<?> type = Registry.ENTITY_TYPE.getOrEmpty(new Identifier(entityName)).orElse(null);
 
-			if (existing != null) {
-				groups.forEach(
-						(groupName, groupBuilder) -> existing.putIfAbsent(groupName, groupBuilder.build()));
+			if (type != null) {
+				Map<String, SlotGroup> entitySlots = this.slots.computeIfAbsent(type, (k) -> new HashMap<>());
+				groups.forEach((groupName, groupBuilder) -> entitySlots.putIfAbsent(groupName, groupBuilder.build()));
+			} else {
+				TrinketsMain.LOGGER.error("[trinkets] Attempted to assign slots to unknown entity " + entityName);
 			}
 		});
 	}
 
-	public Map<String, SlotGroup> getPlayerSlots() {
-		return ImmutableMap.copyOf(this.playerSlots);
-	}
-
 	public Map<String, SlotGroup> getEntitySlots(EntityType<?> entityType) {
-		if (this.entitySlots.containsKey(entityType)) {
-			return ImmutableMap.copyOf(this.entitySlots.get(entityType));
+		if (this.slots.containsKey(entityType)) {
+			return ImmutableMap.copyOf(this.slots.get(entityType));
 		}
 		return ImmutableMap.of();
 	}

@@ -6,6 +6,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonSyntaxException;
 import dev.emi.trinkets.TrinketsMain;
 import dev.emi.trinkets.api.SlotType;
 import dev.emi.trinkets.api.TrinketEnums.DropRule;
@@ -24,16 +25,13 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.JsonHelper;
 import net.minecraft.util.profiler.Profiler;
 
-public class SlotLoader extends
-		SinglePreparationResourceReloadListener<Map<String, GroupData>> implements
-		IdentifiableResourceReloadListener {
+public class SlotLoader extends SinglePreparationResourceReloadListener<Map<String, GroupData>> implements IdentifiableResourceReloadListener {
 
 	public static final SlotLoader INSTANCE = new SlotLoader();
 
 	static final Identifier ID = new Identifier(TrinketsMain.MOD_ID, "slots");
 
-	private static final Gson GSON = (new GsonBuilder()).setPrettyPrinting().disableHtmlEscaping()
-			.create();
+	private static final Gson GSON = (new GsonBuilder()).setPrettyPrinting().disableHtmlEscaping().create();
 	private static final int FILE_SUFFIX_LENGTH = ".json".length();
 
 	private Map<String, GroupData> slots = new HashMap<>();
@@ -43,29 +41,33 @@ public class SlotLoader extends
 		Map<String, GroupData> map = new HashMap<>();
 		String dataType = "slots";
 
-		for (Identifier identifier : resourceManager
-				.findResources(dataType, (stringx) -> stringx.endsWith(".json"))) {
+		for (Identifier identifier : resourceManager.findResources(dataType, (stringx) -> stringx.endsWith(".json"))) {
+
 			try {
-				InputStreamReader reader = new InputStreamReader(
-						resourceManager.getResource(identifier).getInputStream());
+				InputStreamReader reader = new InputStreamReader(resourceManager.getResource(identifier).getInputStream());
 				JsonObject jsonObject = JsonHelper.deserialize(GSON, reader, JsonObject.class);
 
 				if (jsonObject != null) {
 					String path = identifier.getPath();
-					String[] parsed = path
-							.substring(dataType.length() + 1, path.length() - FILE_SUFFIX_LENGTH).split("/", 2);
+					String[] parsed = path.substring(dataType.length() + 1, path.length() - FILE_SUFFIX_LENGTH).split("/");
 					String groupName = parsed[0];
-					String fileName = parsed[1];
+					String fileName = parsed[parsed.length - 1];
 					GroupData group = map.computeIfAbsent(groupName, (k) -> new GroupData());
 
-					if (fileName.equals("group")) {
-						group.read(jsonObject);
-					} else {
-						SlotData slot = group.slots.computeIfAbsent(fileName, (k) -> new SlotData());
-						slot.read(jsonObject);
+					try {
+						if (fileName.equals("group")) {
+							group.read(jsonObject);
+						} else {
+							SlotData slot = group.slots.computeIfAbsent(fileName, (k) -> new SlotData());
+							slot.read(jsonObject);
+						}
+					} catch (JsonSyntaxException e) {
+						TrinketsMain.LOGGER.error("[trinkets] Syntax error while reading data for " + path);
+						e.printStackTrace();
 					}
 				}
 			} catch (IOException e) {
+				TrinketsMain.LOGGER.error("[trinkets] Unknown IO error while reading slot data!");
 				e.printStackTrace();
 			}
 		}
@@ -116,10 +118,8 @@ public class SlotLoader extends
 
 		SlotType create(String group, String name) {
 			Identifier finalIcon = new Identifier(icon);
-			Set<Identifier> finalValidators = validators.stream().map(Identifier::new)
-					.collect(Collectors.toSet());
-			return new SlotType(group, name, order, amount, locked, finalIcon, transferable, finalValidators,
-					DropRule.valueOf(dropRule));
+			Set<Identifier> finalValidators = validators.stream().map(Identifier::new).collect(Collectors.toSet());
+			return new SlotType(group, name, order, amount, locked, finalIcon, transferable, finalValidators, DropRule.valueOf(dropRule));
 		}
 
 		void read(JsonObject jsonObject) {
