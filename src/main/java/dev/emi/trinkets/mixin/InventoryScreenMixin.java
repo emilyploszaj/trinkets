@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import dev.emi.trinkets.TrinketsClient;
 import dev.emi.trinkets.api.SlotGroup;
-import dev.emi.trinkets.api.TrinketSlots;
+import dev.emi.trinkets.api.TrinketsApi;
 import net.minecraft.client.gui.screen.ingame.AbstractInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.client.gui.screen.recipebook.RecipeBookProvider;
@@ -46,7 +46,7 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreen<Playe
 
 	@Inject(at = @At("HEAD"), method = "init")
 	public void init(CallbackInfo info) {
-		for (SlotGroup group : TrinketSlots.getPlayerSlots().values()) {
+		for (SlotGroup group : TrinketsApi.getPlayerSlots().values()) {
 			boundMap.put(group, new Rect2i(getGroupX(group.getName()), getGroupY(group.getName()), 16, 16));
 		}
 		group = null;

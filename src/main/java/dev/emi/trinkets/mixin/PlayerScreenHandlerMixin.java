@@ -6,11 +6,9 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import dev.emi.trinkets.TrinketSlot;
-import dev.emi.trinkets.TrinketsMain;
 import dev.emi.trinkets.api.SlotType;
 import dev.emi.trinkets.api.TrinketsApi;
 import dev.emi.trinkets.api.TrinketInventory;
-import dev.emi.trinkets.api.TrinketSlots;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -42,7 +40,7 @@ public abstract class PlayerScreenHandlerMixin extends ScreenHandler {
 				Pair<SlotType, Integer> p = inv.posMap.get(i);
 				String group = p.getLeft().getGroup();
 				int groupPos = inv.groupOffsetMap.get(p.getLeft()) + p.getRight();
-				int groupAmount = inv.groupOccupancyMap.get(TrinketSlots.getPlayerSlots().get(group));
+				int groupAmount = inv.groupOccupancyMap.get(TrinketsApi.getPlayerSlots().get(group));
 				if (group.equals("hand")) { // TODO move to slot group
 					groupAmount += 1;
 					groupPos += 1;
@@ -52,7 +50,7 @@ public abstract class PlayerScreenHandlerMixin extends ScreenHandler {
 				int x = getGroupX(group) + 1;
 				int y = getGroupY(group) + 1;
 				x += groupPos * 18;
-				this.addSlot(new TrinketSlot(inv, i, x, y, TrinketSlots.getPlayerSlots().get(group), p.getLeft(), groupPos == 0, p.getRight() == 0));
+				this.addSlot(new TrinketSlot(inv, i, x, y, TrinketsApi.getPlayerSlots().get(group), p.getLeft(), groupPos == 0, p.getRight() == 0));
 			}
 		});
 	}
