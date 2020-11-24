@@ -109,7 +109,12 @@ public class EntitySlotLoader extends SinglePreparationResourceReloadListener<Ma
 				GroupData group = slots.get(groupName);
 
 				if (group != null) {
-					SlotGroup.Builder builder = builders.computeIfAbsent(groupName, (k) -> new SlotGroup.Builder(group.getDefaultSlot()));
+					SlotGroup.Builder builder = builders.computeIfAbsent(groupName, (k) -> {
+						if (group.getSlotId() == -1) {
+							return new SlotGroup.Builder(group.getDefaultSlot());
+						}
+						return new SlotGroup.Builder(group.getSlotId());
+					});
 					slotNames.forEach(slotName -> {
 						SlotData slotData = group.getSlot(slotName);
 
