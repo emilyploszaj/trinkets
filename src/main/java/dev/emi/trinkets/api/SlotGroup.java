@@ -6,11 +6,13 @@ import java.util.Map;
 
 public final class SlotGroup {
 
+	private final String name;
 	private final String defaultSlot;
 	private final int slotId;
 	private final Map<String, SlotType> slots;
 
 	private SlotGroup(Builder builder) {
+		this.name = builder.name;
 		this.defaultSlot = builder.defaultSlot;
 		this.slots = builder.slots;
 		this.slotId = builder.slotId;
@@ -18,6 +20,10 @@ public final class SlotGroup {
 
 	public int getSlotId() {
 		return slotId;
+	}
+
+	public String getName() {
+		return name;
 	}
 
 	public String getDefaultSlot() {
@@ -30,16 +36,19 @@ public final class SlotGroup {
 
 	public static class Builder {
 
+		private final String name;
 		private final String defaultSlot;
 		private final int slotId;
 		private final Map<String, SlotType> slots = new HashMap<>();
 
-		public Builder(String defaultSlot) {
+		public Builder(String name, String defaultSlot) {
+			this.name = name;
 			this.defaultSlot = defaultSlot;
 			this.slotId = -1;
 		}
 
-		public Builder(int slotId) {
+		public Builder(String name, int slotId) {
+			this.name = name;
 			this.slotId = slotId;
 			this.defaultSlot = "";
 		}

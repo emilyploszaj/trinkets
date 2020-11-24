@@ -8,6 +8,8 @@
 		"LivingEntityMixin"
 	],
 	"client": [
+		"InventoryScreenMixin",
+		"HandledScreenMixin"
 		"PlayerEntityRendererMixin"
 	],
 	"injectors": {
