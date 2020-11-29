@@ -12,19 +12,19 @@ public class SlotType {
 	private final int amount;
 	private final int locked;
 	private final Identifier icon;
-	private final boolean transferable;
+	private final Set<Identifier> quickMove;
 	private final Set<Identifier> validators;
 	private final DropRule dropRule;
 
 	public SlotType(String group, String name, int order, int amount, int locked, Identifier icon,
-			boolean transferable, Set<Identifier> validators, DropRule dropRule) {
+			Set<Identifier> quickMove, Set<Identifier> validators, DropRule dropRule) {
 		this.group = group;
 		this.name = name;
 		this.order = order;
 		this.amount = amount;
 		this.locked = locked;
 		this.icon = icon;
-		this.transferable = transferable;
+		this.quickMove = quickMove;
 		this.validators = validators;
 		this.dropRule = dropRule;
 	}
@@ -53,8 +53,8 @@ public class SlotType {
 		return icon;
 	}
 
-	public boolean isTransferable() {
-		return transferable;
+	public Set<Identifier> getQuickMove() {
+		return quickMove;
 	}
 
 	public Set<Identifier> getValidators() {

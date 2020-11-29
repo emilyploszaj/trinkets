@@ -15,6 +15,7 @@ import dev.emi.trinkets.TrinketsClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -68,8 +69,9 @@ public abstract class HandledScreenMixin extends Screen {
 					info.setReturnValue(false);
 				}
 			} else {
-				//TODO vanilla slot
-				info.setReturnValue(false);
+				if (!(slot.inventory instanceof PlayerInventory) || slot.id != TrinketsClient.activeGroup.getSlotId()) {
+					info.setReturnValue(false);
+				}
 			}
 		}
 	}

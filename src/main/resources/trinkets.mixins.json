@@ -9,7 +9,7 @@
 	],
 	"client": [
 		"InventoryScreenMixin",
-		"HandledScreenMixin"
+		"HandledScreenMixin",
 		"PlayerEntityRendererMixin"
 	],
 	"injectors": {
