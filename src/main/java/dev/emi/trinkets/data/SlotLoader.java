@@ -116,14 +116,15 @@ public class SlotLoader extends SinglePreparationResourceReloadListener<Map<Stri
 		private int amount = 1;
 		private int locked = 0;
 		private String icon = "";
-		private boolean transferable = false;
+		private Set<String> quickMove = new HashSet<>();
 		private Set<String> validators = new HashSet<>();
 		private String dropRule = DropRule.DEFAULT.toString();
 
 		SlotType create(String group, String name) {
 			Identifier finalIcon = new Identifier(icon);
 			Set<Identifier> finalValidators = validators.stream().map(Identifier::new).collect(Collectors.toSet());
-			return new SlotType(group, name, order, amount, locked, finalIcon, transferable, finalValidators, DropRule.valueOf(dropRule));
+			Set<Identifier> finalQuickMove = validators.stream().map(Identifier::new).collect(Collectors.toSet());
+			return new SlotType(group, name, order, amount, locked, finalIcon, finalQuickMove, finalValidators, DropRule.valueOf(dropRule));
 		}
 
 		void read(JsonObject jsonObject) {
@@ -140,8 +141,18 @@ public class SlotLoader extends SinglePreparationResourceReloadListener<Map<Stri
 
 			icon = JsonHelper.getString(jsonObject, "icon", icon);
 
-			boolean jsonTransferable = JsonHelper.getBoolean(jsonObject, "transferable", transferable);
-			transferable = replace ? jsonTransferable : (transferable || jsonTransferable);
+			JsonArray jsonQuickMoves = JsonHelper.getArray(jsonObject, "quick_move", new JsonArray());
+
+			if (jsonQuickMoves != null) {
+
+				if (replace && jsonQuickMoves.size() > 0) {
+					quickMove.clear();
+				}
+
+				for (JsonElement jsonQuickMove : jsonQuickMoves) {
+					quickMove.add(jsonQuickMove.getAsString());
+				}
+			}
 
 			String jsonDropRule = JsonHelper.getString(jsonObject, "drop_rule", dropRule);
 

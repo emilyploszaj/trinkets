@@ -21,8 +21,10 @@ import net.minecraft.client.util.Rect2i;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.screen.PlayerScreenHandler;
+import net.minecraft.screen.slot.Slot;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.Pair;
 
 /**
  * Draws trinket slot group borders
@@ -30,6 +32,7 @@ import net.minecraft.util.Identifier;
 @Mixin(InventoryScreen.class)
 public abstract class InventoryScreenMixin extends AbstractInventoryScreen<PlayerScreenHandler> implements RecipeBookProvider {
 	private static final Identifier MORE_SLOTS = new Identifier("trinkets", "textures/gui/more_slots.png");
+	private Map<SlotGroup, Pair<Integer, Integer>> slotPos = new HashMap<SlotGroup, Pair<Integer, Integer>>();
 	private Map<SlotGroup, Rect2i> boundMap = new HashMap<SlotGroup, Rect2i>();
 	private Rect2i currentBound = new Rect2i(0, 0, 0, 0);
 	private SlotGroup group = null;
@@ -46,8 +49,38 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreen<Playe
 
 	@Inject(at = @At("HEAD"), method = "init")
 	public void init(CallbackInfo info) {
+		Map<Integer, SlotGroup> ids = new HashMap<Integer, SlotGroup>(); 
 		for (SlotGroup group : TrinketsApi.getPlayerSlots().values()) {
-			boundMap.put(group, new Rect2i(getGroupX(group.getName()), getGroupY(group.getName()), 16, 16));
+			if (group.getSlotId() != -1) {
+				ids.put(group.getSlotId(), group);
+			}
+		}
+		for (Slot slot : this.handler.slots) {
+			if (ids.containsKey(slot.id) && slot.inventory instanceof PlayerInventory) {
+				slotPos.put(ids.get(slot.id), new Pair<Integer, Integer>(slot.x, slot.y));
+			}
+		}
+		int groupNum = 1; // Start at 1 because offhand exists
+		if (TrinketsApi.getPlayerSlots().containsKey("hand")) { // Hardcode the hand slot group to always be above the offhand, if it exists
+			groupNum++;
+			slotPos.put(TrinketsApi.getPlayerSlots().get("hand"), new Pair<Integer, Integer>(77, 44));
+		}
+		for (SlotGroup group : TrinketsApi.getPlayerSlots().values()) {
+			if (!slotPos.containsKey(group)) {
+				int x = 77;
+				int y = 0;
+				if (groupNum >= 4) {
+					x = -4 - (x / 4) * 18;
+					y = 7 + (x % 4) * 18;
+				} else {
+					y = 62 - x * 18;
+				}
+				slotPos.put(group, new Pair<Integer, Integer>(x, y));
+			}
+		}
+		for (SlotGroup group : TrinketsApi.getPlayerSlots().values()) {
+			Pair<Integer, Integer> pos = slotPos.get(group);
+			boundMap.put(group, new Rect2i(pos.getLeft(), pos.getRight(), 16, 16));
 		}
 		group = null;
 		currentBound = new Rect2i(0, 0, 0, 0);
@@ -56,14 +89,14 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreen<Playe
 	@Inject(at = @At("TAIL"), method = "tick")
 	private void tick(CallbackInfo info) {
 		if (group != null) {
-			if (!currentBound.contains(((int) mouseX) - x, ((int) mouseY) - y)) {
+			if (!currentBound.contains(Math.round(mouseX) - x, Math.round(mouseY) - y)) {
 				TrinketsClient.activeGroup = null;
 				group = null;
 			}
 		}
 		if (group == null) {
 			for (Map.Entry<SlotGroup, Rect2i> entry : boundMap.entrySet()) {
-				if (entry.getValue().contains(((int) mouseX) - x, ((int) mouseY) - y)) {
+				if (entry.getValue().contains(Math.round(mouseX) - x, Math.round(mouseY) - y)) {
 					TrinketsClient.activeGroup = entry.getKey();
 					break;
 				}
@@ -90,8 +123,9 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreen<Playe
 		if (group != null) {
 			RenderSystem.enableDepthTest();
 			this.setZOffset(310);
-			int x = getGroupX(group.getName()) - 4 - (slotsWidth - 1) / 2 * 18;
-			int y = getGroupY(group.getName()) - 4;
+			Pair<Integer, Integer> pos = slotPos.get(group);
+			int x = pos.getLeft() - 5 - (slotsWidth - 1) / 2 * 18;
+			int y = pos.getRight() - 5;
 			this.client.getTextureManager().bindTexture(MORE_SLOTS);
 			drawTexture(matrices, x, y, 0, 0, 4, 26);
 			for (int i = 0; i < slotsWidth; i++) {
@@ -100,38 +134,6 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreen<Playe
 			drawTexture(matrices, x + slotsWidth * 18 + 4, y, 22, 0, 4, 26);
 			this.setZOffset(0);
 			RenderSystem.disableDepthTest();
-		}
-	}
-
-	// TODO put this info somewhere else, this is for testing
-	public int getGroupX(String group) {
-		if (group.equals("head")) {
-			return 7;
-		} else if (group.equals("chest")) {
-			return 7;
-		} else if (group.equals("legs")) {
-			return 7;
-		} else if (group.equals("feet")) {
-			return 7;
-		} else {
-			return 76;
-		}
-	}
-
-	// TODO put this info somewhere else, this is for testing
-	public int getGroupY(String group) {
-		if (group.equals("head")) {
-			return 7;
-		} else if (group.equals("chest")) {
-			return 25;
-		} else if (group.equals("legs")) {
-			return 43;
-		} else if (group.equals("feet")) {
-			return 61;
-		} else if (group.equals("offhand")) {
-			return 61;
-		} else {
-			return 43;
 		}
 	}
 }
