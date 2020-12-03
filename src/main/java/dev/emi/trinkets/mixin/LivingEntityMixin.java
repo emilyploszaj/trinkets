@@ -2,30 +2,44 @@ package dev.emi.trinkets.mixin;
 
 import dev.emi.trinkets.api.SlotType;
 import dev.emi.trinkets.api.Trinket;
+import dev.emi.trinkets.api.TrinketComponent;
 import dev.emi.trinkets.api.TrinketEnums;
 import dev.emi.trinkets.api.TrinketEnums.DropRule;
 import dev.emi.trinkets.api.TrinketInventory;
 import dev.emi.trinkets.api.TrinketsApi;
+import dev.emi.trinkets.api.Trinket.SlotReference;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.attribute.AttributeContainer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Pair;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * Trinket dropping on death
+ * Trinket dropping on death, trinket EAMs, and trinket equip/unequip calls
  *
  * @author Emi
  */
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin extends Entity {
+	private Map<Integer, ItemStack> lastEquippedTrinkets = new HashMap<Integer, ItemStack>();
+	
+	@Shadow
+	public abstract AttributeContainer getAttributes();
 
 	protected LivingEntityMixin(EntityType<? extends LivingEntity> entityType, World world) {
 		super(entityType, world);
@@ -74,5 +88,57 @@ public abstract class LivingEntityMixin extends Entity {
 				}
 			}
 		});
+	}
+
+	@Inject(at = @At("TAIL"), method = "tick")
+	private void tick(CallbackInfo info) {
+		LivingEntity entity = (LivingEntity) (Object) this;
+		Optional<TrinketComponent> optional = TrinketsApi.getTrinketComponent(entity);
+		if (optional.isPresent()) {
+			TrinketComponent comp = optional.get();
+			TrinketInventory inv = comp.getInventory();
+			for (int i = 0; i < inv.size(); i++) {
+				ItemStack oldStack = getOldStack(i);
+				ItemStack newStack = inv.getStack(i);
+				if (!ItemStack.areEqual(newStack, oldStack)) {
+					Pair<SlotType, Integer> pair = inv.posMap.get(i);
+					SlotReference ref = new SlotReference(pair.getLeft(), pair.getRight());
+					if (!this.world.isClient) {
+						UUID uuid = UUID.nameUUIDFromBytes((ref.index + ref.slot.getName() + ref.slot.getGroup()).getBytes());
+						if (!oldStack.isEmpty()) {
+							Optional<Trinket> trinket = TrinketsApi.getTrinket(oldStack.getItem());
+							if (trinket.isPresent()) {
+								this.getAttributes().removeModifiers(trinket.get().getModifiers(oldStack, ref, entity, uuid));
+							}
+						}
+						if (!newStack.isEmpty()) {
+							Optional<Trinket> trinket = TrinketsApi.getTrinket(newStack.getItem());
+							if (trinket.isPresent()) {
+								this.getAttributes().addTemporaryModifiers(trinket.get().getModifiers(newStack, ref, entity, uuid));
+							}
+						}
+					}
+					lastEquippedTrinkets.put(i, newStack.copy());
+					if (!newStack.isItemEqual(oldStack)) {
+						TrinketsApi.getTrinket(oldStack.getItem()).ifPresent(trinket -> {
+							trinket.onUnequip(oldStack, ref, entity);
+						});
+						TrinketsApi.getTrinket(newStack.getItem()).ifPresent(trinket -> {
+							trinket.onEquip(newStack, ref, entity);
+						});
+					}
+				}
+			}
+		}
+	}
+
+	private ItemStack getOldStack(int i) {
+		if (lastEquippedTrinkets.containsKey(i)) {
+			ItemStack stack = lastEquippedTrinkets.get(i);
+			if (stack != null) {
+				return stack;
+			}
+		}
+		return ItemStack.EMPTY;
 	}
 }

@@ -27,7 +27,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.Pair;
 
 /**
- * Draws trinket slot group borders
+ * Draws trinket slot group borders and handles active group logic
  */
 @Mixin(InventoryScreen.class)
 public abstract class InventoryScreenMixin extends AbstractInventoryScreen<PlayerScreenHandler> implements RecipeBookProvider {
@@ -35,8 +35,9 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreen<Playe
 	private Map<SlotGroup, Pair<Integer, Integer>> slotPos = new HashMap<SlotGroup, Pair<Integer, Integer>>();
 	private Map<SlotGroup, Rect2i> boundMap = new HashMap<SlotGroup, Rect2i>();
 	private Rect2i currentBound = new Rect2i(0, 0, 0, 0);
+	private Rect2i quickMoveBound = new Rect2i(0, 0, 0, 0);
 	private SlotGroup group = null;
-	private int slotsWidth;
+	private SlotGroup quickMoveGroup = null;
 
 	@Shadow
 	private float mouseX;
@@ -95,9 +96,18 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreen<Playe
 			}
 		}
 		if (group == null) {
+			if (quickMoveGroup != null) {
+				if (quickMoveBound.contains(Math.round(mouseX) - x, Math.round(mouseY) - y)) {
+					TrinketsClient.activeGroup = quickMoveGroup;
+					TrinketsClient.quickMoveGroup = null;
+				}
+			}
+		}
+		if (group == null) {
 			for (Map.Entry<SlotGroup, Rect2i> entry : boundMap.entrySet()) {
 				if (entry.getValue().contains(Math.round(mouseX) - x, Math.round(mouseY) - y)) {
 					TrinketsClient.activeGroup = entry.getKey();
+					TrinketsClient.quickMoveGroup = null;
 					break;
 				}
 			}
@@ -105,8 +115,8 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreen<Playe
 		if (group != TrinketsClient.activeGroup) {
 			group = TrinketsClient.activeGroup;
 			if (group != null) {
-				slotsWidth = group.getSlots().values().size() + 1;
-				if (group.getName().equals("hand")) slotsWidth -= 1; // TODO move this to a slot group property
+				int slotsWidth = group.getSlots().values().size() + 1;
+				if (group.getSlotId() == -1) slotsWidth -= 1;
 				Rect2i r = boundMap.get(group);
 				if (r == null) {
 					currentBound = new Rect2i(0, 0, 0, 0);
@@ -116,24 +126,52 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreen<Playe
 				}
 			}
 		}
+		if (quickMoveGroup != TrinketsClient.quickMoveGroup) {
+			quickMoveGroup = TrinketsClient.quickMoveGroup;
+			if (quickMoveGroup != null) {
+				int slotsWidth = quickMoveGroup.getSlots().values().size() + 1;
+				if (quickMoveGroup.getSlotId() == -1) slotsWidth -= 1;
+				Rect2i r = boundMap.get(quickMoveGroup);
+				if (r == null) {
+					quickMoveBound = new Rect2i(0, 0, 0, 0);
+				} else {
+					int l = (slotsWidth - 1) / 2 * 18;
+					quickMoveBound = new Rect2i(r.getX() - l - 4, r.getY() - 4, slotsWidth * 18 + 8, 26);
+				}
+			}
+		}
+		if (TrinketsClient.quickMoveTimer > 0) {
+			TrinketsClient.quickMoveTimer--;
+			if (TrinketsClient.quickMoveTimer <= 0) {
+				TrinketsClient.quickMoveGroup = null;
+			}
+		}
 	}
 
 	@Inject(at = @At("TAIL"), method = "drawForeground")
 	private void drawForeground(MatrixStack matrices, int mouseX, int mouseY, CallbackInfo info) {
-		if (group != null) {
-			RenderSystem.enableDepthTest();
-			this.setZOffset(310);
-			Pair<Integer, Integer> pos = slotPos.get(group);
-			int x = pos.getLeft() - 5 - (slotsWidth - 1) / 2 * 18;
-			int y = pos.getRight() - 5;
-			this.client.getTextureManager().bindTexture(MORE_SLOTS);
-			drawTexture(matrices, x, y, 0, 0, 4, 26);
-			for (int i = 0; i < slotsWidth; i++) {
-				drawTexture(matrices, x + i * 18 + 4, y, 4, 0, 18, 26);
-			}
-			drawTexture(matrices, x + slotsWidth * 18 + 4, y, 22, 0, 4, 26);
-			this.setZOffset(0);
-			RenderSystem.disableDepthTest();
+		if (TrinketsClient.activeGroup != null) {
+			drawGroup(matrices, TrinketsClient.activeGroup);
+		}else if (TrinketsClient.quickMoveGroup != null) {
+			drawGroup(matrices, TrinketsClient.quickMoveGroup);
 		}
+	}
+
+	private void drawGroup(MatrixStack matrices, SlotGroup group) {
+		RenderSystem.enableDepthTest();
+		this.setZOffset(310);
+		Pair<Integer, Integer> pos = slotPos.get(group);
+		int slotsWidth = group.getSlots().values().size() + 1;
+		if (group.getSlotId() == -1) slotsWidth -= 1;
+		int x = pos.getLeft() - 5 - (slotsWidth - 1) / 2 * 18;
+		int y = pos.getRight() - 5;
+		this.client.getTextureManager().bindTexture(MORE_SLOTS);
+		drawTexture(matrices, x, y, 0, 0, 4, 26);
+		for (int i = 0; i < slotsWidth; i++) {
+			drawTexture(matrices, x + i * 18 + 4, y, 4, 0, 18, 26);
+		}
+		drawTexture(matrices, x + slotsWidth * 18 + 4, y, 22, 0, 4, 26);
+		this.setZOffset(0);
+		RenderSystem.disableDepthTest();
 	}
 }

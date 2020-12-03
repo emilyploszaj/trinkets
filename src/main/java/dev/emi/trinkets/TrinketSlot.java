@@ -41,6 +41,9 @@ public class TrinketSlot extends Slot {
 		if (TrinketsClient.activeGroup == group) {
 			return baseType || TrinketsClient.activeType == type;
 		}
+		if (TrinketsClient.quickMoveGroup == group) {
+			return baseType || TrinketsClient.quickMoveType == type;
+		}
 		return false;
 	}
 
