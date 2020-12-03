@@ -9,104 +9,105 @@ import net.minecraft.client.util.math.Vector3f;
 import net.minecraft.item.ItemStack;
 
 public interface TrinketRenderer {
+	public static final float MAGIC_ROTATION = 180f / (float) Math.PI;
 
-	void render(ItemStack stack, Trinket.SlotReference slot, MatrixStack matrixStack, VertexConsumerProvider vertexConsumer, int light,
-			PlayerEntityModel<AbstractClientPlayerEntity> model, AbstractClientPlayerEntity player, float headYaw, float headPitch);
+	void render(ItemStack stack, Trinket.SlotReference slot, MatrixStack matrices, VertexConsumerProvider vertexConsumer, int light,
+			PlayerEntityModel<AbstractClientPlayerEntity> model, AbstractClientPlayerEntity player, float limbAngle, float limbDistance,
+			float tickDelta, float animationProgress, float headYaw, float headPitch);
 
-	// todo: Review these translation methods before release
 	/**
 	 * Translates the rendering context to the center of the player's face
 	 */
-	static void translateToFace(MatrixStack matrixStack, PlayerEntityModel<AbstractClientPlayerEntity> model, AbstractClientPlayerEntity player, float headYaw,
+	static void translateToFace(MatrixStack matrices, PlayerEntityModel<AbstractClientPlayerEntity> model, AbstractClientPlayerEntity player, float headYaw,
 			float headPitch) {
 
 		if (player.isInSwimmingPose() || player.isFallFlying()) {
-			matrixStack.multiply(Vector3f.POSITIVE_Z.getDegreesQuaternion(model.head.roll));
-			matrixStack.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(headYaw));
-			matrixStack.multiply(Vector3f.POSITIVE_X.getDegreesQuaternion(-45.0F));
+			matrices.multiply(Vector3f.POSITIVE_Z.getDegreesQuaternion(model.head.roll));
+			matrices.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(headYaw));
+			matrices.multiply(Vector3f.POSITIVE_X.getDegreesQuaternion(-45.0F));
 		} else {
 
 			if (player.isInSneakingPose() && !model.riding) {
-				matrixStack.translate(0.0F, 0.25F, 0.0F);
+				matrices.translate(0.0F, 0.25F, 0.0F);
 			}
-			matrixStack.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(headYaw));
-			matrixStack.multiply(Vector3f.POSITIVE_X.getDegreesQuaternion(headPitch));
+			matrices.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(headYaw));
+			matrices.multiply(Vector3f.POSITIVE_X.getDegreesQuaternion(headPitch));
 		}
-		matrixStack.translate(0.0F, -0.25F, -0.3F);
+		matrices.translate(0.0F, -0.25F, -0.3F);
 	}
 
 	/**
 	 * Translates the rendering context to the center of the player's chest/torso segment
 	 */
-	static void translateToChest(MatrixStack matrixStack, PlayerEntityModel<AbstractClientPlayerEntity> model, AbstractClientPlayerEntity player) {
+	static void translateToChest(MatrixStack matrices, PlayerEntityModel<AbstractClientPlayerEntity> model, AbstractClientPlayerEntity player) {
 
 		if (player.isInSneakingPose() && !model.riding && !player.isSwimming()) {
-			matrixStack.translate(0.0F, 0.2F, 0.0F);
-			matrixStack.multiply(Vector3f.POSITIVE_X.getDegreesQuaternion(model.torso.pitch * 57.5F));
+			matrices.translate(0.0F, 0.2F, 0.0F);
+			matrices.multiply(Vector3f.POSITIVE_X.getDegreesQuaternion(model.torso.pitch * MAGIC_ROTATION));
 		}
-		matrixStack.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(model.torso.yaw * 57.5F));
-		matrixStack.translate(0.0F, 0.4F, -0.16F);
+		matrices.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(model.torso.yaw * MAGIC_ROTATION));
+		matrices.translate(0.0F, 0.4F, -0.16F);
 	}
 
 	/**
 	 * Translates the rendering context to the center of the bottom of the player's right arm
 	 */
-	static void translateToRightArm(MatrixStack matrixStack, PlayerEntityModel<AbstractClientPlayerEntity> model, AbstractClientPlayerEntity player) {
+	static void translateToRightArm(MatrixStack matrices, PlayerEntityModel<AbstractClientPlayerEntity> model, AbstractClientPlayerEntity player) {
 
 		if (player.isInSneakingPose() && !model.riding && !player.isSwimming()) {
-			matrixStack.translate(0.0F, 0.2F, 0.0F);
+			matrices.translate(0.0F, 0.2F, 0.0F);
 		}
-		matrixStack.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(model.torso.yaw * 57.5F));
-		matrixStack.translate(-0.3125F, 0.15625F, 0.0F);
-		matrixStack.multiply(Vector3f.POSITIVE_Z.getDegreesQuaternion(model.rightArm.roll * 57.5F));
-		matrixStack.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(model.rightArm.yaw * 57.5F));
-		matrixStack.multiply(Vector3f.POSITIVE_X.getDegreesQuaternion(model.rightArm.pitch * 57.5F));
-		matrixStack.translate(-0.0625F, 0.625F, 0.0F);
+		matrices.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(model.torso.yaw * MAGIC_ROTATION));
+		matrices.translate(-0.3125F, 0.15625F, 0.0F);
+		matrices.multiply(Vector3f.POSITIVE_Z.getDegreesQuaternion(model.rightArm.roll * MAGIC_ROTATION));
+		matrices.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(model.rightArm.yaw * MAGIC_ROTATION));
+		matrices.multiply(Vector3f.POSITIVE_X.getDegreesQuaternion(model.rightArm.pitch * MAGIC_ROTATION));
+		matrices.translate(-0.0625F, 0.625F, 0.0F);
 	}
 
 	/**
 	 * Translates the rendering context to the center of the bottom of the player's left arm
 	 */
-	static void translateToLeftArm(MatrixStack matrixStack, PlayerEntityModel<AbstractClientPlayerEntity> model, AbstractClientPlayerEntity player) {
+	static void translateToLeftArm(MatrixStack matrices, PlayerEntityModel<AbstractClientPlayerEntity> model, AbstractClientPlayerEntity player) {
 
 		if (player.isInSneakingPose() && !model.riding && !player.isSwimming()) {
-			matrixStack.translate(0.0F, 0.2F, 0.0F);
+			matrices.translate(0.0F, 0.2F, 0.0F);
 		}
-		matrixStack.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(model.torso.yaw * 57.5F));
-		matrixStack.translate(0.3125F, 0.15625F, 0.0F);
-		matrixStack.multiply(Vector3f.POSITIVE_Z.getDegreesQuaternion(model.leftArm.roll * 57.5F));
-		matrixStack.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(model.leftArm.yaw * 57.5F));
-		matrixStack.multiply(Vector3f.POSITIVE_X.getDegreesQuaternion(model.leftArm.pitch * 57.5F));
-		matrixStack.translate(0.0625F, 0.625F, 0.0F);
+		matrices.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(model.torso.yaw * MAGIC_ROTATION));
+		matrices.translate(0.3125F, 0.15625F, 0.0F);
+		matrices.multiply(Vector3f.POSITIVE_Z.getDegreesQuaternion(model.leftArm.roll * MAGIC_ROTATION));
+		matrices.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(model.leftArm.yaw * MAGIC_ROTATION));
+		matrices.multiply(Vector3f.POSITIVE_X.getDegreesQuaternion(model.leftArm.pitch * MAGIC_ROTATION));
+		matrices.translate(0.0625F, 0.625F, 0.0F);
 	}
 
 	/**
 	 * Translates the rendering context to the center of the bottom of the player's right leg
 	 */
-	static void translateToRightLeg(MatrixStack matrixStack, PlayerEntityModel<AbstractClientPlayerEntity> model, AbstractClientPlayerEntity player) {
+	static void translateToRightLeg(MatrixStack matrices, PlayerEntityModel<AbstractClientPlayerEntity> model, AbstractClientPlayerEntity player) {
 
 		if (player.isInSneakingPose() && !model.riding && !player.isSwimming()) {
-			matrixStack.translate(0.0F, 0.0F, 0.25F);
+			matrices.translate(0.0F, 0.0F, 0.25F);
 		}
-		matrixStack.translate(-0.125F, 0.75F, 0.0F);
-		matrixStack.multiply(Vector3f.POSITIVE_Z.getDegreesQuaternion(model.rightLeg.roll * 57.5F));
-		matrixStack.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(model.rightLeg.yaw * 57.5F));
-		matrixStack.multiply(Vector3f.POSITIVE_X.getDegreesQuaternion(model.rightLeg.pitch * 57.5F));
-		matrixStack.translate(0.0F, 0.75F, 0.0F);
+		matrices.translate(-0.125F, 0.75F, 0.0F);
+		matrices.multiply(Vector3f.POSITIVE_Z.getDegreesQuaternion(model.rightLeg.roll * MAGIC_ROTATION));
+		matrices.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(model.rightLeg.yaw * MAGIC_ROTATION));
+		matrices.multiply(Vector3f.POSITIVE_X.getDegreesQuaternion(model.rightLeg.pitch * MAGIC_ROTATION));
+		matrices.translate(0.0F, 0.75F, 0.0F);
 	}
 
 	/**
 	 * Translates the rendering context to the center of the bottom of the player's left leg
 	 */
-	static void translateToLeftLeg(MatrixStack matrixStack, PlayerEntityModel<AbstractClientPlayerEntity> model, AbstractClientPlayerEntity player) {
+	static void translateToLeftLeg(MatrixStack matrices, PlayerEntityModel<AbstractClientPlayerEntity> model, AbstractClientPlayerEntity player) {
 
 		if (player.isInSneakingPose() && !model.riding && !player.isSwimming()) {
-			matrixStack.translate(0.0F, 0.0F, 0.25F);
+			matrices.translate(0.0F, 0.0F, 0.25F);
 		}
-		matrixStack.translate(0.125F, 0.75F, 0.0F);
-		matrixStack.multiply(Vector3f.POSITIVE_Z.getDegreesQuaternion(model.leftLeg.roll * 57.5F));
-		matrixStack.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(model.leftLeg.yaw * 57.5F));
-		matrixStack.multiply(Vector3f.POSITIVE_X.getDegreesQuaternion(model.leftLeg.pitch * 57.5F));
-		matrixStack.translate(0.0F, 0.75F, 0.0F);
+		matrices.translate(0.125F, 0.75F, 0.0F);
+		matrices.multiply(Vector3f.POSITIVE_Z.getDegreesQuaternion(model.leftLeg.roll * MAGIC_ROTATION));
+		matrices.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(model.leftLeg.yaw * MAGIC_ROTATION));
+		matrices.multiply(Vector3f.POSITIVE_X.getDegreesQuaternion(model.leftLeg.pitch * MAGIC_ROTATION));
+		matrices.translate(0.0F, 0.75F, 0.0F);
 	}
 }
