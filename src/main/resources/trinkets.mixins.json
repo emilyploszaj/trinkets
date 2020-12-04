@@ -10,7 +10,8 @@
 	"client": [
 		"InventoryScreenMixin",
 		"HandledScreenMixin",
-		"PlayerEntityRendererMixin"
+		"PlayerEntityRendererMixin",
+		"AbstractButtonWidgetMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

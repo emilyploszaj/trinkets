@@ -1,14 +1,19 @@
 package dev.emi.trinkets.api;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import dev.emi.trinkets.TrinketsMain;
+import dev.emi.trinkets.api.Trinket.SlotReference;
 import dev.onyxstudios.cca.api.v3.component.AutoSyncedComponent;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.util.Pair;
 
 public class LivingEntityTrinketComponent implements TrinketComponent, AutoSyncedComponent {
 
@@ -34,7 +39,8 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 					if (i >= entry.getKey().getAmount()) {
 						if (!stack.isEmpty()) {
 							// If amount is lowered between loads of the entity drop excess
-							TrinketsMain.LOGGER.info("[trinkets] Found item in slot that doesn't exist! Dropping on ground.");
+							TrinketsMain.LOGGER
+									.info("[trinkets] Found item in slot that doesn't exist! Dropping on ground.");
 							entity.dropStack(stack);
 						}
 					} else {
@@ -52,7 +58,8 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 					ItemStack stack = ItemStack.fromTag(c);
 					if (!stack.isEmpty()) {
 						// If slot is removed between loads of the entity drop items
-						TrinketsMain.LOGGER.info("[trinkets] Found item in slot that doesn't exist! Dropping on ground.");
+						TrinketsMain.LOGGER
+								.info("[trinkets] Found item in slot that doesn't exist! Dropping on ground.");
 						entity.dropStack(stack);
 					}
 				}
@@ -77,5 +84,28 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 	@Override
 	public TrinketInventory getInventory() {
 		return inventory;
+	}
+
+	@Override
+	public boolean isEquipped(Predicate<ItemStack> predicate) {
+		for (int i = 0; i < inventory.size(); i++) {
+			if (predicate.test(inventory.getStack(i))) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	@Override
+	public List<Pair<SlotReference, ItemStack>> getEquipped(Predicate<ItemStack> predicate) {
+		List<Pair<SlotReference, ItemStack>> list = new ArrayList<Pair<SlotReference, ItemStack>>();
+		for (int i = 0; i < inventory.size(); i++) {
+			ItemStack stack = inventory.getStack(i);
+			if (predicate.test(stack)) {
+				Pair<SlotType, Integer> pair = inventory.posMap.get(i);
+				list.add(new Pair<SlotReference, ItemStack>(new SlotReference(pair.getLeft(), pair.getRight()), stack));
+			}
+		}
+		return list;
 	}
 }

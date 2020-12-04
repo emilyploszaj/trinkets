@@ -12,12 +12,20 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.util.TriState;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.attribute.EntityAttribute;
+import net.minecraft.entity.attribute.EntityAttributeModifier;
+import net.minecraft.entity.attribute.EntityAttributes;
+import net.minecraft.entity.attribute.EntityAttributeModifier.Operation;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.resource.ResourceType;
 import net.minecraft.tag.Tag;
 import net.minecraft.util.Identifier;
+
+import java.util.UUID;
+
+import com.google.common.collect.Multimap;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -29,14 +37,18 @@ public class TrinketsMain implements ModInitializer, EntityComponentInitializer 
 
 	@Override
 	public void onInitialize() {
+		registerDefaultPredicates();
 		ResourceManagerHelper resourceManagerHelper = ResourceManagerHelper.get(ResourceType.SERVER_DATA);
 		resourceManagerHelper.registerReloadListener(SlotLoader.INSTANCE);
 		resourceManagerHelper.registerReloadListener(EntitySlotLoader.INSTANCE);
 		TrinketsApi.registerTrinket(Items.DIAMOND, new Trinket() {
-			
+
 			@Override
-			public boolean canEquip(ItemStack stack, SlotReference slot, LivingEntity entity) {
-				return true;
+			public Multimap<EntityAttribute, EntityAttributeModifier> getModifiers(ItemStack stack, SlotReference slot,
+					LivingEntity entity, UUID uuid) {
+				Multimap<EntityAttribute, EntityAttributeModifier> map = Trinket.super.getModifiers(stack, slot, entity, uuid);
+				map.put(EntityAttributes.GENERIC_MAX_HEALTH, new EntityAttributeModifier(uuid, "Max health", 10.0d, Operation.ADDITION));
+				return map;
 			}
 		});
 	}

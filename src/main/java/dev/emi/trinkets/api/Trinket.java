@@ -3,6 +3,8 @@ package dev.emi.trinkets.api;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import java.util.Optional;
+import java.util.UUID;
+
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.EntityAttribute;
@@ -48,9 +50,10 @@ public interface Trinket {
 	/**
 	 * Returns the Entity Attribute Modifiers for a stack in a slot. Child implementations should
 	 * remain pure
+	 * @param uuid The UUID to use for creating attributes
 	 */
 	public default Multimap<EntityAttribute, EntityAttributeModifier> getModifiers(ItemStack stack,
-			SlotReference slot, LivingEntity entity) {
+			SlotReference slot, LivingEntity entity, UUID uuid) {
 		Multimap<EntityAttribute, EntityAttributeModifier> map = HashMultimap.create();
 		if (stack.hasTag() && stack.getTag().contains("TrinketAttributeModifiers", 9)) {
 			ListTag list = stack.getTag().getList("TrinketAttributeModifiers", 10);
@@ -85,7 +88,7 @@ public interface Trinket {
 
 	public static class SlotReference {
 		public SlotType slot;
-		public int index; 
+		public int index;
 
 		public SlotReference(SlotType slot, int index) {
 			this.slot = slot;

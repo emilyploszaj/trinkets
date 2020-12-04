@@ -24,8 +24,8 @@ public class TrinketFeatureRenderer extends FeatureRenderer<AbstractClientPlayer
 	}
 
 	@Override
-	public void render(MatrixStack matrixStack, VertexConsumerProvider vertexConsumer, int light, AbstractClientPlayerEntity player, float a, float b, float c, float d,
-			float headYaw, float headPitch) {
+	public void render(MatrixStack matrices, VertexConsumerProvider vertexConsumer, int light, AbstractClientPlayerEntity player, float limbAngle,
+			float limbDistance, float tickDelta, float animationProgress, float headYaw, float headPitch) {
 		TrinketsApi.getTrinketComponent(player).ifPresent(trinkets -> {
 			TrinketInventory inv = trinkets.getInventory();
 
@@ -33,10 +33,10 @@ public class TrinketFeatureRenderer extends FeatureRenderer<AbstractClientPlayer
 				ItemStack stack = inv.getStack(i);
 				Pair<SlotType, Integer> p = inv.posMap.get(i);
 				TrinketRendererRegistry.getRenderer(stack.getItem()).ifPresent(renderer -> {
-					matrixStack.push();
-					renderer.render(stack, new Trinket.SlotReference(p.getLeft(), p.getRight()), matrixStack, vertexConsumer, light, context.getModel(), player,
-							headYaw, headPitch);
-					matrixStack.pop();
+					matrices.push();
+					renderer.render(stack, new Trinket.SlotReference(p.getLeft(), p.getRight()), matrices, vertexConsumer, light, context.getModel(), player,
+							limbAngle, limbDistance, tickDelta, animationProgress, headYaw, headPitch);
+					matrices.pop();
 				});
 			}
 		});
