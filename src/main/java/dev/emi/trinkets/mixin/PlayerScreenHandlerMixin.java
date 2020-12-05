@@ -14,6 +14,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import dev.emi.trinkets.TrinketPlayerScreenHandler;
 import dev.emi.trinkets.TrinketSlot;
 import dev.emi.trinkets.TrinketsClient;
 import dev.emi.trinkets.api.SlotGroup;
@@ -39,15 +40,15 @@ import net.minecraft.util.Pair;
  * @author Emi
  */
 @Mixin(PlayerScreenHandler.class)
-public abstract class PlayerScreenHandlerMixin extends ScreenHandler {
+public abstract class PlayerScreenHandlerMixin extends ScreenHandler implements TrinketPlayerScreenHandler {
 
 	@Shadow @Final
 	private PlayerEntity owner;
 
 	// TODO store this exclusively in the screen handler and mixin an interface to get it from the screen
-	private Map<SlotGroup, Pair<Integer, Integer>> slotPos = new HashMap<SlotGroup, Pair<Integer, Integer>>();
-	public int trinketSlotStart;
-	public int trinketSlotEnd;
+	private Map<SlotGroup, Pair<Integer, Integer>> groupPos = new HashMap<SlotGroup, Pair<Integer, Integer>>();
+	public int trinketSlotStart = 0;
+	public int trinketSlotEnd = 0;
 
 	protected PlayerScreenHandlerMixin(ScreenHandlerType<?> type, int syncId) {
 		super(type, syncId);
@@ -55,6 +56,16 @@ public abstract class PlayerScreenHandlerMixin extends ScreenHandler {
 
 	@Inject(at = @At("RETURN"), method = "<init>")
 	public void init(PlayerInventory playerInv, boolean onServer, PlayerEntity owner, CallbackInfo info) {
+		updateTrinketSlots();
+	}
+
+	@Override
+	public void updateTrinketSlots() {
+		groupPos.clear();
+		while (trinketSlotStart < trinketSlotEnd) {
+			slots.remove(trinketSlotStart);
+			trinketSlotEnd--;
+		}
 		Map<Integer, SlotGroup> ids = new HashMap<Integer, SlotGroup>(); 
 		for (SlotGroup group : TrinketsApi.getPlayerSlots().values()) {
 			if (group.getSlotId() != -1) {
@@ -63,16 +74,16 @@ public abstract class PlayerScreenHandlerMixin extends ScreenHandler {
 		}
 		for (Slot slot : this.slots) {
 			if (ids.containsKey(slot.id) && slot.inventory instanceof PlayerInventory) {
-				slotPos.put(ids.get(slot.id), new Pair<Integer, Integer>(slot.x, slot.y));
+				groupPos.put(ids.get(slot.id), new Pair<Integer, Integer>(slot.x, slot.y));
 			}
 		}
 		int groupNum = 1; // Start at 1 because offhand exists
 		if (TrinketsApi.getPlayerSlots().containsKey("hand")) { // Hardcode the hand slot group to always be above the offhand, if it exists
 			groupNum++;
-			slotPos.put(TrinketsApi.getPlayerSlots().get("hand"), new Pair<Integer, Integer>(77, 44));
+			groupPos.put(TrinketsApi.getPlayerSlots().get("hand"), new Pair<Integer, Integer>(77, 44));
 		}
 		for (SlotGroup group : TrinketsApi.getPlayerSlots().values()) {
-			if (!slotPos.containsKey(group)) {
+			if (!groupPos.containsKey(group)) {
 				int x = 77;
 				int y = 0;
 				if (groupNum >= 4) {
@@ -81,7 +92,7 @@ public abstract class PlayerScreenHandlerMixin extends ScreenHandler {
 				} else {
 					y = 62 - x * 18;
 				}
-				slotPos.put(group, new Pair<Integer, Integer>(x, y));
+				groupPos.put(group, new Pair<Integer, Integer>(x, y));
 			}
 		}
 		trinketSlotStart = slots.size();
@@ -98,11 +109,16 @@ public abstract class PlayerScreenHandlerMixin extends ScreenHandler {
 				}
 				groupPos = groupPos - groupAmount / 2;
 				if (group.getSlotId() != -1 && groupPos >= 0) groupPos++;
-				Pair<Integer, Integer> pos = slotPos.get(group);
+				Pair<Integer, Integer> pos = getGroupPos(group);
 				this.addSlot(new TrinketSlot(inv, i, pos.getLeft() + groupPos * 18, pos.getRight(), group, p.getLeft(), p.getRight(), groupPos == 0, p.getRight() == 0));
 			}
 		});
 		trinketSlotEnd = slots.size();
+	}
+	
+	@Override
+	public Pair<Integer, Integer> getGroupPos(SlotGroup group) {
+		return groupPos.get(group);
 	}
 
 	@Inject(at = @At("HEAD"), method = "close")
