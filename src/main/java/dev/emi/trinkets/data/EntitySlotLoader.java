@@ -8,21 +8,32 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import dev.emi.trinkets.TrinketsMain;
+import dev.emi.trinkets.TrinketsNetwork;
 import dev.emi.trinkets.api.SlotGroup;
 import dev.emi.trinkets.data.SlotLoader.GroupData;
 import dev.emi.trinkets.data.SlotLoader.SlotData;
+import io.netty.buffer.Unpooled;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import net.fabricmc.fabric.api.network.ServerSidePacketRegistry;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.resource.SinglePreparationResourceReloadListener;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.PlayerManager;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.JsonHelper;
 import net.minecraft.util.profiler.Profiler;
@@ -35,7 +46,7 @@ public class EntitySlotLoader extends SinglePreparationResourceReloadListener<Ma
 	private static final Gson GSON = (new GsonBuilder()).setPrettyPrinting().disableHtmlEscaping().create();
 	private static final Identifier ID = new Identifier(TrinketsMain.MOD_ID, "entities");
 
-	private Map<EntityType<?>, Map<String, SlotGroup>> slots = new HashMap<>();
+	private final Map<EntityType<?>, Map<String, SlotGroup>> slots = new HashMap<>();
 
 	@Override
 	protected Map<String, Map<String, Set<String>>> prepare(ResourceManager resourceManager, Profiler profiler) {
@@ -148,6 +159,37 @@ public class EntitySlotLoader extends SinglePreparationResourceReloadListener<Ma
 			return ImmutableMap.copyOf(this.slots.get(entityType));
 		}
 		return ImmutableMap.of();
+	}
+
+	public void setSlots(Map<EntityType<?>, Map<String, SlotGroup>> slots) {
+		this.slots.clear();
+		this.slots.putAll(slots);
+	}
+
+	public void sync(PlayerEntity playerEntity) {
+		PacketByteBuf buf = getSlotsPacket();
+		ServerSidePacketRegistry.INSTANCE.sendToPlayer(playerEntity, TrinketsNetwork.SYNC_SLOTS, buf);
+	}
+
+	public void sync(List<? extends PlayerEntity> players) {
+		PacketByteBuf buf = getSlotsPacket();
+		players.forEach(player -> ServerSidePacketRegistry.INSTANCE.sendToPlayer(player, TrinketsNetwork.SYNC_SLOTS, buf));
+	}
+
+	private PacketByteBuf getSlotsPacket() {
+		CompoundTag tag = new CompoundTag();
+		this.slots.forEach((entity, slotMap) -> {
+			CompoundTag slotsTag = new CompoundTag();
+			slotMap.forEach((id, slotGroup) -> {
+				CompoundTag groupTag = new CompoundTag();
+				slotGroup.write(groupTag);
+				slotsTag.put(id, groupTag);
+			});
+			tag.put(Registry.ENTITY_TYPE.getId(entity).toString(), slotsTag);
+		});
+		PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
+		buf.writeCompoundTag(tag);
+		return buf;
 	}
 
 	@Override

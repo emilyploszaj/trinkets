@@ -9,6 +9,7 @@ import dev.onyxstudios.cca.api.v3.entity.EntityComponentFactoryRegistry;
 import dev.onyxstudios.cca.api.v3.entity.EntityComponentInitializer;
 import nerdhub.cardinal.components.api.util.RespawnCopyStrategy;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.util.TriState;
 import net.minecraft.entity.LivingEntity;
@@ -20,6 +21,8 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.resource.ResourceType;
+import net.minecraft.resource.ServerResourceManager;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.tag.Tag;
 import net.minecraft.util.Identifier;
 
@@ -41,6 +44,8 @@ public class TrinketsMain implements ModInitializer, EntityComponentInitializer 
 		ResourceManagerHelper resourceManagerHelper = ResourceManagerHelper.get(ResourceType.SERVER_DATA);
 		resourceManagerHelper.registerReloadListener(SlotLoader.INSTANCE);
 		resourceManagerHelper.registerReloadListener(EntitySlotLoader.INSTANCE);
+		ServerLifecycleEvents.END_DATA_PACK_RELOAD.register(
+			(server, serverResourceManager, success) -> EntitySlotLoader.INSTANCE.sync(server.getPlayerManager().getPlayerList()));
 		TrinketsApi.registerTrinket(Items.DIAMOND, new Trinket() {
 
 			@Override
