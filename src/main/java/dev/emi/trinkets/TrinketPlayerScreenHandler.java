@@ -9,7 +9,7 @@ import net.minecraft.util.Pair;
 public interface TrinketPlayerScreenHandler {
 	
 	/**
-	 * Called to inform the player's slot handler that it needs to remove and readd its trinket slots to reflect new changes
+	 * Called to inform the player's slot handler that it needs to remove and re-add its trinket slots to reflect new changes
 	 */
 	public void updateTrinketSlots();
 

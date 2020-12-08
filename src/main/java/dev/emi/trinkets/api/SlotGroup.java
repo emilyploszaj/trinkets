@@ -3,6 +3,8 @@ package dev.emi.trinkets.api;
 import com.google.common.collect.ImmutableMap;
 import java.util.HashMap;
 import java.util.Map;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 
 public final class SlotGroup {
 
@@ -32,6 +34,40 @@ public final class SlotGroup {
 
 	public Map<String, SlotType> getSlots() {
 		return ImmutableMap.copyOf(slots);
+	}
+
+	public void write(CompoundTag data) {
+		CompoundTag tag = new CompoundTag();
+		tag.putString("Name", name);
+		tag.putString("DefaultSlot", defaultSlot);
+		tag.putInt("SlotId", slotId);
+		CompoundTag typesTag = new CompoundTag();
+
+		slots.forEach((id, slot) -> {
+			CompoundTag typeTag = new CompoundTag();
+			slot.write(typeTag);
+			typesTag.put(id, typeTag);
+		});
+		tag.put("SlotTypes", typesTag);
+		data.put("GroupData", tag);
+	}
+
+	public static SlotGroup read(CompoundTag data) {
+		CompoundTag groupData = data.getCompound("GroupData");
+		String name = groupData.getString("Name");
+		String defaultSlot = groupData.getString("DefaultSlot");
+		int slotId = groupData.getInt("SlotId");
+		CompoundTag typesTag = groupData.getCompound("SlotTypes");
+		Builder builder = defaultSlot.isEmpty() ? new Builder(name, slotId) : new Builder(name, defaultSlot);
+
+		for (String id : typesTag.getKeys()) {
+			CompoundTag tag = (CompoundTag) typesTag.get(id);
+
+			if (tag != null) {
+				builder.addSlot(id, SlotType.read(tag));
+			}
+		}
+		return builder.build();
 	}
 
 	public static class Builder {
