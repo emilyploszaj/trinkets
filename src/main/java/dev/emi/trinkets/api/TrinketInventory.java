@@ -12,7 +12,7 @@ import net.minecraft.util.collection.DefaultedList;
 public class TrinketInventory implements Inventory {
 
 	public LivingEntityTrinketComponent component;
-	public DefaultedList<ItemStack> stacks;
+	public DefaultedList<ItemStack> stacks = DefaultedList.of();
 	// This is a really weird solution to the problem of quickly getting slot info, I plan on changing it to something more reasonable
 	public Map<SlotType, Integer> slotMap = new HashMap<SlotType, Integer>();
 	public Map<SlotType, Integer> groupOffsetMap = new HashMap<SlotType, Integer>();
@@ -24,7 +24,11 @@ public class TrinketInventory implements Inventory {
 
 	public TrinketInventory(LivingEntityTrinketComponent comp) {
 		this.component = comp;
-		Map<String, SlotGroup> groups = TrinketsApi.getEntitySlots(comp.entity.getType());
+		this.update();
+	}
+
+	public void update() {
+		Map<String, SlotGroup> groups = TrinketsApi.getEntitySlots(component.entity.getType());
 		int i = 0;
 		for (Map.Entry<String, SlotGroup> group : groups.entrySet()) {
 			int groupOffset = 0;
@@ -33,7 +37,7 @@ public class TrinketInventory implements Inventory {
 				slotMap.put(slot.getValue(), i);
 				groupOffsetMap.put(slot.getValue(), groupOffset);
 				for (int j = 0; j < slot.getValue().getAmount(); j++) {
-					posMap.put(i + j, new Pair<SlotType, Integer>(slot.getValue(), j));
+					posMap.put(i + j, new Pair<>(slot.getValue(), j));
 				}
 				i += slot.getValue().getAmount();
 				groupOffset += slot.getValue().getAmount();
@@ -41,7 +45,17 @@ public class TrinketInventory implements Inventory {
 			groupOccupancyMap.put(group.getValue(), groupOffset);
 		}
 		size = i;
-		stacks = DefaultedList.ofSize(size, ItemStack.EMPTY);
+		DefaultedList<ItemStack> newStacks = DefaultedList.ofSize(size, ItemStack.EMPTY);
+		int k = 0;
+		for (; k < stacks.size(); k++) {
+
+			if (k < newStacks.size()) {
+				newStacks.set(k, stacks.get(k));
+			} else {
+				component.entity.dropStack(stacks.get(k));
+			}
+		}
+		stacks = newStacks;
 	}
 
 	@Override

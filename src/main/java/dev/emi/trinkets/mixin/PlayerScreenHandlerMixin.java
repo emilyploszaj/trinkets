@@ -1,5 +1,6 @@
 package dev.emi.trinkets.mixin;
 
+import dev.emi.trinkets.TrinketsMain;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -98,6 +99,7 @@ public abstract class PlayerScreenHandlerMixin extends ScreenHandler implements 
 		trinketSlotStart = slots.size();
 		TrinketsApi.getTrinketComponent(owner).ifPresent(trinkets -> {
 			TrinketInventory inv = trinkets.getInventory();
+			inv.update();
 			for (int i = 0; i < inv.size(); i++) {
 				Pair<SlotType, Integer> p = inv.posMap.get(i);
 				SlotGroup group = TrinketsApi.getPlayerSlots().get(p.getLeft().getGroup());
