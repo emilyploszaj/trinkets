@@ -10,6 +10,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import dev.emi.trinkets.TrinketPlayerScreenHandler;
 import dev.emi.trinkets.TrinketsClient;
@@ -28,6 +29,8 @@ import net.minecraft.util.Pair;
 
 /**
  * Draws trinket slot group borders and handles active group logic
+ * 
+ * @author Emi
  */
 @Mixin(InventoryScreen.class)
 public abstract class InventoryScreenMixin extends AbstractInventoryScreen<PlayerScreenHandler> implements RecipeBookProvider {
@@ -92,7 +95,11 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreen<Playe
 					currentBound = new Rect2i(0, 0, 0, 0);
 				} else {
 					int l = (slotsWidth - 1) / 2 * 18;
-					currentBound = new Rect2i(r.getX() - l - 4, r.getY() - 4, slotsWidth * 18 + 8, 26);
+					if (slotsWidth > 1) {
+						currentBound = new Rect2i(r.getX() - l - 5, r.getY() - 5, slotsWidth * 18 + 8, 26);
+					} else {
+						currentBound = new Rect2i(r.getX() - l, r.getY(), 18, 18);
+					}
 				}
 			}
 		}
@@ -136,12 +143,23 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreen<Playe
 		int x = pos.getLeft() - 5 - (slotsWidth - 1) / 2 * 18;
 		int y = pos.getRight() - 5;
 		this.client.getTextureManager().bindTexture(MORE_SLOTS);
-		drawTexture(matrices, x, y, 0, 0, 4, 26);
-		for (int i = 0; i < slotsWidth; i++) {
-			drawTexture(matrices, x + i * 18 + 4, y, 4, 0, 18, 26);
+		if (slotsWidth > 1) {
+			drawTexture(matrices, x, y, 0, 0, 4, 26);
+			for (int i = 0; i < slotsWidth; i++) {
+				drawTexture(matrices, x + i * 18 + 4, y, 4, 0, 18, 26);
+			}
+			drawTexture(matrices, x + slotsWidth * 18 + 4, y, 22, 0, 4, 26);
+		} else {
+			drawTexture(matrices, x + 4, y + 4, 4, 4, 18, 18);
 		}
-		drawTexture(matrices, x + slotsWidth * 18 + 4, y, 22, 0, 4, 26);
 		this.setZOffset(0);
 		RenderSystem.disableDepthTest();
+	}
+
+	@Inject(at = @At("HEAD"), method = "isClickOutsideBounds", cancellable = true)
+	protected void isClickOutsideBounds(double mouseX, double mouseY, int left, int top, int button, CallbackInfoReturnable<Boolean> info) {
+		if (currentBound.contains((int) (Math.round(mouseX) - x), (int) (Math.round(mouseY) - y))) {
+			info.setReturnValue(false);
+		}
 	}
 }

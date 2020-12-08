@@ -4,10 +4,10 @@ A data-driven accessory mod for Minecraft using Fabric.
 ![Image of the Trinkets UI](https://i.imgur.com/CgWhc5a.png)
 
 ## About
-Trinkets adds a slot group and slot system to Minecraft. Slot groups are collections of slots for a certain body part. By default there are 6 slot groups (head, chest, legs, feet, offhand, hand) that can have slots added to them, but more groups can be added if desired. By itself, Trinkets only implements one slot (chest:cape) and reimplements the elytra to use this slot, mods are responsible for adding any slots they plan on using.
+Trinkets adds a slot group and slot system to Minecraft. Slot groups are collections of slots for a certain body part. By default there are 6 slot groups (head, chest, legs, feet, offhand, hand) that can have slots added to them, but more groups can be added if desired.
 
 ## Suggested Slots
-If you're a developer using Trinkets for your mod, here is the list of slots I suggest you use before creating new ones. These slots are not enabled by default but have textures provided by Trinkets and should be used for the most compatibility between mods. This list will be added to and modified over time.
+If you're a developer using Trinkets for your mod, here is the list of slots I suggest you use before creating new ones. These slots are provided by default but not enabled, and can be added very easily.
 
 | Slot | Examples | Texture identifier
 | --- | --- | --- |
@@ -28,16 +28,12 @@ repositories {
 	maven {
 		url = "https://jitpack.io"
 	}
-	maven {
-		name = "NerdHubMC"
-		url = "https://maven.abusedmaster.xyz/"
-	}
 }
 ```
 And then to add Trinkets you add it as a dependency in your build.gradle
 ```
 dependencies {
-	modImplementation "com.github.emilyploszaj:trinkets:${trinkets_version}"
+	modImplementation "com.github.emilyalexandra:trinkets:${trinkets_version}"
 }
 ```
 All you need to get started with Trinkets is to register a slot and add an item to the game that extends `TrinketItem`, here is a short example:

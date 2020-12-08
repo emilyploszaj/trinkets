@@ -1,6 +1,5 @@
 package dev.emi.trinkets.mixin;
 
-import dev.emi.trinkets.TrinketsMain;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -88,12 +87,13 @@ public abstract class PlayerScreenHandlerMixin extends ScreenHandler implements 
 				int x = 77;
 				int y = 0;
 				if (groupNum >= 4) {
-					x = -4 - (x / 4) * 18;
-					y = 7 + (x % 4) * 18;
+					x = -4 - (groupNum / 4) * 18;
+					y = 7 + (groupNum % 4) * 18;
 				} else {
-					y = 62 - x * 18;
+					y = 62 - groupNum * 18;
 				}
 				groupPos.put(group, new Pair<Integer, Integer>(x, y));
+				groupNum++;
 			}
 		}
 		trinketSlotStart = slots.size();

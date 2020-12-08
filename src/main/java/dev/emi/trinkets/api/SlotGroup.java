@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableMap;
 import java.util.HashMap;
 import java.util.Map;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
 
 public final class SlotGroup {
 

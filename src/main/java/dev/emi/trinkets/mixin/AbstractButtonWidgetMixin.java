@@ -15,6 +15,8 @@ import net.minecraft.client.util.math.MatrixStack;
 
 /**
  * Makes buttons uninteractable while trinket groups are being interacted with
+ * 
+ * @author Emi
  */
 @Mixin(AbstractButtonWidget.class)
 public class AbstractButtonWidgetMixin {

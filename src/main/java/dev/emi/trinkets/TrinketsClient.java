@@ -12,7 +12,6 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
@@ -50,7 +49,8 @@ public class TrinketsClient implements ClientModInitializer {
 				}
 				packetContext.getTaskQueue().execute(() -> {
 					EntitySlotLoader.INSTANCE.setSlots(slots);
-					ClientPlayerEntity playerEntity = MinecraftClient.getInstance().player;
+					MinecraftClient client = MinecraftClient.getInstance();
+					ClientPlayerEntity playerEntity = client.player;
 
 					if (playerEntity != null) {
 						((TrinketPlayerScreenHandler) playerEntity.playerScreenHandler).updateTrinketSlots();

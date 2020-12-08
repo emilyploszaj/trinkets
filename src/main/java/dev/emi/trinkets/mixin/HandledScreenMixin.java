@@ -22,6 +22,8 @@ import net.minecraft.util.Identifier;
 
 /**
  * Draws trinket slot backs, adjusts z location of draw calls, and makes non-trinket slots un-interactable while a trinket slot group is focused
+ * 
+ * @author Emi
  */
 @Mixin(HandledScreen.class)
 public abstract class HandledScreenMixin extends Screen {

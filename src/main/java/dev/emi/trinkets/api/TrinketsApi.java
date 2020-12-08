@@ -81,7 +81,8 @@ public class TrinketsApi {
 		});
 		TrinketsApi.registerValidatorPredicate(new Identifier(TrinketsMain.MOD_ID, "tag"), (stack, slot, entity) -> {
 			Tag<Item> tag = entity.world.getTagManager().getItems().getTagOrEmpty(new Identifier("trinkets", slot.slot.getGroup() + "/" + slot.slot.getName()));
-			if (tag.contains(stack.getItem())) {
+			Tag<Item> all = entity.world.getTagManager().getItems().getTagOrEmpty(new Identifier("trinkets", "all"));
+			if (tag.contains(stack.getItem()) || all.contains(stack.getItem())) {
 				return TriState.TRUE;
 			}
 			return TriState.DEFAULT;
