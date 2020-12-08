@@ -153,7 +153,7 @@ public abstract class PlayerScreenHandlerMixin extends ScreenHandler implements 
 						SlotReference ref = new SlotReference(type, pair.getRight());
 						TriState state = TriState.DEFAULT;
 						for (Identifier id : type.getValidators()) {
-							Optional<Function3<ItemStack, SlotReference, LivingEntity, TriState>> function = TrinketsApi.getValidatorPredicator(id);
+							Optional<Function3<ItemStack, SlotReference, LivingEntity, TriState>> function = TrinketsApi.getValidatorPredicate(id);
 							if (function.isPresent()) {
 								state = function.get().apply(stack, ref, owner);
 							}

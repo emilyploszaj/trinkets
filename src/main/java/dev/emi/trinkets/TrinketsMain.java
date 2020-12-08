@@ -10,18 +10,14 @@ import dev.onyxstudios.cca.api.v3.entity.EntityComponentInitializer;
 import nerdhub.cardinal.components.api.util.RespawnCopyStrategy;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
-import net.fabricmc.fabric.api.util.TriState;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.attribute.EntityAttributeModifier.Operation;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.resource.ResourceType;
-import net.minecraft.tag.Tag;
-import net.minecraft.util.Identifier;
 
 import java.util.UUID;
 
@@ -37,7 +33,6 @@ public class TrinketsMain implements ModInitializer, EntityComponentInitializer 
 
 	@Override
 	public void onInitialize() {
-		registerDefaultPredicates();
 		ResourceManagerHelper resourceManagerHelper = ResourceManagerHelper.get(ResourceType.SERVER_DATA);
 		resourceManagerHelper.registerReloadListener(SlotLoader.INSTANCE);
 		resourceManagerHelper.registerReloadListener(EntitySlotLoader.INSTANCE);
@@ -50,28 +45,6 @@ public class TrinketsMain implements ModInitializer, EntityComponentInitializer 
 				map.put(EntityAttributes.GENERIC_MAX_HEALTH, new EntityAttributeModifier(uuid, "Max health", 10.0d, Operation.ADDITION));
 				return map;
 			}
-		});
-	}
-
-	public void registerDefaultPredicates() {
-		TrinketsApi.registerQuickMovePredicate(new Identifier(MOD_ID, "always"), (stack, slot, entity) -> {
-			return TriState.TRUE;
-		});
-		TrinketsApi.registerQuickMovePredicate(new Identifier(MOD_ID, "never"), (stack, slot, entity) -> {
-			return TriState.FALSE;
-		});
-		TrinketsApi.registerValidatorPredicate(new Identifier(MOD_ID, "tag"), (stack, slot, entity) -> {
-			Tag<Item> tag = entity.world.getTagManager().getItems().getTagOrEmpty(new Identifier("trinkets", slot.slot.getGroup() + "/" + slot.slot.getName()));
-			if (tag.contains(stack.getItem())) {
-				return TriState.TRUE;
-			}
-			return TriState.DEFAULT;
-		});
-		TrinketsApi.registerValidatorPredicate(new Identifier(MOD_ID, "all"), (stack, slot, entity) -> {
-			return TriState.TRUE;
-		});
-		TrinketsApi.registerValidatorPredicate(new Identifier(MOD_ID, "none"), (stack, slot, entity) -> {
-			return TriState.FALSE;
 		});
 	}
 
