@@ -20,6 +20,6 @@ public class PlayerManagerMixin {
 
 	@Inject(at = @At("TAIL"), method = "onPlayerConnect")
 	public void onPlayerConnect(ClientConnection connection, ServerPlayerEntity player, CallbackInfo cb) {
-      EntitySlotLoader.INSTANCE.sync(player);
+		EntitySlotLoader.INSTANCE.sync(player);
 	}
 }
