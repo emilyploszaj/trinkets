@@ -45,7 +45,6 @@ public abstract class PlayerScreenHandlerMixin extends ScreenHandler implements 
 	@Shadow @Final
 	private PlayerEntity owner;
 
-	// TODO store this exclusively in the screen handler and mixin an interface to get it from the screen
 	private Map<SlotGroup, Pair<Integer, Integer>> groupPos = new HashMap<SlotGroup, Pair<Integer, Integer>>();
 	public int trinketSlotStart = 0;
 	public int trinketSlotEnd = 0;
