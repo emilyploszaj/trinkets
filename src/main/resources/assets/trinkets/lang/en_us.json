@@ -1,4 +1,9 @@
 {
+	"trinkets.tooltip.slots.any" : "Equippable in §9any§r trinket slot",
+	"trinkets.tooltip.slots.list" : "Equippable in the trinket slots:",
+	"trinkets.tooltip.slots.single" : "Equippable in the %d trinket slot",
+	"trinkets.tooltip.attributes.all" : "When equipped:",
+	"trinkets.tooltip.attributes.single" : "When equipped in the %d trinket slot:",
 	"trinkets.slot.head.mask": "Mask",
 	"trinkets.slot.chest.necklace": "Necklace",
 	"trinkets.slot.chest.backpack": "Backpack",

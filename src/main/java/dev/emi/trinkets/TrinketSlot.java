@@ -57,7 +57,7 @@ public class TrinketSlot extends Slot {
 		SlotReference reference = new SlotReference(type, slotOffset);
 		TriState state = TriState.DEFAULT;
 		for (Identifier id : type.getValidators()) {
-			Optional<Function3<ItemStack, SlotReference, LivingEntity, TriState>> function = TrinketsApi.getValidatorPredicator(id);
+			Optional<Function3<ItemStack, SlotReference, LivingEntity, TriState>> function = TrinketsApi.getValidatorPredicate(id);
 			if (function.isPresent()) {
 				state = function.get().apply(stack, reference, entity);
 			}
@@ -66,7 +66,7 @@ public class TrinketSlot extends Slot {
 			}
 		}
 		if (state == TriState.DEFAULT) {
-			state = TrinketsApi.getValidatorPredicator(new Identifier("trinkets", "tag")).get().apply(stack, reference, entity);
+			state = TrinketsApi.getValidatorPredicate(new Identifier("trinkets", "tag")).get().apply(stack, reference, entity);
 		}
 		if (state.get()) {
 			Optional<Trinket> trinket = TrinketsApi.getTrinket(stack.getItem());

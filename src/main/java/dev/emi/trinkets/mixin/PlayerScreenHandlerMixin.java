@@ -1,6 +1,5 @@
 package dev.emi.trinkets.mixin;
 
-import dev.emi.trinkets.TrinketsMain;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -46,7 +45,6 @@ public abstract class PlayerScreenHandlerMixin extends ScreenHandler implements 
 	@Shadow @Final
 	private PlayerEntity owner;
 
-	// TODO store this exclusively in the screen handler and mixin an interface to get it from the screen
 	private Map<SlotGroup, Pair<Integer, Integer>> groupPos = new HashMap<SlotGroup, Pair<Integer, Integer>>();
 	public int trinketSlotStart = 0;
 	public int trinketSlotEnd = 0;
@@ -88,12 +86,13 @@ public abstract class PlayerScreenHandlerMixin extends ScreenHandler implements 
 				int x = 77;
 				int y = 0;
 				if (groupNum >= 4) {
-					x = -4 - (x / 4) * 18;
-					y = 7 + (x % 4) * 18;
+					x = -4 - (groupNum / 4) * 18;
+					y = 7 + (groupNum % 4) * 18;
 				} else {
-					y = 62 - x * 18;
+					y = 62 - groupNum * 18;
 				}
 				groupPos.put(group, new Pair<Integer, Integer>(x, y));
+				groupNum++;
 			}
 		}
 		trinketSlotStart = slots.size();
@@ -155,7 +154,7 @@ public abstract class PlayerScreenHandlerMixin extends ScreenHandler implements 
 						SlotReference ref = new SlotReference(type, pair.getRight());
 						TriState state = TriState.DEFAULT;
 						for (Identifier id : type.getValidators()) {
-							Optional<Function3<ItemStack, SlotReference, LivingEntity, TriState>> function = TrinketsApi.getValidatorPredicator(id);
+							Optional<Function3<ItemStack, SlotReference, LivingEntity, TriState>> function = TrinketsApi.getValidatorPredicate(id);
 							if (function.isPresent()) {
 								state = function.get().apply(stack, ref, owner);
 							}

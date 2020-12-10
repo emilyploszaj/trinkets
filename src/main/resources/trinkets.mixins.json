@@ -12,7 +12,8 @@
 		"InventoryScreenMixin",
 		"HandledScreenMixin",
 		"PlayerEntityRendererMixin",
-		"AbstractButtonWidgetMixin"
+		"AbstractButtonWidgetMixin",
+		"ItemStackMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
