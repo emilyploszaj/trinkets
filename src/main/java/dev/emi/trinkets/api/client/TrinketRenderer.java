@@ -5,8 +5,8 @@ import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.model.PlayerEntityModel;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.client.util.math.Vector3f;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.math.Vec3f;
 
 public interface TrinketRenderer {
 	public static final float MAGIC_ROTATION = 180f / (float) Math.PI;
@@ -22,16 +22,16 @@ public interface TrinketRenderer {
 			float headPitch) {
 
 		if (player.isInSwimmingPose() || player.isFallFlying()) {
-			matrices.multiply(Vector3f.POSITIVE_Z.getDegreesQuaternion(model.head.roll));
-			matrices.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(headYaw));
-			matrices.multiply(Vector3f.POSITIVE_X.getDegreesQuaternion(-45.0F));
+			matrices.multiply(Vec3f.POSITIVE_Z.getDegreesQuaternion(model.head.roll));
+			matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(headYaw));
+			matrices.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(-45.0F));
 		} else {
 
 			if (player.isInSneakingPose() && !model.riding) {
 				matrices.translate(0.0F, 0.25F, 0.0F);
 			}
-			matrices.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(headYaw));
-			matrices.multiply(Vector3f.POSITIVE_X.getDegreesQuaternion(headPitch));
+			matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(headYaw));
+			matrices.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(headPitch));
 		}
 		matrices.translate(0.0F, -0.25F, -0.3F);
 	}
@@ -43,9 +43,9 @@ public interface TrinketRenderer {
 
 		if (player.isInSneakingPose() && !model.riding && !player.isSwimming()) {
 			matrices.translate(0.0F, 0.2F, 0.0F);
-			matrices.multiply(Vector3f.POSITIVE_X.getDegreesQuaternion(model.torso.pitch * MAGIC_ROTATION));
+			matrices.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(model.body.pitch * MAGIC_ROTATION));
 		}
-		matrices.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(model.torso.yaw * MAGIC_ROTATION));
+		matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(model.body.yaw * MAGIC_ROTATION));
 		matrices.translate(0.0F, 0.4F, -0.16F);
 	}
 
@@ -57,11 +57,11 @@ public interface TrinketRenderer {
 		if (player.isInSneakingPose() && !model.riding && !player.isSwimming()) {
 			matrices.translate(0.0F, 0.2F, 0.0F);
 		}
-		matrices.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(model.torso.yaw * MAGIC_ROTATION));
+		matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(model.body.yaw * MAGIC_ROTATION));
 		matrices.translate(-0.3125F, 0.15625F, 0.0F);
-		matrices.multiply(Vector3f.POSITIVE_Z.getDegreesQuaternion(model.rightArm.roll * MAGIC_ROTATION));
-		matrices.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(model.rightArm.yaw * MAGIC_ROTATION));
-		matrices.multiply(Vector3f.POSITIVE_X.getDegreesQuaternion(model.rightArm.pitch * MAGIC_ROTATION));
+		matrices.multiply(Vec3f.POSITIVE_Z.getDegreesQuaternion(model.rightArm.roll * MAGIC_ROTATION));
+		matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(model.rightArm.yaw * MAGIC_ROTATION));
+		matrices.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(model.rightArm.pitch * MAGIC_ROTATION));
 		matrices.translate(-0.0625F, 0.625F, 0.0F);
 	}
 
@@ -73,11 +73,11 @@ public interface TrinketRenderer {
 		if (player.isInSneakingPose() && !model.riding && !player.isSwimming()) {
 			matrices.translate(0.0F, 0.2F, 0.0F);
 		}
-		matrices.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(model.torso.yaw * MAGIC_ROTATION));
+		matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(model.body.yaw * MAGIC_ROTATION));
 		matrices.translate(0.3125F, 0.15625F, 0.0F);
-		matrices.multiply(Vector3f.POSITIVE_Z.getDegreesQuaternion(model.leftArm.roll * MAGIC_ROTATION));
-		matrices.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(model.leftArm.yaw * MAGIC_ROTATION));
-		matrices.multiply(Vector3f.POSITIVE_X.getDegreesQuaternion(model.leftArm.pitch * MAGIC_ROTATION));
+		matrices.multiply(Vec3f.POSITIVE_Z.getDegreesQuaternion(model.leftArm.roll * MAGIC_ROTATION));
+		matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(model.leftArm.yaw * MAGIC_ROTATION));
+		matrices.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(model.leftArm.pitch * MAGIC_ROTATION));
 		matrices.translate(0.0625F, 0.625F, 0.0F);
 	}
 
@@ -90,9 +90,9 @@ public interface TrinketRenderer {
 			matrices.translate(0.0F, 0.0F, 0.25F);
 		}
 		matrices.translate(-0.125F, 0.75F, 0.0F);
-		matrices.multiply(Vector3f.POSITIVE_Z.getDegreesQuaternion(model.rightLeg.roll * MAGIC_ROTATION));
-		matrices.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(model.rightLeg.yaw * MAGIC_ROTATION));
-		matrices.multiply(Vector3f.POSITIVE_X.getDegreesQuaternion(model.rightLeg.pitch * MAGIC_ROTATION));
+		matrices.multiply(Vec3f.POSITIVE_Z.getDegreesQuaternion(model.rightLeg.roll * MAGIC_ROTATION));
+		matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(model.rightLeg.yaw * MAGIC_ROTATION));
+		matrices.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(model.rightLeg.pitch * MAGIC_ROTATION));
 		matrices.translate(0.0F, 0.75F, 0.0F);
 	}
 
@@ -105,9 +105,9 @@ public interface TrinketRenderer {
 			matrices.translate(0.0F, 0.0F, 0.25F);
 		}
 		matrices.translate(0.125F, 0.75F, 0.0F);
-		matrices.multiply(Vector3f.POSITIVE_Z.getDegreesQuaternion(model.leftLeg.roll * MAGIC_ROTATION));
-		matrices.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(model.leftLeg.yaw * MAGIC_ROTATION));
-		matrices.multiply(Vector3f.POSITIVE_X.getDegreesQuaternion(model.leftLeg.pitch * MAGIC_ROTATION));
+		matrices.multiply(Vec3f.POSITIVE_Z.getDegreesQuaternion(model.leftLeg.roll * MAGIC_ROTATION));
+		matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(model.leftLeg.yaw * MAGIC_ROTATION));
+		matrices.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(model.leftLeg.pitch * MAGIC_ROTATION));
 		matrices.translate(0.0F, 0.75F, 0.0F);
 	}
 }
