@@ -104,8 +104,10 @@ public class ItemStackMixin {
 			}
 			if (attributes.size() > 0) {
 				if (allAttributesSame) {
-					list.add(new TranslatableText("trinkets.tooltip.attributes.all").formatted(Formatting.GRAY));
-					addAttributes(list, defaultAttribute);
+					if (!defaultAttribute.isEmpty()) {
+						list.add(new TranslatableText("trinkets.tooltip.attributes.all").formatted(Formatting.GRAY));
+						addAttributes(list, defaultAttribute);
+					}
 				} else {
 					for (SlotType type : attributes.keySet()) {
 						if (attributes.get(type).isEmpty()) continue;
