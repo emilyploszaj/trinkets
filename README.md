@@ -37,7 +37,7 @@ repositories {
 And then to add Trinkets you add it as a dependency in your build.gradle
 ```
 dependencies {
-	modImplementation "com.github.emilyploszaj:trinkets:${trinkets_version}"
+	modImplementation "com.github.emilyalexandra:trinkets:${trinkets_version}"
 }
 ```
 All you need to get started with Trinkets is to register a slot and add an item to the game that extends `TrinketItem`, here is a short example:
@@ -75,4 +75,4 @@ public class RingItem extends TrinketItem {
 Something important to note is that trinkets that extend `TrinketItem` will automatically be equippable by dispensers and right click. If you make an item that instead implements the base interface `Trinket`, you will need to add this functionality yourself.
 
 ## Other Information
-For a tutorial on rendering trinkets, visit this repository's [wiki](https://github.com/emilyploszaj/trinkets/wiki/Rendering-Trinkets).
+For a tutorial on rendering trinkets, visit this repository's [wiki](https://github.com/emilyalexandra/trinkets/wiki/Rendering-Trinkets).
