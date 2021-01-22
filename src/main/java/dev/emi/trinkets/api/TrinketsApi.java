@@ -11,11 +11,13 @@ import java.util.Optional;
 
 import com.mojang.datafixers.util.Function3;
 
+import net.fabricmc.fabric.api.tag.TagRegistry;
 import net.fabricmc.fabric.api.util.TriState;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.tag.ItemTags;
 import net.minecraft.tag.Tag;
 import net.minecraft.util.Identifier;
 
@@ -80,8 +82,8 @@ public class TrinketsApi {
 			return TriState.FALSE;
 		});
 		TrinketsApi.registerValidatorPredicate(new Identifier(TrinketsMain.MOD_ID, "tag"), (stack, slot, entity) -> {
-			Tag<Item> tag = entity.world.getTagManager().getItems().getTagOrEmpty(new Identifier("trinkets", slot.slot.getGroup() + "/" + slot.slot.getName()));
-			Tag<Item> all = entity.world.getTagManager().getItems().getTagOrEmpty(new Identifier("trinkets", "all"));
+			Tag<Item> tag = ItemTags.getTagGroup().getTagOrEmpty(new Identifier("trinkets", slot.slot.getGroup() + "/" + slot.slot.getName()));
+			Tag<Item> all = ItemTags.getTagGroup().getTagOrEmpty(new Identifier("trinkets", "all"));
 			if (tag.contains(stack.getItem()) || all.contains(stack.getItem())) {
 				return TriState.TRUE;
 			}
