@@ -11,7 +11,6 @@ import java.util.Optional;
 
 import com.mojang.datafixers.util.Function3;
 
-import net.fabricmc.fabric.api.tag.TagRegistry;
 import net.fabricmc.fabric.api.util.TriState;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
