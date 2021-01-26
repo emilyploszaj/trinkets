@@ -4,6 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.At.Shift;
@@ -27,7 +28,9 @@ import net.minecraft.util.Identifier;
  */
 @Mixin(HandledScreen.class)
 public abstract class HandledScreenMixin extends Screen {
+	@Unique
 	private static final Identifier MORE_SLOTS = new Identifier("trinkets", "textures/gui/more_slots.png");
+	@Unique
 	private static final Identifier BLANK_BACK = new Identifier("trinkets", "textures/gui/blank_back.png");
 
 	protected HandledScreenMixin(Text title) {

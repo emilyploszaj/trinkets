@@ -9,7 +9,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.Vec3f;
 
 public interface TrinketRenderer {
-	public static final float MAGIC_ROTATION = 180f / (float) Math.PI;
+	float MAGIC_ROTATION = 180f / (float) Math.PI;
 
 	void render(ItemStack stack, Trinket.SlotReference slot, MatrixStack matrices, VertexConsumerProvider vertexConsumer, int light,
 			PlayerEntityModel<AbstractClientPlayerEntity> model, AbstractClientPlayerEntity player, float limbAngle, float limbDistance,

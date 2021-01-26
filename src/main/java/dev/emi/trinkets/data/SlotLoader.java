@@ -92,7 +92,7 @@ public class SlotLoader extends SinglePreparationResourceReloadListener<Map<Stri
 
 		private String defaultSlot = "";
 		private int slotId = -1;
-		private Map<String, SlotData> slots = new HashMap<>();
+		private final Map<String, SlotData> slots = new HashMap<>();
 
 		void read(JsonObject jsonObject) {
 			defaultSlot = JsonHelper.getString(jsonObject, "default_slot", defaultSlot);
@@ -116,8 +116,8 @@ public class SlotLoader extends SinglePreparationResourceReloadListener<Map<Stri
 		private int amount = 1;
 		private int locked = 0;
 		private String icon = "";
-		private Set<String> quickMove = new HashSet<>();
-		private Set<String> validators = new HashSet<>();
+		private final Set<String> quickMove = new HashSet<>();
+		private final Set<String> validators = new HashSet<>();
 		private String dropRule = DropRule.DEFAULT.toString();
 
 		SlotType create(String group, String name) {

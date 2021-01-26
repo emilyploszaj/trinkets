@@ -8,7 +8,7 @@ import java.util.function.Predicate;
 
 import dev.emi.trinkets.TrinketsMain;
 import dev.emi.trinkets.api.Trinket.SlotReference;
-import dev.onyxstudios.cca.api.v3.component.AutoSyncedComponent;
+import dev.onyxstudios.cca.api.v3.component.sync.AutoSyncedComponent;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;

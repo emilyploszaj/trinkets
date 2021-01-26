@@ -25,11 +25,11 @@ public class TrinketsApi {
 	public static final ComponentKey<TrinketComponent> TRINKET_COMPONENT = ComponentRegistryV3.INSTANCE
 			.getOrCreate(new Identifier(TrinketsMain.MOD_ID, "trinkets"), TrinketComponent.class);
 	private static final Map<Identifier, Function3<ItemStack, SlotReference, LivingEntity, TriState>> QUICK_MOVE_PREDICATES
-			= new HashMap<Identifier, Function3<ItemStack, SlotReference, LivingEntity, TriState>>(); 
+			= new HashMap<>();
 	private static final Map<Identifier, Function3<ItemStack, SlotReference, LivingEntity, TriState>> VALIDATOR_PREDICATES
-			= new HashMap<Identifier, Function3<ItemStack, SlotReference, LivingEntity, TriState>>(); 
+			= new HashMap<>();
 
-	private static final Map<Item, Trinket> TRINKETS = new HashMap<Item, Trinket>();
+	private static final Map<Item, Trinket> TRINKETS = new HashMap<>();
 
 	public static void registerTrinket(Item item, Trinket trinket) {
 		TRINKETS.put(item, trinket);
@@ -74,12 +74,8 @@ public class TrinketsApi {
 	}
 
 	static {
-		TrinketsApi.registerQuickMovePredicate(new Identifier(TrinketsMain.MOD_ID, "always"), (stack, slot, entity) -> {
-			return TriState.TRUE;
-		});
-		TrinketsApi.registerQuickMovePredicate(new Identifier(TrinketsMain.MOD_ID, "never"), (stack, slot, entity) -> {
-			return TriState.FALSE;
-		});
+		TrinketsApi.registerQuickMovePredicate(new Identifier(TrinketsMain.MOD_ID, "always"), (stack, slot, entity) -> TriState.TRUE);
+		TrinketsApi.registerQuickMovePredicate(new Identifier(TrinketsMain.MOD_ID, "never"), (stack, slot, entity) -> TriState.FALSE);
 		TrinketsApi.registerValidatorPredicate(new Identifier(TrinketsMain.MOD_ID, "tag"), (stack, slot, entity) -> {
 			Tag<Item> tag = ItemTags.getTagGroup().getTagOrEmpty(new Identifier("trinkets", slot.slot.getGroup() + "/" + slot.slot.getName()));
 			Tag<Item> all = ItemTags.getTagGroup().getTagOrEmpty(new Identifier("trinkets", "all"));
@@ -88,11 +84,7 @@ public class TrinketsApi {
 			}
 			return TriState.DEFAULT;
 		});
-		TrinketsApi.registerValidatorPredicate(new Identifier(TrinketsMain.MOD_ID, "all"), (stack, slot, entity) -> {
-			return TriState.TRUE;
-		});
-		TrinketsApi.registerValidatorPredicate(new Identifier(TrinketsMain.MOD_ID, "none"), (stack, slot, entity) -> {
-			return TriState.FALSE;
-		});
+		TrinketsApi.registerValidatorPredicate(new Identifier(TrinketsMain.MOD_ID, "all"), (stack, slot, entity) -> TriState.TRUE);
+		TrinketsApi.registerValidatorPredicate(new Identifier(TrinketsMain.MOD_ID, "none"), (stack, slot, entity) -> TriState.FALSE);
 	}
 }

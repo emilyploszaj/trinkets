@@ -11,7 +11,7 @@ public interface TrinketPlayerScreenHandler {
 	/**
 	 * Called to inform the player's slot handler that it needs to remove and re-add its trinket slots to reflect new changes
 	 */
-	public void updateTrinketSlots();
+	void updateTrinketSlots();
 
-	public Pair<Integer, Integer> getGroupPos(SlotGroup group);
+	Pair<Integer, Integer> getGroupPos(SlotGroup group);
 }

@@ -7,6 +7,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -34,11 +35,17 @@ import net.minecraft.util.Pair;
  */
 @Mixin(InventoryScreen.class)
 public abstract class InventoryScreenMixin extends AbstractInventoryScreen<PlayerScreenHandler> implements RecipeBookProvider {
+	@Unique
 	private static final Identifier MORE_SLOTS = new Identifier("trinkets", "textures/gui/more_slots.png");
-	private Map<SlotGroup, Rect2i> boundMap = new HashMap<SlotGroup, Rect2i>();
+	@Unique
+	private final Map<SlotGroup, Rect2i> boundMap = new HashMap<>();
+	@Unique
 	private Rect2i currentBound = new Rect2i(0, 0, 0, 0);
+	@Unique
 	private Rect2i quickMoveBound = new Rect2i(0, 0, 0, 0);
+	@Unique
 	private SlotGroup group = null;
+	@Unique
 	private SlotGroup quickMoveGroup = null;
 
 	@Shadow

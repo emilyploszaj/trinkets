@@ -16,7 +16,10 @@ import com.ibm.icu.text.DecimalFormat;
 import com.ibm.icu.text.DecimalFormatSymbols;
 import com.mojang.datafixers.util.Function3;
 
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.At.Shift;
@@ -49,12 +52,14 @@ import net.minecraft.util.Util;
  * @author Emi
  */
 @Mixin(ItemStack.class)
-public class ItemStackMixin {
+public abstract class ItemStackMixin {
 
+	@Shadow @Final
+	public static java.text.DecimalFormat MODIFIER_FORMAT;
 	// Couldn't shadow for some reason
-	private static final DecimalFormat FORMAT = Util.make(new DecimalFormat("#.##"), (decimalFormat) -> {
-		decimalFormat.setDecimalFormatSymbols(DecimalFormatSymbols.getInstance(Locale.ROOT));
-	});
+//	private static final DecimalFormat FORMAT = Util.make(new DecimalFormat("#.##"), (decimalFormat) -> {
+//		decimalFormat.setDecimalFormatSymbols(DecimalFormatSymbols.getInstance(Locale.ROOT));
+//	});
 	
 	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;isSectionHidden(ILnet/minecraft/item/ItemStack$TooltipSection;)Z",
 		ordinal = 3, shift = Shift.BEFORE), method = "getTooltip", locals = LocalCapture.CAPTURE_FAILHARD)
@@ -121,6 +126,7 @@ public class ItemStackMixin {
 	}
 
 	// `equals` doesn't test thoroughly
+	@Unique
 	private void addAttributes(List<Text> list, Multimap<EntityAttribute, EntityAttributeModifier> map) {
 		if (!map.isEmpty()) {
 			for (Map.Entry<EntityAttribute, EntityAttributeModifier> entry : map.entries()) {
@@ -134,19 +140,21 @@ public class ItemStackMixin {
 					g *= 100.0D;
 				}
 				if (g > 0.0D) {
-					list.add(new TranslatableText("attribute.modifier.plus." + modifier.getOperation().getId(), new Object[]{FORMAT.format(g), new TranslatableText(entry.getKey().getTranslationKey())}).formatted(Formatting.BLUE));
+					list.add(new TranslatableText("attribute.modifier.plus." + modifier.getOperation().getId(), MODIFIER_FORMAT.format(g), new TranslatableText(entry.getKey().getTranslationKey())).formatted(Formatting.BLUE));
 				} else if (g < 0.0D) {
 					g *= -1.0D;
-					list.add(new TranslatableText("attribute.modifier.take." + modifier.getOperation().getId(), new Object[]{FORMAT.format(g), new TranslatableText(entry.getKey().getTranslationKey())}).formatted(Formatting.RED));
+					list.add(new TranslatableText("attribute.modifier.take." + modifier.getOperation().getId(), MODIFIER_FORMAT.format(g), new TranslatableText(entry.getKey().getTranslationKey())).formatted(Formatting.RED));
 				}
 			}
 		}
 	}
 
+	@Unique
 	private String getTranslationKey(SlotType type) {
 		return "trinkets.slot." + type.getGroup() + "." + type.getName();
 	}
 
+	@Unique
 	private boolean areMapsEqual(Multimap<EntityAttribute, EntityAttributeModifier> map1, Multimap<EntityAttribute, EntityAttributeModifier> map2) {
 		if (map1.size() != map2.size()) {
 			return false;
@@ -173,6 +181,7 @@ public class ItemStackMixin {
 		return true;
 	}
 
+	@Unique
 	private boolean canInsert(PlayerEntity player, SlotType type, int off, ItemStack stack) {
 		SlotReference reference = new SlotReference(type, off);
 		TriState state = TriState.DEFAULT;

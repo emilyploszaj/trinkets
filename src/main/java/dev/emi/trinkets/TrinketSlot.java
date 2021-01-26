@@ -22,11 +22,11 @@ import net.minecraft.util.Identifier;
  * A gui slot for a trinket slot
  */
 public class TrinketSlot extends Slot {
-	private SlotGroup group;
-	private SlotType type;
-	private boolean alwaysVisible;
-	private boolean baseType;
-	private int slotOffset;
+	private final SlotGroup group;
+	private final SlotType type;
+	private final boolean alwaysVisible;
+	private final boolean baseType;
+	private final int slotOffset;
 
 	public TrinketSlot(Inventory inventory, int index, int x, int y, SlotGroup group, SlotType type, int slotOffset, boolean alwaysVisible, boolean baseType) {
 		super(inventory, index, x, y);

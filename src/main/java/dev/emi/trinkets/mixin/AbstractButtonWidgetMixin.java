@@ -19,7 +19,7 @@ import net.minecraft.client.util.math.MatrixStack;
  * @author Emi
  */
 @Mixin(AbstractButtonWidget.class)
-public class AbstractButtonWidgetMixin {
+public abstract class AbstractButtonWidgetMixin {
 
 	@Shadow
 	protected boolean hovered;

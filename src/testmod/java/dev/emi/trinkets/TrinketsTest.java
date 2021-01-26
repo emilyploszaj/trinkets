@@ -6,6 +6,7 @@ import org.apache.logging.log4j.Logger;
 
 public class TrinketsTest implements ModInitializer {
 
+	public static final String MOD_ID = "trinkets-testmod";
 	public static final Logger LOGGER = LogManager.getLogger();
 
 	@Override

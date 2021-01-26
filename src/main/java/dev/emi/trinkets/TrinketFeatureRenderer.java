@@ -32,6 +32,7 @@ public class TrinketFeatureRenderer extends FeatureRenderer<AbstractClientPlayer
 			for (int i = 0; i < inv.size(); i++) {
 				ItemStack stack = inv.getStack(i);
 				Pair<SlotType, Integer> p = inv.posMap.get(i);
+
 				TrinketRendererRegistry.getRenderer(stack.getItem()).ifPresent(renderer -> {
 					matrices.push();
 					renderer.render(stack, new Trinket.SlotReference(p.getLeft(), p.getRight()), matrices, vertexConsumer, light, context.getModel(), player,
