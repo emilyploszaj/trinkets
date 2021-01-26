@@ -1,17 +1,16 @@
 package dev.emi.trinkets.mixin;
 
+import dev.emi.trinkets.TrinketsClient;
+import net.minecraft.client.gui.widget.AbstractButtonWidget;
+import net.minecraft.client.util.math.MatrixStack;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.At.Shift;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-
-import dev.emi.trinkets.TrinketsClient;
-import net.minecraft.client.gui.widget.AbstractButtonWidget;
-import net.minecraft.client.util.math.MatrixStack;
 
 /**
  * Makes buttons uninteractable while trinket groups are being interacted with
@@ -19,7 +18,7 @@ import net.minecraft.client.util.math.MatrixStack;
  * @author Emi
  */
 @Mixin(AbstractButtonWidget.class)
-public class AbstractButtonWidgetMixin {
+public abstract class AbstractButtonWidgetMixin {
 
 	@Shadow
 	protected boolean hovered;

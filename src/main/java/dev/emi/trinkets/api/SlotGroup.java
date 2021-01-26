@@ -1,9 +1,10 @@
 package dev.emi.trinkets.api;
 
 import com.google.common.collect.ImmutableMap;
+import net.minecraft.nbt.CompoundTag;
+
 import java.util.HashMap;
 import java.util.Map;
-import net.minecraft.nbt.CompoundTag;
 
 public final class SlotGroup {
 

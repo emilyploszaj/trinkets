@@ -21,7 +21,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * @author Emi
  */
 @Mixin(PlayerInventory.class)
-public class PlayerInventoryMixin {
+public abstract class PlayerInventoryMixin {
 
 	@Shadow
 	@Final

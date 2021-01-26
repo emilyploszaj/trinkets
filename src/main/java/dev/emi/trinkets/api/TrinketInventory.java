@@ -1,13 +1,14 @@
 package dev.emi.trinkets.api;
 
-import java.util.HashMap;
-import java.util.Map;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventories;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Pair;
 import net.minecraft.util.collection.DefaultedList;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class TrinketInventory implements Inventory {
 

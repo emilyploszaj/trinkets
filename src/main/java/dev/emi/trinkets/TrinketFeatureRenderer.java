@@ -16,7 +16,7 @@ import net.minecraft.util.Pair;
 
 public class TrinketFeatureRenderer extends FeatureRenderer<AbstractClientPlayerEntity, PlayerEntityModel<AbstractClientPlayerEntity>> {
 
-	private FeatureRendererContext<AbstractClientPlayerEntity, PlayerEntityModel<AbstractClientPlayerEntity>> context;
+	private final FeatureRendererContext<AbstractClientPlayerEntity, PlayerEntityModel<AbstractClientPlayerEntity>> context;
 
 	public TrinketFeatureRenderer(FeatureRendererContext<AbstractClientPlayerEntity, PlayerEntityModel<AbstractClientPlayerEntity>> context) {
 		super(context);
@@ -32,10 +32,12 @@ public class TrinketFeatureRenderer extends FeatureRenderer<AbstractClientPlayer
 			for (int i = 0; i < inv.size(); i++) {
 				ItemStack stack = inv.getStack(i);
 				Pair<SlotType, Integer> p = inv.posMap.get(i);
+
 				TrinketRendererRegistry.getRenderer(stack.getItem()).ifPresent(renderer -> {
 					matrices.push();
-					renderer.render(stack, new Trinket.SlotReference(p.getLeft(), p.getRight()), matrices, vertexConsumer, light, context.getModel(), player,
-							limbAngle, limbDistance, tickDelta, animationProgress, headYaw, headPitch);
+					renderer.render(stack, new Trinket.SlotReference(p.getLeft(), p.getRight()), matrices,
+							vertexConsumer, light, context.getModel(), player, limbAngle, limbDistance, tickDelta,
+							animationProgress, headYaw, headPitch);
 					matrices.pop();
 				});
 			}

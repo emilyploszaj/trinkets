@@ -2,9 +2,6 @@ package dev.emi.trinkets.api;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import java.util.Optional;
-import java.util.UUID;
-
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.EntityAttribute;
@@ -15,12 +12,15 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
+import java.util.Optional;
+import java.util.UUID;
+
 public interface Trinket {
 
 	/**
 	 * Called every tick on the client and server side
 	 */
-	public default void tick(ItemStack stack, SlotReference slot, LivingEntity entity) {
+	default void tick(ItemStack stack, SlotReference slot, LivingEntity entity) {
 	}
 
 	/**
@@ -28,7 +28,7 @@ public interface Trinket {
 	 *
 	 * @param stack The stack being equipped
 	 */
-	public default void onEquip(ItemStack stack, SlotReference slot, LivingEntity entity) {
+	default void onEquip(ItemStack stack, SlotReference slot, LivingEntity entity) {
 	}
 
 	/**
@@ -36,14 +36,14 @@ public interface Trinket {
 	 *
 	 * @param stack The stack being unequipped
 	 */
-	public default void onUnequip(ItemStack stack, SlotReference slot, LivingEntity entity) {
+	default void onUnequip(ItemStack stack, SlotReference slot, LivingEntity entity) {
 	}
 
-	public default boolean canEquip(ItemStack stack, SlotReference slot, LivingEntity entity) {
+	default boolean canEquip(ItemStack stack, SlotReference slot, LivingEntity entity) {
 		return true;
 	}
 
-	public default boolean canUnequip(ItemStack stack, SlotReference slot, LivingEntity entity) {
+	default boolean canUnequip(ItemStack stack, SlotReference slot, LivingEntity entity) {
 		return !EnchantmentHelper.hasBindingCurse(stack);
 	}
 
@@ -52,7 +52,7 @@ public interface Trinket {
 	 * remain pure
 	 * @param uuid The UUID to use for creating attributes
 	 */
-	public default Multimap<EntityAttribute, EntityAttributeModifier> getModifiers(ItemStack stack,
+	default Multimap<EntityAttribute, EntityAttributeModifier> getModifiers(ItemStack stack,
 			SlotReference slot, LivingEntity entity, UUID uuid) {
 		Multimap<EntityAttribute, EntityAttributeModifier> map = HashMultimap.create();
 		if (stack.hasTag() && stack.getTag().contains("TrinketAttributeModifiers", 9)) {
@@ -78,15 +78,15 @@ public interface Trinket {
 		return map;
 	}
 
-	public default void onBreak(ItemStack stack, SlotReference slot, LivingEntity entity) {
+	default void onBreak(ItemStack stack, SlotReference slot, LivingEntity entity) {
 		// TODO
 	}
 
-	public default TrinketEnums.DropRule getDropRule(ItemStack stack, SlotReference slot, LivingEntity entity) {
+	default TrinketEnums.DropRule getDropRule(ItemStack stack, SlotReference slot, LivingEntity entity) {
 		return TrinketEnums.DropRule.DEFAULT;
 	}
 
-	public static class SlotReference {
+	class SlotReference {
 		public SlotType slot;
 		public int index;
 

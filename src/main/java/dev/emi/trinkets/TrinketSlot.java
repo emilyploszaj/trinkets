@@ -1,14 +1,7 @@
 package dev.emi.trinkets;
 
-import java.util.Optional;
-
 import com.mojang.datafixers.util.Function3;
-
-import dev.emi.trinkets.api.SlotGroup;
-import dev.emi.trinkets.api.SlotType;
-import dev.emi.trinkets.api.Trinket;
-import dev.emi.trinkets.api.TrinketInventory;
-import dev.emi.trinkets.api.TrinketsApi;
+import dev.emi.trinkets.api.*;
 import dev.emi.trinkets.api.Trinket.SlotReference;
 import net.fabricmc.fabric.api.util.TriState;
 import net.minecraft.entity.LivingEntity;
@@ -18,15 +11,17 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.util.Identifier;
 
+import java.util.Optional;
+
 /**
  * A gui slot for a trinket slot
  */
 public class TrinketSlot extends Slot {
-	private SlotGroup group;
-	private SlotType type;
-	private boolean alwaysVisible;
-	private boolean baseType;
-	private int slotOffset;
+	private final SlotGroup group;
+	private final SlotType type;
+	private final boolean alwaysVisible;
+	private final boolean baseType;
+	private final int slotOffset;
 
 	public TrinketSlot(Inventory inventory, int index, int x, int y, SlotGroup group, SlotType type, int slotOffset, boolean alwaysVisible, boolean baseType) {
 		super(inventory, index, x, y);
@@ -54,28 +49,38 @@ public class TrinketSlot extends Slot {
 	@Override
 	public boolean canInsert(ItemStack stack) {
 		LivingEntity entity = ((TrinketInventory) inventory).component.entity;
-		SlotReference reference = new SlotReference(type, slotOffset);
+		return canInsert(stack, new SlotReference(type, slotOffset), entity);
+	}
+
+	public static boolean canInsert(ItemStack stack, SlotReference slotRef, LivingEntity entity) {
 		TriState state = TriState.DEFAULT;
-		for (Identifier id : type.getValidators()) {
+
+		for (Identifier id : slotRef.slot.getValidators()) {
 			Optional<Function3<ItemStack, SlotReference, LivingEntity, TriState>> function = TrinketsApi.getValidatorPredicate(id);
+
 			if (function.isPresent()) {
-				state = function.get().apply(stack, reference, entity);
+				state = function.get().apply(stack, slotRef, entity);
 			}
+
 			if (state != TriState.DEFAULT) {
 				break;
 			}
 		}
+
 		if (state == TriState.DEFAULT) {
-			state = TrinketsApi.getValidatorPredicate(new Identifier("trinkets", "tag")).get().apply(stack, reference, entity);
-		}
-		if (state.get()) {
-			Optional<Trinket> trinket = TrinketsApi.getTrinket(stack.getItem());
-			if (trinket.isPresent()) {
-				return trinket.get().canEquip(stack, reference, entity);
-			} else {
-				return true;
+			Optional<Function3<ItemStack, SlotReference, LivingEntity, TriState>> validatorPredicate =
+					TrinketsApi.getValidatorPredicate(new Identifier("trinkets", "tag"));
+
+			if (validatorPredicate.isPresent()) {
+				state = validatorPredicate.get().apply(stack, slotRef, entity);
 			}
 		}
+
+		if (state.get()) {
+			Optional<Trinket> trinket = TrinketsApi.getTrinket(stack.getItem());
+			return trinket.map(value -> value.canEquip(stack, slotRef, entity)).orElse(true);
+		}
+
 		return false;
 	}
 
@@ -83,11 +88,7 @@ public class TrinketSlot extends Slot {
 	public boolean canTakeItems(PlayerEntity player) {
 		ItemStack stack = this.getStack();
 		Optional<Trinket> trinket = TrinketsApi.getTrinket(stack.getItem());
-		if (trinket.isPresent()) {
-			return trinket.get().canUnequip(stack, new Trinket.SlotReference(type, slotOffset), player);
-		} else {
-			return true;
-		}
+		return trinket.map(value -> value.canUnequip(stack, new SlotReference(type, slotOffset), player)).orElse(true);
 	}
 
 	@Override

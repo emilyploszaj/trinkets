@@ -1,39 +1,29 @@
 package dev.emi.trinkets.data;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSyntaxException;
+import com.google.gson.*;
 import dev.emi.trinkets.TrinketsMain;
 import dev.emi.trinkets.TrinketsNetwork;
 import dev.emi.trinkets.api.SlotGroup;
 import dev.emi.trinkets.data.SlotLoader.GroupData;
 import dev.emi.trinkets.data.SlotLoader.SlotData;
 import io.netty.buffer.Unpooled;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import net.fabricmc.fabric.api.network.ServerSidePacketRegistry;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.resource.SinglePreparationResourceReloadListener;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.JsonHelper;
 import net.minecraft.util.profiler.Profiler;
 import net.minecraft.util.registry.Registry;
+
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.*;
 
 public class EntitySlotLoader extends SinglePreparationResourceReloadListener<Map<String, Map<String, Set<String>>>> implements IdentifiableResourceReloadListener {
 
@@ -162,27 +152,31 @@ public class EntitySlotLoader extends SinglePreparationResourceReloadListener<Ma
 		this.slots.putAll(slots);
 	}
 
-	public void sync(PlayerEntity playerEntity) {
+	public void sync(ServerPlayerEntity playerEntity) {
 		PacketByteBuf buf = getSlotsPacket();
-		ServerSidePacketRegistry.INSTANCE.sendToPlayer(playerEntity, TrinketsNetwork.SYNC_SLOTS, buf);
+		ServerPlayNetworking.send(playerEntity, TrinketsNetwork.SYNC_SLOTS, buf);
 	}
 
-	public void sync(List<? extends PlayerEntity> players) {
+	public void sync(List<? extends ServerPlayerEntity> players) {
 		PacketByteBuf buf = getSlotsPacket();
-		players.forEach(player -> ServerSidePacketRegistry.INSTANCE.sendToPlayer(player, TrinketsNetwork.SYNC_SLOTS, buf));
+		players.forEach(player -> ServerPlayNetworking.send(player, TrinketsNetwork.SYNC_SLOTS, buf));
 	}
 
 	private PacketByteBuf getSlotsPacket() {
 		CompoundTag tag = new CompoundTag();
+
 		this.slots.forEach((entity, slotMap) -> {
 			CompoundTag slotsTag = new CompoundTag();
+
 			slotMap.forEach((id, slotGroup) -> {
 				CompoundTag groupTag = new CompoundTag();
 				slotGroup.write(groupTag);
 				slotsTag.put(id, groupTag);
 			});
+
 			tag.put(Registry.ENTITY_TYPE.getId(entity).toString(), slotsTag);
 		});
+
 		PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
 		buf.writeCompoundTag(tag);
 		return buf;
