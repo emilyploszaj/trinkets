@@ -35,8 +35,9 @@ public class TrinketFeatureRenderer extends FeatureRenderer<AbstractClientPlayer
 
 				TrinketRendererRegistry.getRenderer(stack.getItem()).ifPresent(renderer -> {
 					matrices.push();
-					renderer.render(stack, new Trinket.SlotReference(p.getLeft(), p.getRight()), matrices, vertexConsumer, light, context.getModel(), player,
-							limbAngle, limbDistance, tickDelta, animationProgress, headYaw, headPitch);
+					renderer.render(stack, new Trinket.SlotReference(p.getLeft(), p.getRight()), matrices,
+							vertexConsumer, light, context.getModel(), player, limbAngle, limbDistance, tickDelta,
+							animationProgress, headYaw, headPitch);
 					matrices.pop();
 				});
 			}

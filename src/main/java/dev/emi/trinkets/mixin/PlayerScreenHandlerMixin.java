@@ -91,7 +91,7 @@ public abstract class PlayerScreenHandlerMixin extends ScreenHandler implements 
 		for (SlotGroup group : TrinketsApi.getPlayerSlots().values()) {
 			if (!groupPos.containsKey(group)) {
 				int x = 77;
-				int y = 0;
+				int y;
 				if (groupNum >= 4) {
 					x = -4 - (groupNum / 4) * 18;
 					y = 7 + (groupNum % 4) * 18;
@@ -181,7 +181,13 @@ public abstract class PlayerScreenHandlerMixin extends ScreenHandler implements 
 						}
 
 						if (state == TriState.DEFAULT) {
-							state = TrinketsApi.getQuickMovePredicate(new Identifier("trinkets", "always")).get().apply(stack, ref, owner);
+							Optional<Function3<ItemStack, SlotReference, LivingEntity, TriState>> quickMovePredicate =
+									TrinketsApi.getQuickMovePredicate(new Identifier("trinkets", "always"));
+
+							if (quickMovePredicate.isPresent()) {
+								// FIXME: state is unused
+								state = quickMovePredicate.get().apply(stack, ref, owner);
+							}
 						}
 
 						if (this.insertItem(stack, trinketSlotStart + i, trinketSlotStart + i + 1, false)) {

@@ -6,6 +6,8 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
 
 import java.util.HashSet;
@@ -70,6 +72,10 @@ public class SlotType {
 
 	public DropRule getDropRule() {
 		return dropRule;
+	}
+
+	public TranslatableText getTranslation() {
+		return new TranslatableText("trinkets.slot." + this.group + "." + this.name);
 	}
 
 	public void write(CompoundTag data) {

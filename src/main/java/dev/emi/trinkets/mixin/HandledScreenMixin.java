@@ -42,15 +42,19 @@ public abstract class HandledScreenMixin extends Screen {
 		// Item tooltips (count, item bar) are drawn at z + 200 (normal itmes are drawn at 300)
 		// Inventory tooltip is drawn at 400
 		if (slot instanceof TrinketSlot) {
+			assert this.client != null;
 			TrinketSlot ts = (TrinketSlot) slot;
 			Identifier id = ts.getBackgroundIdentifier();
+
 			if (slot.getStack().isEmpty() && id != null) {
 				// TODO apply this transformation at parse?
 				this.client.getTextureManager().bindTexture(new Identifier(id.getNamespace(), "textures/" + id.getPath() + ".png"));
 			} else {
 				this.client.getTextureManager().bindTexture(BLANK_BACK);
 			}
+
 			RenderSystem.enableDepthTest();
+
 			if (ts.isTrinketFocused()) {
 				// Thus, I need to draw trinket slot backs over normal items at z 300 (310 was chosen)
 				drawTexture(matrices, slot.x, slot.y, 310, 0, 0, 16, 16, 16, 16);

@@ -49,28 +49,38 @@ public class TrinketSlot extends Slot {
 	@Override
 	public boolean canInsert(ItemStack stack) {
 		LivingEntity entity = ((TrinketInventory) inventory).component.entity;
-		SlotReference reference = new SlotReference(type, slotOffset);
+		return canInsert(stack, new SlotReference(type, slotOffset), entity);
+	}
+
+	public static boolean canInsert(ItemStack stack, SlotReference slotRef, LivingEntity entity) {
 		TriState state = TriState.DEFAULT;
-		for (Identifier id : type.getValidators()) {
+
+		for (Identifier id : slotRef.slot.getValidators()) {
 			Optional<Function3<ItemStack, SlotReference, LivingEntity, TriState>> function = TrinketsApi.getValidatorPredicate(id);
+
 			if (function.isPresent()) {
-				state = function.get().apply(stack, reference, entity);
+				state = function.get().apply(stack, slotRef, entity);
 			}
+
 			if (state != TriState.DEFAULT) {
 				break;
 			}
 		}
+
 		if (state == TriState.DEFAULT) {
-			state = TrinketsApi.getValidatorPredicate(new Identifier("trinkets", "tag")).get().apply(stack, reference, entity);
-		}
-		if (state.get()) {
-			Optional<Trinket> trinket = TrinketsApi.getTrinket(stack.getItem());
-			if (trinket.isPresent()) {
-				return trinket.get().canEquip(stack, reference, entity);
-			} else {
-				return true;
+			Optional<Function3<ItemStack, SlotReference, LivingEntity, TriState>> validatorPredicate =
+					TrinketsApi.getValidatorPredicate(new Identifier("trinkets", "tag"));
+
+			if (validatorPredicate.isPresent()) {
+				state = validatorPredicate.get().apply(stack, slotRef, entity);
 			}
 		}
+
+		if (state.get()) {
+			Optional<Trinket> trinket = TrinketsApi.getTrinket(stack.getItem());
+			return trinket.map(value -> value.canEquip(stack, slotRef, entity)).orElse(true);
+		}
+
 		return false;
 	}
 
@@ -78,11 +88,7 @@ public class TrinketSlot extends Slot {
 	public boolean canTakeItems(PlayerEntity player) {
 		ItemStack stack = this.getStack();
 		Optional<Trinket> trinket = TrinketsApi.getTrinket(stack.getItem());
-		if (trinket.isPresent()) {
-			return trinket.get().canUnequip(stack, new Trinket.SlotReference(type, slotOffset), player);
-		} else {
-			return true;
-		}
+		return trinket.map(value -> value.canUnequip(stack, new SlotReference(type, slotOffset), player)).orElse(true);
 	}
 
 	@Override
