@@ -9,7 +9,7 @@
 		{
 			"name": "Emi",
 			"contact": {
-				"github": "https://github.com/emilyploszaj"
+				"github": "https://github.com/emilyalexandra"
 			}
 		},
 		{
@@ -20,8 +20,8 @@
 		}
 	],
 	"contact": {
-		"homepage": "https://emi.dev/",
-		"sources": "https://github.com/emilyploszaj/trinkets"
+		"homepage": "https://www.curseforge.com/minecraft/mc-mods/trinkets-fabric",
+		"sources": "https://github.com/emilyalexandra/trinkets"
 	},
 
 	"license": "MIT",
@@ -42,17 +42,18 @@
 	"custom": {
 		"cardinal-components": [
 			"trinkets:trinkets"
-		]
+		],
+		"modmenu:api": true
 	},
 	"mixins": [
 		"trinkets.mixins.json"
 	],
 
 	"depends": {
-		"fabricloader": ">=0.4.0",
-		"fabric": "*"
-	},
-	"suggests": {
-		"flamingo": "*"
+		"minecraft": ">=1.17",
+		"fabricloader": ">=0.7.0",
+		"cardinal-components-base": ">=3.0.0",
+		"cardinal-components-entity": ">=3.0.0",
+		"fabric": ">=0.28.0"
 	}
 }
