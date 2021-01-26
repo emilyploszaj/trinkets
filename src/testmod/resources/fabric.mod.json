@@ -1,0 +1,45 @@
+{
+	"schemaVersion": 1,
+	"id": "trinkets-testmod",
+	"version": "${version}",
+
+	"name": "Trinkets Testmod",
+	"description": "A test mod for Trinkets development",
+	"authors": [
+		{
+			"name": "Emi",
+			"contact": {
+				"github": "https://github.com/emilyalexandra"
+			}
+		},
+		{
+			"name": "C4",
+			"contact": {
+				"github": "https://github.com/TheIllusiveC4"
+			}
+		}
+	],
+	"contact": {
+		"homepage": "https://www.curseforge.com/minecraft/mc-mods/trinkets-fabric",
+		"sources": "https://github.com/emilyalexandra/trinkets"
+	},
+
+	"license": "MIT",
+	"icon": "assets/trinkets-testmod/icon.png",
+
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"dev.emi.trinkets.TrinketsTest"
+		]
+	},
+	"custom": {
+		"modmenu:parent": "trinkets"
+	},
+
+	"depends": {
+		"minecraft": ">=1.17",
+		"fabricloader": ">=0.7.0",
+		"trinkets": "*"
+	}
+}
