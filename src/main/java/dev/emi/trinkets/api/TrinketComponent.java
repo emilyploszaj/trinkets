@@ -26,6 +26,6 @@ public interface TrinketComponent extends ComponentV3 {
 	}
 
 	default List<Pair<SlotReference, ItemStack>> getAllEquipped() {
-		return getEquipped(stack -> true);
+		return getEquipped(stack -> !stack.isEmpty());
 	}
 }
