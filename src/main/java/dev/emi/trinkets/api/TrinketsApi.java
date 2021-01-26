@@ -1,16 +1,11 @@
 package dev.emi.trinkets.api;
 
+import com.mojang.datafixers.util.Function3;
 import dev.emi.trinkets.TrinketsMain;
 import dev.emi.trinkets.api.Trinket.SlotReference;
 import dev.emi.trinkets.data.EntitySlotLoader;
 import dev.onyxstudios.cca.api.v3.component.ComponentKey;
 import dev.onyxstudios.cca.api.v3.component.ComponentRegistryV3;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-
-import com.mojang.datafixers.util.Function3;
-
 import net.fabricmc.fabric.api.util.TriState;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -19,6 +14,10 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.tag.ItemTags;
 import net.minecraft.tag.Tag;
 import net.minecraft.util.Identifier;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 public class TrinketsApi {
 

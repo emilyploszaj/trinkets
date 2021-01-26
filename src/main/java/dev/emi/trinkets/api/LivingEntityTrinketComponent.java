@@ -1,11 +1,5 @@
 package dev.emi.trinkets.api;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Predicate;
-
 import dev.emi.trinkets.TrinketsMain;
 import dev.emi.trinkets.api.Trinket.SlotReference;
 import dev.onyxstudios.cca.api.v3.component.sync.AutoSyncedComponent;
@@ -14,6 +8,12 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.util.Pair;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Predicate;
 
 public class LivingEntityTrinketComponent implements TrinketComponent, AutoSyncedComponent {
 

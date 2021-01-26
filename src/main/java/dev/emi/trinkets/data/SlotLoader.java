@@ -1,16 +1,18 @@
 package dev.emi.trinkets.data;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSyntaxException;
+import com.google.gson.*;
 import dev.emi.trinkets.TrinketsMain;
 import dev.emi.trinkets.api.SlotType;
 import dev.emi.trinkets.api.TrinketEnums.DropRule;
 import dev.emi.trinkets.data.SlotLoader.GroupData;
+import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
+import net.minecraft.resource.ResourceManager;
+import net.minecraft.resource.SinglePreparationResourceReloadListener;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.JsonHelper;
+import net.minecraft.util.profiler.Profiler;
+
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashMap;
@@ -18,12 +20,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
-import net.minecraft.resource.ResourceManager;
-import net.minecraft.resource.SinglePreparationResourceReloadListener;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.JsonHelper;
-import net.minecraft.util.profiler.Profiler;
 
 public class SlotLoader extends SinglePreparationResourceReloadListener<Map<String, GroupData>> implements IdentifiableResourceReloadListener {
 

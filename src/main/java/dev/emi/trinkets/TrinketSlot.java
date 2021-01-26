@@ -1,14 +1,7 @@
 package dev.emi.trinkets;
 
-import java.util.Optional;
-
 import com.mojang.datafixers.util.Function3;
-
-import dev.emi.trinkets.api.SlotGroup;
-import dev.emi.trinkets.api.SlotType;
-import dev.emi.trinkets.api.Trinket;
-import dev.emi.trinkets.api.TrinketInventory;
-import dev.emi.trinkets.api.TrinketsApi;
+import dev.emi.trinkets.api.*;
 import dev.emi.trinkets.api.Trinket.SlotReference;
 import net.fabricmc.fabric.api.util.TriState;
 import net.minecraft.entity.LivingEntity;
@@ -17,6 +10,8 @@ import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.util.Identifier;
+
+import java.util.Optional;
 
 /**
  * A gui slot for a trinket slot

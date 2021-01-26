@@ -1,13 +1,8 @@
 package dev.emi.trinkets.mixin;
 
-import dev.emi.trinkets.api.SlotType;
-import dev.emi.trinkets.api.Trinket;
-import dev.emi.trinkets.api.TrinketComponent;
-import dev.emi.trinkets.api.TrinketEnums;
-import dev.emi.trinkets.api.TrinketEnums.DropRule;
-import dev.emi.trinkets.api.TrinketInventory;
-import dev.emi.trinkets.api.TrinketsApi;
+import dev.emi.trinkets.api.*;
 import dev.emi.trinkets.api.Trinket.SlotReference;
+import dev.emi.trinkets.api.TrinketEnums.DropRule;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -17,18 +12,17 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.Pair;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Trinket dropping on death, trinket EAMs, and trinket equip/unequip calls

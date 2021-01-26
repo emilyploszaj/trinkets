@@ -3,18 +3,17 @@ package dev.emi.trinkets;
 import dev.emi.trinkets.api.SlotGroup;
 import dev.emi.trinkets.api.SlotType;
 import dev.emi.trinkets.data.EntitySlotLoader;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 public class TrinketsClient implements ClientModInitializer {
 	public static SlotGroup activeGroup;
