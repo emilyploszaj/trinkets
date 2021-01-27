@@ -5,12 +5,15 @@
 	"trinkets.tooltip.attributes.all" : "When equipped:",
 	"trinkets.tooltip.attributes.single" : "When equipped in the %d trinket slot:",
 	"trinkets.slot.head.mask": "Mask",
+	"trinkets.slot.head.hat": "Hat",
 	"trinkets.slot.chest.necklace": "Necklace",
 	"trinkets.slot.chest.backpack": "Backpack",
 	"trinkets.slot.chest.cape": "Cape",
 	"trinkets.slot.legs.belt": "Belt",
 	"trinkets.slot.feet.aglet": "Aglet",
-	"trinkets.slot.hand.gloves": "Gloves",
+	"trinkets.slot.feet.shoes": "Shoes",
+	"trinkets.slot.hand.glove": "Glove",
+	"trinkets.slot.offhand.glove": "Glove",
 	"trinkets.slot.hand.ring": "Ring",
 	"trinkets.slot.offhand.ring": "Ring"
 }
