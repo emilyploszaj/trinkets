@@ -12,8 +12,6 @@ import java.util.UUID;
 
 public class TestTrinket extends TrinketItem {
 
-	private static final EntityAttributeModifier SPEED_BOOST_MODIFIER = new EntityAttributeModifier(UUID.fromString("ac7ab816-2b08-46b6-879d-e5dea34ff305"), "trinkets-testmod:movement_speed", 0.4, EntityAttributeModifier.Operation.MULTIPLY_TOTAL);
-
 	public TestTrinket(Settings settings) {
 		super(settings);
 	}
@@ -21,7 +19,9 @@ public class TestTrinket extends TrinketItem {
 	@Override
 	public Multimap<EntityAttribute, EntityAttributeModifier> getModifiers(ItemStack stack, SlotReference slot, LivingEntity entity, UUID uuid) {
 		Multimap<EntityAttribute, EntityAttributeModifier> modifiers = super.getModifiers(stack, slot, entity, uuid);
-		modifiers.put(EntityAttributes.GENERIC_MOVEMENT_SPEED, SPEED_BOOST_MODIFIER);
+		EntityAttributeModifier speedModifier = new EntityAttributeModifier(uuid, "trinkets-testmod:movement_speed",
+				0.4, EntityAttributeModifier.Operation.MULTIPLY_TOTAL);
+		modifiers.put(EntityAttributes.GENERIC_MOVEMENT_SPEED, speedModifier);
 		return modifiers;
 	}
 }
