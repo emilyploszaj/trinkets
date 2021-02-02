@@ -11,11 +11,12 @@ public class TrinketsTest implements ModInitializer {
 
 	public static final String MOD_ID = "trinkets-testmod";
 	public static final Logger LOGGER = LogManager.getLogger();
+	public static Item TEST_TRINKET;
 
 	@Override
 	public void onInitialize() {
 		LOGGER.info("[Trinkets Testmod] test mod was initialized!");
-		Registry.register(Registry.ITEM, identifier("test"), new TestTrinket(new Item.Settings().maxCount(1)));
+		TEST_TRINKET = Registry.register(Registry.ITEM, identifier("test"), new TestTrinket(new Item.Settings().maxCount(1)));
 	}
 
 	private static Identifier identifier(String id) {

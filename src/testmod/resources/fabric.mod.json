@@ -31,6 +31,9 @@
 	"entrypoints": {
 		"main": [
 			"dev.emi.trinkets.TrinketsTest"
+		],
+		"client": [
+			"dev.emi.trinkets.client.TrinketsTestClient"
 		]
 	},
 	"custom": {
