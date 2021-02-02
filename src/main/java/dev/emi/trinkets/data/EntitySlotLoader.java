@@ -57,7 +57,7 @@ public class EntitySlotLoader extends SinglePreparationResourceReloadListener<Ma
 								String slot = assignedSlot.getAsString();
 								String[] parsedSlot = slot.split("/");
 
-								if (parsedSlot.length > 2) {
+								if (parsedSlot.length != 2) {
 									TrinketsMain.LOGGER.error("Detected malformed slot assignment " + slot
 											+ "! Slots should be in the format 'group/slot'.");
 									continue;

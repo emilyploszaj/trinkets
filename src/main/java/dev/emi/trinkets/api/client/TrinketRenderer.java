@@ -1,19 +1,60 @@
 package dev.emi.trinkets.api.client;
 
 import dev.emi.trinkets.api.Trinket;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.entity.EntityRenderer;
+import net.minecraft.client.render.entity.LivingEntityRenderer;
+import net.minecraft.client.render.entity.model.BipedEntityModel;
+import net.minecraft.client.render.entity.model.EntityModel;
 import net.minecraft.client.render.entity.model.PlayerEntityModel;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.Vec3f;
 
 public interface TrinketRenderer {
 	float MAGIC_ROTATION = 180f / (float) Math.PI;
 
-	void render(ItemStack stack, Trinket.SlotReference slot, MatrixStack matrices, VertexConsumerProvider vertexConsumer, int light,
-			PlayerEntityModel<AbstractClientPlayerEntity> model, AbstractClientPlayerEntity player, float limbAngle, float limbDistance,
-			float tickDelta, float animationProgress, float headYaw, float headPitch);
+	/**
+	 * Renders the Trinket
+	 *
+	 * @param stack The {@link ItemStack} for the Trinket being rendered
+	 * @param slotReference The exact slot for the item being rendered
+	 * @param contextModel The model this Trinket is being rendered on
+	 */
+	void render(ItemStack stack, Trinket.SlotReference slotReference, EntityModel<? extends LivingEntity> contextModel,
+				MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, LivingEntity entity,
+				float limbAngle, float limbDistance, float tickDelta, float animationProgress, float headYaw,
+				float headPitch);
+
+	/**
+	 * Rotates the rendering for the models based on the entity's poses and movements. This will do
+	 * nothing if the entity render object does not implement {@link LivingEntityRenderer} or if the
+	 * model does not implement {@link BipedEntityModel}).
+	 *
+	 * @param entity The wearer of the trinket
+	 * @param model The model to align to the body movement
+	 */
+	static void followBodyRotations(final LivingEntity entity,
+									final BipedEntityModel<LivingEntity> model) {
+
+		EntityRenderer<? super LivingEntity> render = MinecraftClient.getInstance()
+				.getEntityRenderDispatcher().getRenderer(entity);
+
+		if (render instanceof LivingEntityRenderer) {
+			//noinspection unchecked
+			LivingEntityRenderer<LivingEntity, EntityModel<LivingEntity>> livingRenderer =
+					(LivingEntityRenderer<LivingEntity, EntityModel<LivingEntity>>) render;
+			EntityModel<LivingEntity> entityModel = livingRenderer.getModel();
+
+			if (entityModel instanceof BipedEntityModel) {
+				BipedEntityModel<LivingEntity> bipedModel = (BipedEntityModel<LivingEntity>) entityModel;
+				bipedModel.setAttributes(model);
+			}
+		}
+	}
 
 	/**
 	 * Translates the rendering context to the center of the player's face

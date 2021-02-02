@@ -59,7 +59,9 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreen<Playe
 	public void init(CallbackInfo info) {
 		for (SlotGroup group : TrinketsApi.getPlayerSlots().values()) {
 			Pair<Integer, Integer> pos = ((TrinketPlayerScreenHandler) handler).getGroupPos(group);
-			boundMap.put(group, new Rect2i(pos.getLeft(), pos.getRight(), 16, 16));
+			if (pos != null) {
+				boundMap.put(group, new Rect2i(pos.getLeft(), pos.getRight(), 16, 16));
+			}
 		}
 
 		group = null;
