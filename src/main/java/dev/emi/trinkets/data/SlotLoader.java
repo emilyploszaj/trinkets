@@ -119,7 +119,7 @@ public class SlotLoader extends SinglePreparationResourceReloadListener<Map<Stri
 		SlotType create(String group, String name) {
 			Identifier finalIcon = new Identifier(icon);
 			Set<Identifier> finalValidators = validators.stream().map(Identifier::new).collect(Collectors.toSet());
-			Set<Identifier> finalQuickMove = validators.stream().map(Identifier::new).collect(Collectors.toSet());
+			Set<Identifier> finalQuickMove = quickMove.stream().map(Identifier::new).collect(Collectors.toSet());
 			return new SlotType(group, name, order, amount, locked, finalIcon, finalQuickMove, finalValidators, DropRule.valueOf(dropRule));
 		}
 
