@@ -1,6 +1,7 @@
 package dev.emi.trinkets.data;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import com.google.gson.*;
 import dev.emi.trinkets.TrinketsMain;
 import dev.emi.trinkets.TrinketsNetwork;
@@ -10,12 +11,14 @@ import dev.emi.trinkets.data.SlotLoader.SlotData;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
+import net.fabricmc.fabric.api.resource.ResourceReloadListenerKeys;
 import net.minecraft.entity.EntityType;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.resource.SinglePreparationResourceReloadListener;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.tag.ServerTagManagerHolder;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.JsonHelper;
 import net.minecraft.util.profiler.Profiler;
@@ -98,45 +101,57 @@ public class EntitySlotLoader extends SinglePreparationResourceReloadListener<Ma
 	@Override
 	protected void apply(Map<String, Map<String, Set<String>>> loader, ResourceManager manager, Profiler profiler) {
 		Map<String, GroupData> slots = SlotLoader.INSTANCE.getSlots();
-		Map<String, Map<String, SlotGroup.Builder>> groupBuilders = new HashMap<>();
+		Map<EntityType<?>, Map<String, SlotGroup.Builder>> groupBuilders = new HashMap<>();
 
 		loader.forEach((entityName, groups) -> {
-			Map<String, SlotGroup.Builder> builders = groupBuilders.computeIfAbsent(entityName, (k) -> new HashMap<>());
-			groups.forEach((groupName, slotNames) -> {
-				GroupData group = slots.get(groupName);
+			Set<EntityType<?>> types = new HashSet<>();
 
-				if (group != null) {
-					SlotGroup.Builder builder = builders.computeIfAbsent(groupName, (k) -> {
-						if (group.getSlotId() == -1) {
-							return new SlotGroup.Builder(groupName, group.getDefaultSlot());
-						}
-						return new SlotGroup.Builder(groupName, group.getSlotId());
-					});
-					slotNames.forEach(slotName -> {
-						SlotData slotData = group.getSlot(slotName);
-
-						if (slotData != null) {
-							builder.addSlot(slotName, slotData.create(groupName, slotName));
-						} else {
-							TrinketsMain.LOGGER.error("[trinkets] Attempted to assign unknown slot " + slotName);
-						}
-					});
+			try {
+				if (entityName.startsWith("#")) {
+					types.addAll(ServerTagManagerHolder.getTagManager().getTag(Registry.ENTITY_TYPE_KEY,
+									new Identifier(entityName.substring(1)),
+									(identifier) -> new IllegalArgumentException("Unknown entity tag '" + identifier + "'"))
+									.values());
 				} else {
-					TrinketsMain.LOGGER.error("[trinkets] Attempted to assign slot from unknown group " + groupName);
+					types.add(Registry.ENTITY_TYPE.getOrEmpty(new Identifier(entityName))
+							.orElseThrow(() -> new IllegalArgumentException("Unknown entity '" + entityName + "'")));
 				}
-			});
+			} catch (IllegalArgumentException e) {
+				TrinketsMain.LOGGER.error("[trinkets] Attempted to assign unknown entity entry " + entityName);
+			}
+
+			for (EntityType<?> type : types) {
+				Map<String, SlotGroup.Builder> builders = groupBuilders.computeIfAbsent(type, (k) -> new HashMap<>());
+				groups.forEach((groupName, slotNames) -> {
+					GroupData group = slots.get(groupName);
+
+					if (group != null) {
+						SlotGroup.Builder builder = builders.computeIfAbsent(groupName, (k) -> {
+							if (group.getSlotId() == -1) {
+								return new SlotGroup.Builder(groupName, group.getDefaultSlot());
+							}
+							return new SlotGroup.Builder(groupName, group.getSlotId());
+						});
+						slotNames.forEach(slotName -> {
+							SlotData slotData = group.getSlot(slotName);
+
+							if (slotData != null) {
+								builder.addSlot(slotName, slotData.create(groupName, slotName));
+							} else {
+								TrinketsMain.LOGGER.error("[trinkets] Attempted to assign unknown slot " + slotName);
+							}
+						});
+					} else {
+						TrinketsMain.LOGGER.error("[trinkets] Attempted to assign slot from unknown group " + groupName);
+					}
+				});
+			}
 		});
 		this.slots.clear();
 
-		groupBuilders.forEach((entityName, groups) -> {
-			EntityType<?> type = Registry.ENTITY_TYPE.getOrEmpty(new Identifier(entityName)).orElse(null);
-
-			if (type != null) {
-				Map<String, SlotGroup> entitySlots = this.slots.computeIfAbsent(type, (k) -> new HashMap<>());
-				groups.forEach((groupName, groupBuilder) -> entitySlots.putIfAbsent(groupName, groupBuilder.build()));
-			} else {
-				TrinketsMain.LOGGER.error("[trinkets] Attempted to assign slots to unknown entity " + entityName);
-			}
+		groupBuilders.forEach((entity, groups) -> {
+			Map<String, SlotGroup> entitySlots = this.slots.computeIfAbsent(entity, (k) -> new HashMap<>());
+			groups.forEach((groupName, groupBuilder) -> entitySlots.putIfAbsent(groupName, groupBuilder.build()));
 		});
 	}
 
@@ -189,6 +204,6 @@ public class EntitySlotLoader extends SinglePreparationResourceReloadListener<Ma
 
 	@Override
 	public Collection<Identifier> getFabricDependencies() {
-		return Collections.singletonList(SlotLoader.ID);
+		return Lists.newArrayList(SlotLoader.ID, ResourceReloadListenerKeys.TAGS);
 	}
 }
