@@ -76,7 +76,14 @@ public class EntitySlotLoader extends SinglePreparationResourceReloadListener<Ma
 
 							for (JsonElement entity : entities) {
 								String name = entity.getAsString();
-								Map<String, Set<String>> slots = map.computeIfAbsent(name, (k) -> new HashMap<>());
+								String id;
+
+								if (name.startsWith("#")) {
+									id = "#" + new Identifier(name.substring(1)).toString();
+								} else {
+									id = new Identifier(name).toString();
+								}
+								Map<String, Set<String>> slots = map.computeIfAbsent(id, (k) -> new HashMap<>());
 
 								if (replace) {
 									slots.clear();
