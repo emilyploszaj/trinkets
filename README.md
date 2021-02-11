@@ -26,18 +26,15 @@ To add Trinkets to your project you need to add jitpack and nerdhubmc to your re
 ```
 repositories {
 	maven {
-		url = "https://jitpack.io"
-	}
-	maven {
-		name = "NerdHubMC"
-		url = "https://maven.abusedmaster.xyz/"
+		name = "TerraformersMC"
+		url = "https://maven.terraformersmc.com/"
 	}
 }
 ```
 And then to add Trinkets you add it as a dependency in your build.gradle
 ```
 dependencies {
-	modImplementation "com.github.emilyalexandra:trinkets:${trinkets_version}"
+	modImplementation "dev.emi:trinkets:${trinkets_version}"
 }
 ```
 All you need to get started with Trinkets is to register a slot and add an item to the game that extends `TrinketItem`, here is a short example:
