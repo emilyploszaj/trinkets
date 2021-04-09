@@ -22,7 +22,7 @@ public class TrinketsClient extends TrinketsMain implements ClientModInitializer
 	@Override
 	public void onInitializeClient(){
 		//Is this needed?
-		ClientSpriteRegistryCallback.event(SpriteAtlasTexture.BLOCK_ATLAS_TEX).register((spriteAtlasTexture, registry) -> {
+		ClientSpriteRegistryCallback.event(SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE).register((spriteAtlasTexture, registry) -> {
 			registry.register(new Identifier("trinkets", "item/empty"));
 		});
 	}
