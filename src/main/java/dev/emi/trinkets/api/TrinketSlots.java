@@ -11,10 +11,10 @@ import net.minecraft.util.Identifier;
  * Registry and screenHandler of all slot groups and slots
  */
 public class TrinketSlots {
-	public static List<SlotGroup> slotGroups = new ArrayList<SlotGroup>();
+	public static List<SlotGroup> slotGroups = new ArrayList<>();
 
 	static {
-		//Default slot groups
+		// Default slot groups
 		TrinketSlots.addSlotGroup(SlotGroups.HEAD, 5);
 		TrinketSlots.addSlotGroup(SlotGroups.CHEST, 6);
 		TrinketSlots.addSlotGroup(SlotGroups.LEGS, 7);
@@ -74,6 +74,7 @@ public class TrinketSlots {
 							return;
 						}
 					}
+
 					if (!group.onReal && slotName.equals(group.defaultSlot) && group.slots.size() > 0) {
 						Slot s = group.slots.get(0);
 						group.slots.set(0, new Slot(slotName, texture, group));
@@ -107,6 +108,7 @@ public class TrinketSlots {
 					}
 					Slot newSlot = new Slot(slotName, texture, group);
 					newSlot.canEquip = canEquip;
+
 					if (!group.onReal && slotName.equals(group.defaultSlot) && group.slots.size() > 0) {
 						Slot s = group.slots.get(0);
 						group.slots.set(0, newSlot);
@@ -125,12 +127,14 @@ public class TrinketSlots {
 	 * @return List of {@code group:slot} names for all slots currently registered
 	 */
 	public static List<String> getAllSlotNames() {
-		List<String> names = new ArrayList<String>();
+		List<String> names = new ArrayList<>();
+
 		for(SlotGroup group: slotGroups){
 			for(Slot slot: group.slots){
 				names.add(group.getName() + ":" + slot.getName());
 			}
 		}
+
 		return names;
 	}
 
@@ -138,11 +142,9 @@ public class TrinketSlots {
 	 * @return List of all slots currently registered
 	 */
 	public static List<Slot> getAllSlots() {
-		List<Slot> slots = new ArrayList<Slot>();
+		List<Slot> slots = new ArrayList<>();
 		for(SlotGroup group: slotGroups){
-			for(Slot slot: group.slots){
-				slots.add(slot);
-			}
+			slots.addAll(group.slots);
 		}
 		return slots;
 	}
@@ -171,7 +173,7 @@ public class TrinketSlots {
 	}
 
 	public static class SlotGroup {
-		private String name;
+		private final String name;
 		public String defaultSlot;
 		public List<Slot> slots = new ArrayList<Slot>();
 		public boolean onReal = false;
@@ -187,8 +189,8 @@ public class TrinketSlots {
 	}
 
 	public static class Slot {
-		private SlotGroup group;
-		private String name;
+		private final SlotGroup group;
+		private final String name;
 		public boolean disableQuickMove = false;
 		public Identifier texture;
 		public BiFunction<Slot, ItemStack, Boolean> canEquip = (slot, stack) -> {

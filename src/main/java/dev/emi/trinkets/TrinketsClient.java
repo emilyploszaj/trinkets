@@ -10,13 +10,13 @@ import net.minecraft.screen.slot.Slot;
 import net.minecraft.util.Identifier;
 
 public class TrinketsClient extends TrinketsMain implements ClientModInitializer {
-	///Slots in the current hovered slot group
+	// Slots in the current hovered slot group
 	public static List<Slot> activeSlots;
-	///Current hovered slot group
+	// Current hovered slot group
 	public static SlotGroup slotGroup = null;
-	///Last slot group that had a trinket equipped through shift clicking
+	// Last slot group that had a trinket equipped through shift clicking
 	public static SlotGroup lastEquipped = null;
-	///Ticks left to slot the last equipped slot
+	// Ticks left to slot the last equipped slot
 	public static int displayEquipped = 0;
 
 	@Override

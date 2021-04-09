@@ -1,34 +1,32 @@
 package dev.emi.trinkets.mixin.client;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-
+import dev.emi.trinkets.TrinketInventoryRenderer;
+import dev.emi.trinkets.TrinketsClient;
+import dev.emi.trinkets.api.TrinketInventory;
+import dev.emi.trinkets.api.TrinketSlots;
+import dev.emi.trinkets.api.TrinketSlots.SlotGroup;
 import dev.emi.trinkets.mixin.SlotMixin;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screen.ingame.AbstractInventoryScreen;
+import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.item.ItemGroup;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
+import net.minecraft.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import dev.emi.trinkets.TrinketInventoryRenderer;
-import dev.emi.trinkets.TrinketsClient;
-import dev.emi.trinkets.api.TrinketInventory;
-import dev.emi.trinkets.api.TrinketSlots;
-import dev.emi.trinkets.api.TrinketSlots.SlotGroup;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.text.Text;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Trinkets slots in the creative inventory, noticably grosser than the survival inventory due to slot restrictions
@@ -39,7 +37,7 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
 	@Shadow
 	private static int selectedTab;
 
-	private List<Slot> creativeSlots = new ArrayList<Slot>();
+	private final List<Slot> creativeSlots = new ArrayList<>();
 	private int mouseX, mouseY;
 
 	public CreativeInventoryScreenMixin(CreativeInventoryScreen.CreativeScreenHandler screenHandler, PlayerInventory inventory, Text text) {
@@ -53,15 +51,16 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
 
 	@Inject(at = @At("TAIL"), method = "init")
 	public void init(CallbackInfo info) {
-		if(creativeSlots.size() == 0) return;
+		if (creativeSlots.size() == 0) return;
 		TrinketsClient.displayEquipped = 0;
 		List<TrinketSlots.Slot> trinketSlots = TrinketSlots.getAllSlots();
+
 		for (int i = 0; i < trinketSlots.size(); i++) {
 			if (!trinketSlots.get(i).getSlotGroup().onReal && trinketSlots.get(i).getSlotGroup().slots.get(0).equals(trinketSlots.get(i))) {
-				((SlotMixin) (Object) creativeSlots.get(i)).setXPosition(getGroupX(trinketSlots.get(i).getSlotGroup()) + 1);
-				((SlotMixin) (Object) creativeSlots.get(i)).setYPosition(getGroupY(trinketSlots.get(i).getSlotGroup()) + 1);
+				((SlotMixin) creativeSlots.get(i)).setXPosition(getGroupX(trinketSlots.get(i).getSlotGroup()) + 1);
+				((SlotMixin) creativeSlots.get(i)).setYPosition(getGroupY(trinketSlots.get(i).getSlotGroup()) + 1);
 			} else {
-				((SlotMixin) (Object) creativeSlots.get(i)).setXPosition(Integer.MIN_VALUE);
+				((SlotMixin) creativeSlots.get(i)).setXPosition(Integer.MIN_VALUE);
 			}
 		}
 	}
@@ -72,117 +71,125 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
 		List<TrinketSlots.Slot> trinketSlots = TrinketSlots.getAllSlots();
 		float relX = mouseX - this.x;
 		float relY = mouseY - this.y;
+
 		if (TrinketsClient.slotGroup == null || !inBounds(TrinketsClient.slotGroup, relX, relY, true)) {
 			if (TrinketsClient.slotGroup != null) {
 				for (int i = 0; i < trinketSlots.size(); i++) {
 					if (trinketSlots.get(i).getSlotGroup().getName().equals(TrinketsClient.slotGroup.getName())
 							&& (TrinketsClient.slotGroup.onReal || TrinketsClient.slotGroup.slots.get(0) != trinketSlots.get(i))) {
-						((SlotMixin) (Object) creativeSlots.get(i)).setXPosition(Integer.MIN_VALUE);
+						((SlotMixin) creativeSlots.get(i)).setXPosition(Integer.MIN_VALUE);
 					}
 				}
 			}
+
 			TrinketsClient.slotGroup = null;
+
 			for (SlotGroup group : TrinketSlots.slotGroups) {
 				if (inBounds(group, relX, relY, false) && group.slots.size() > 0) {
 					TrinketsClient.displayEquipped = 0;
 					TrinketsClient.slotGroup = group;
-					List<Slot> tSlots = new ArrayList<Slot>();
+					List<Slot> tSlots = new ArrayList<>();
+
 					for (int i = 0; i < trinketSlots.size(); i++) {
 						if (trinketSlots.get(i).getSlotGroup() == group)
 							tSlots.add(creativeSlots.get(i));
 					}
-					if (tSlots.size() == 0) return;
-					int groupX = getGroupX(group);
-					int groupY = getGroupY(group);
-					int count = group.slots.size();
-					int offset = 1;
-					if (group.onReal) {
-						count++;
-						offset = 0;
-					} else {
-						((SlotMixin) (Object) tSlots.get(0)).setXPosition(groupX + 1);
-						((SlotMixin) (Object) tSlots.get(0)).setYPosition(groupY + 1);
+
+					if (renameThisIfYouKnowWhatThisDoes(group, tSlots)) {
+						return;
 					}
-					int l = count / 2;
-					int r = count - l - 1;
-					for (int i = 0; i < l; i++) {
-						((SlotMixin) (Object) tSlots.get(i + offset)).setXPosition(groupX - (i + 1) * 18 + 1);
-						((SlotMixin) (Object) tSlots.get(i + offset)).setYPosition(groupY + 1);
-					}
-					for (int i = 0; i < r; i++) {
-						((SlotMixin) (Object) tSlots.get(i + l + offset)).setXPosition(groupX + (i + 1) * 18 + 1);
-						((SlotMixin) (Object) tSlots.get(i + l + offset)).setYPosition(groupY + 1);
-					}
-					TrinketsClient.activeSlots = new ArrayList<Slot>();
+
+					TrinketsClient.activeSlots = new ArrayList<>();
 					if (group.vanillaSlot != -1) {
 						TrinketsClient.activeSlots.add(this.getScreenHandler().getSlot(group.vanillaSlot));
 					}
-					for (Slot ts : tSlots) {
-						TrinketsClient.activeSlots.add(ts);
-					}
+
+					TrinketsClient.activeSlots.addAll(tSlots);
 					break;
 				}
 			}
 		}
 		if (TrinketsClient.displayEquipped > 0) {
 			TrinketsClient.displayEquipped--;
+
 			if (TrinketsClient.slotGroup == null) {
 				SlotGroup group = TrinketsClient.lastEquipped;
+
 				if (group != null) {
-					List<Slot> tSlots = new ArrayList<Slot>();
+					List<Slot> tSlots = new ArrayList<>();
+
 					for (int i = 0; i < trinketSlots.size(); i++) {
 						if (trinketSlots.get(i).getSlotGroup().getName().equals(group.getName())) {
 							tSlots.add(creativeSlots.get(i));
 						}
 					}
-					if (tSlots.size() == 0) return;
-					int groupX = getGroupX(group);
-					int groupY = getGroupY(group);
-					int count = group.slots.size();
-					int offset = 1;
-					if (group.onReal) {
-						count++;
-						offset = 0;
-					} else {
-						((SlotMixin) (Object) tSlots.get(0)).setXPosition(groupX + 1);
-						((SlotMixin) (Object) tSlots.get(0)).setYPosition(groupY + 1);
-					}
-					int l = count / 2;
-					int r = count - l - 1;
-					for (int i = 0; i < l; i++) {
-						((SlotMixin) (Object) tSlots.get(i + offset)).setXPosition(groupX - (i + 1) * 18 + 1);
-						((SlotMixin) (Object) tSlots.get(i + offset)).setYPosition(groupY + 1);
-					}
-					for (int i = 0; i < r; i++) {
-						((SlotMixin) (Object) tSlots.get(i + l + offset)).setXPosition(groupX + (i + 1) * 18 + 1);
-						((SlotMixin) (Object) tSlots.get(i + l + offset)).setYPosition(groupY + 1);
-					}
-					TrinketsClient.activeSlots = new ArrayList<Slot>();
+
+					if (renameThisIfYouKnowWhatThisDoes(group, tSlots)) return;
+
+					TrinketsClient.activeSlots = new ArrayList<>();
+
 					if (group.vanillaSlot != -1) {
 						TrinketsClient.activeSlots.add(this.getScreenHandler().getSlot(group.vanillaSlot));
 					}
-					for (Slot ts : tSlots) {
-						TrinketsClient.activeSlots.add(ts);
-					}
+
+					TrinketsClient.activeSlots.addAll(tSlots);
 				}
 			}
 		}
 		for (int i = 0; i < trinketSlots.size(); i++) {
 			if (((TrinketsClient.lastEquipped == null || TrinketsClient.displayEquipped <= 0 || !trinketSlots.get(i).getSlotGroup().getName().equals(TrinketsClient.lastEquipped.getName()))
-					&& (TrinketsClient.slotGroup == null || !trinketSlots.get(i).getSlotGroup().equals(TrinketsClient.slotGroup)))
+					&& (!trinketSlots.get(i).getSlotGroup().equals(TrinketsClient.slotGroup)))
 					&& (trinketSlots.get(i).getSlotGroup().onReal || trinketSlots.get(i).getSlotGroup().slots.get(0) != trinketSlots.get(i))) {
-				((SlotMixin) (Object) creativeSlots.get(i)).setXPosition(Integer.MIN_VALUE);
+				((SlotMixin) creativeSlots.get(i)).setXPosition(Integer.MIN_VALUE);
 			}
 		}
 	}
 
+	private boolean renameThisIfYouKnowWhatThisDoes(SlotGroup group, List<Slot> slots) {
+		if (slots.size() == 0) {
+			return true;
+		}
+
+		int groupX = getGroupX(group);
+		int groupY = getGroupY(group);
+		int count = group.slots.size();
+		int offset = 1;
+
+		if (group.onReal) {
+			count++;
+			offset = 0;
+		} else {
+			((SlotMixin) slots.get(0)).setXPosition(groupX + 1);
+			((SlotMixin) slots.get(0)).setYPosition(groupY + 1);
+		}
+
+		int l = count / 2;
+		int r = count - l - 1;
+
+		for (int i = 0; i < l; i++) {
+			((SlotMixin) slots.get(i + offset)).setXPosition(groupX - (i + 1) * 18 + 1);
+			((SlotMixin) slots.get(i + offset)).setYPosition(groupY + 1);
+		}
+
+		for (int i = 0; i < r; i++) {
+			((SlotMixin) slots.get(i + l + offset)).setXPosition(groupX + (i + 1) * 18 + 1);
+			((SlotMixin) slots.get(i + l + offset)).setYPosition(groupY + 1);
+		}
+
+		return false;
+	}
+
 	@Inject(at = @At(value = "TAIL"), method = "drawBackground")
 	protected void drawBackground(MatrixStack matrices, float f, int x, int y, CallbackInfo info) {
-		if (selectedTab != ItemGroup.INVENTORY.getIndex()) return;
+		if (selectedTab != ItemGroup.INVENTORY.getIndex()) {
+			return;
+		}
+
 		GlStateManager.disableLighting();
 		SlotGroup lastGroup = TrinketSlots.slotGroups.get(TrinketSlots.slotGroups.size() - 1);
 		int lastX = getGroupX(lastGroup);
 		int lastY = getGroupY(lastGroup);
+
 		if (lastX < 0) {
 			TrinketInventoryRenderer.renderExcessSlotGroups(matrices, this, this.client.getTextureManager(), this.x, this.y, lastX, lastY);
 		}
@@ -202,8 +209,10 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
 		} else {
 			return;
 		}
+
 		super.drawForeground(matrices, x, y);
 		RenderSystem.disableLighting();
+
 		for (SlotGroup group : TrinketSlots.slotGroups) {
 			if (!group.onReal && group.slots.size() > 0) {
 				this.client.getTextureManager().bindTexture(TrinketInventoryRenderer.MORE_SLOTS_TEX);
@@ -214,7 +223,10 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
 
 	@Inject(at = @At(value = "TAIL"), method = "render")
 	protected void render(MatrixStack matrices, int x, int y, float f, CallbackInfo info) {
-		if (selectedTab != ItemGroup.INVENTORY.getIndex()) return;
+		if (selectedTab != ItemGroup.INVENTORY.getIndex()) {
+			return;
+		}
+
 		mouseX = x;
 		mouseY = y;
 	}
@@ -224,9 +236,12 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
 		if (itemGroup == ItemGroup.INVENTORY) {
 			ScreenHandler screenHandler = this.getScreenHandler();
 			creativeSlots.clear();
+
 			for (int i = 46; i < screenHandler.slots.size(); i++) {
-				if(screenHandler.getSlot(i).inventory instanceof TrinketInventory) creativeSlots.add(screenHandler.getSlot(i));
+				if (screenHandler.getSlot(i).inventory instanceof TrinketInventory)
+					creativeSlots.add(screenHandler.getSlot(i));
 			}
+
 			init(info);
 		}
 	}
@@ -253,7 +268,10 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
 		if (group.vanillaSlot == 45) return 34;
 		if (group.getName().equals("hand")) return 15;
 		int j = 0;
-		if (TrinketSlots.slotGroups.get(5).slots.size() == 0) j = -1;
+		if (TrinketSlots.slotGroups.get(5).slots.size() == 0) {
+			j = -1;
+		}
+
 		for (int i = 6; i < TrinketSlots.slotGroups.size(); i++) {
 			if (TrinketSlots.slotGroups.get(i) == group) {
 				j += i;

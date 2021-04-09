@@ -1,13 +1,5 @@
 package dev.emi.trinkets.extern;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.function.Predicate;
-
 import dev.emi.trinkets.api.TrinketComponent;
 import dev.emi.trinkets.api.TrinketsApi;
 import net.minecraft.enchantment.Enchantment;
@@ -16,6 +8,13 @@ import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.function.Predicate;
 
 /**
  * Two different mods (and potentially more) want to mess with how mending items are picked, and so does trinkets
@@ -33,13 +32,11 @@ public class TrinketsMending {
 	public static List<Entry<EquipmentSlot, ItemStack>> getAllValidEquipment(Enchantment ench, LivingEntity entity, Predicate<ItemStack> condition) {
 		Map<EquipmentSlot, ItemStack> map = ench.getEquipment(entity);
 		// Trinkets will all be in the EquipmentSlot.MAINHAND since there really is no other option
-		List<Entry<EquipmentSlot, ItemStack>> list = new ArrayList<Entry<EquipmentSlot, ItemStack>>();
+		List<Entry<EquipmentSlot, ItemStack>> list = new ArrayList<>();
 		
 		// Add all damaged equipment with mending to the list
-		Iterator<Entry<EquipmentSlot, ItemStack>> iterator = map.entrySet().iterator();
-		while (iterator.hasNext()) {
-			Entry<EquipmentSlot, ItemStack> entry = (Entry<EquipmentSlot, ItemStack>) iterator.next();
-			ItemStack stack = (ItemStack) entry.getValue();
+		for (Entry<EquipmentSlot, ItemStack> entry : map.entrySet()) {
+			ItemStack stack = entry.getValue();
 			if (!stack.isEmpty() && EnchantmentHelper.getLevel(ench, stack) > 0 && condition.test(stack)) {
 				list.add(entry);
 			}
@@ -47,7 +44,7 @@ public class TrinketsMending {
 		
 		// Add all damaged trinkets with mending to the list
 		if (entity instanceof PlayerEntity) { // Should be
-			Map<EquipmentSlot, ItemStack> dummy = new HashMap<EquipmentSlot, ItemStack>();
+			Map<EquipmentSlot, ItemStack> dummy = new HashMap<>();
 			TrinketComponent comp = TrinketsApi.getTrinketComponent((PlayerEntity) entity);
 			for (int i = 0; i < comp.getInventory().size(); i++) {
 				ItemStack stack = comp.getInventory().getStack(i);
