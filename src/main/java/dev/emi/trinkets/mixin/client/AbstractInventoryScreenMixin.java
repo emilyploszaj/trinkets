@@ -1,4 +1,4 @@
-package dev.emi.trinkets.mixin;
+package dev.emi.trinkets.mixin.client;
 
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.util.math.MatrixStack;

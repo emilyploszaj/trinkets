@@ -1,4 +1,4 @@
-package dev.emi.trinkets.mixin;
+package dev.emi.trinkets.mixin.client;
 
 import dev.emi.trinkets.api.SlotGroups;
 import dev.emi.trinkets.api.Slots;
@@ -30,6 +30,7 @@ public abstract class ElytraFeatureRendererMixin<T extends LivingEntity, M exten
 		super(context);
 	}
 
+	@SuppressWarnings("UnresolvedMixinReference")
 	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;getEquippedStack(Lnet/minecraft/entity/EquipmentSlot;)Lnet/minecraft/item/ItemStack;"), method = "render")
 	public ItemStack getEquippedStackProxy(T entity, EquipmentSlot slot) {
 		if (entity instanceof PlayerEntity) {

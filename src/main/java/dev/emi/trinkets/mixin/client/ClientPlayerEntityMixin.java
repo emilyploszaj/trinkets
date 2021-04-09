@@ -1,4 +1,4 @@
-package dev.emi.trinkets.mixin;
+package dev.emi.trinkets.mixin.client;
 
 import com.mojang.authlib.GameProfile;
 

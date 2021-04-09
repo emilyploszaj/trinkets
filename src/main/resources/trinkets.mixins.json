@@ -15,13 +15,13 @@
 		"PlayerInventoryMixin"
 	],
 	"client": [
-		"ClientPlayerEntityMixin",
-		"InventoryScreenMixin",
-		"HandledScreenMixin",
-		"ElytraFeatureRendererMixin",
-		"AbstractInventoryScreenMixin",
-		"PlayerEntityRendererMixin",
-		"CreativeInventoryScreenMixin",
+		"client.ClientPlayerEntityMixin",
+		"client.InventoryScreenMixin",
+		"client.HandledScreenMixin",
+		"client.ElytraFeatureRendererMixin",
+		"client.AbstractInventoryScreenMixin",
+		"client.PlayerEntityRendererMixin",
+		"client.CreativeInventoryScreenMixin",
 		"ItemStackMixin"
 	],
 	"injectors": {

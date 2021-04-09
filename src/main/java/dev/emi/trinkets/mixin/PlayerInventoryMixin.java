@@ -18,7 +18,7 @@ import net.minecraft.item.ItemStack;
  * Ticks trinkets
  */
 @Mixin(PlayerInventory.class)
-public class PlayerInventoryMixin {
+public abstract class PlayerInventoryMixin {
 	@Shadow
 	@Final
 	public PlayerEntity player;
