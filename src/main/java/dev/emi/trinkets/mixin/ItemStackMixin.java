@@ -51,7 +51,6 @@ public abstract class ItemStackMixin {
 	private void getTooltip(PlayerEntity player, TooltipContext context, CallbackInfoReturnable<List<Text>> info, List<Text> list) {
 		TrinketsApi.getTrinketComponent(player).ifPresent(comp -> {
 			ItemStack self = (ItemStack) (Object) this;
-			TrinketInventory inv = comp.getInventory();
 			Set<SlotType> slots = Sets.newHashSet();
 			UUID uuid = UUID.randomUUID();
 			Map<SlotType, Multimap<EntityAttribute, EntityAttributeModifier>> attributes = Maps.newHashMap();
@@ -59,29 +58,31 @@ public abstract class ItemStackMixin {
 			boolean allAttributesSame = true;
 			int slotCount = 0;
 
-			for (int i = 0; i < inv.size(); i++) {
-				Pair<SlotType, Integer> pair = inv.posMap.get(i);
+			for (Map.Entry<String, Map<String, TrinketInventory>> group : comp.getInventory().entrySet()) {
+				for (Map.Entry<String, TrinketInventory> inventory : group.getValue().entrySet()) {
+					TrinketInventory trinketInventory = inventory.getValue();
+					SlotType slotType = trinketInventory.getSlotType();
+					for (int i = 0; i < trinketInventory.size(); i++) {
+						if (TrinketSlot.canInsert(self, new SlotReference(trinketInventory, i), player)) {
+							slots.add(slotType);
+							Optional<Trinket> optional = TrinketsApi.getTrinket((self).getItem());
 
-				if (TrinketSlot.canInsert(self, new SlotReference(pair.getLeft(), pair.getRight()), player)) {
-					slots.add(pair.getLeft());
-					Optional<Trinket> optional = TrinketsApi.getTrinket((self).getItem());
+							if (optional.isPresent()) {
+								Trinket trinket = optional.get();
+								Multimap<EntityAttribute, EntityAttributeModifier> map =
+										trinket.getModifiers(self, new SlotReference(trinketInventory, i), player, uuid);
 
-					if (optional.isPresent()) {
-						Trinket trinket = optional.get();
-						Multimap<EntityAttribute, EntityAttributeModifier> map =
-							trinket.getModifiers(self, new SlotReference(pair.getLeft(), pair.getRight()), player, uuid);
+								if (defaultAttribute == null) {
+									defaultAttribute = map;
+								} else if (allAttributesSame) {
+									allAttributesSame = areMapsEqual(defaultAttribute, map);
+								}
 
-						if (defaultAttribute == null) {
-							defaultAttribute = map;
-						} else if (allAttributesSame) {
-							allAttributesSame = areMapsEqual(defaultAttribute, map);
+								attributes.put(slotType, map);
+							}
 						}
-
-						attributes.put(pair.getLeft(), map);
 					}
-				}
 
-				if (pair.getRight() == 0) {
 					slotCount++;
 				}
 			}

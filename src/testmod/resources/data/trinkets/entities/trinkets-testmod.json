@@ -3,6 +3,7 @@
   "slots": [
     "hand/glove",
     "offhand/glove",
+    "offhand/ring",
     "head/hat",
     "chest/necklace",
     "legs/belt",

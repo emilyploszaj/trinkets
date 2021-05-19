@@ -1,96 +1,150 @@
 package dev.emi.trinkets.api;
 
-import dev.emi.trinkets.TrinketsMain;
 import dev.emi.trinkets.api.Trinket.SlotReference;
 import dev.onyxstudios.cca.api.v3.component.sync.AutoSyncedComponent;
+import net.fabricmc.fabric.api.util.NbtType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.util.Pair;
+import net.minecraft.util.collection.DefaultedList;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 
 public class LivingEntityTrinketComponent implements TrinketComponent, AutoSyncedComponent {
 
-	public TrinketInventory inventory;
+	public Map<String, Map<String, TrinketInventory>> inventory = new HashMap<>();
+	public Map<String, SlotGroup> groups = new HashMap<>();
+	public int size;
 	public LivingEntity entity;
 
 	public LivingEntityTrinketComponent(LivingEntity entity) {
 		this.entity = entity;
-		this.inventory = new TrinketInventory(this);
+		this.update();
+	}
+
+	@Override
+	public LivingEntity getEntity() {
+		return this.entity;
+	}
+
+	@Override
+	public Map<String, SlotGroup> getGroups() {
+		return this.groups;
+	}
+
+	@Override
+	public Map<String, Map<String, TrinketInventory>> getInventory() {
+		return inventory;
+	}
+
+	@Override
+	public void update() {
+		Map<String, SlotGroup> entitySlots = TrinketsApi.getEntitySlots(this.entity.getType());
+		int count = 0;
+		groups.clear();
+		Map<String, Map<String, TrinketInventory>> inventory = new HashMap<>();
+		for (Map.Entry<String, SlotGroup> group : entitySlots.entrySet()) {
+			String groupKey = group.getKey();
+			SlotGroup groupValue = group.getValue();
+			Map<String, TrinketInventory> oldGroup = this.inventory.get(groupKey);
+			groups.put(groupKey, groupValue);
+			for (Map.Entry<String, SlotType> slot : groupValue.getSlots().entrySet()) {
+				TrinketInventory inv = new TrinketInventory(slot.getValue(), this);
+				if (oldGroup != null) {
+					TrinketInventory oldInv = oldGroup.get(slot.getKey());
+					if (oldInv != null) {
+						for (int i = 0; i < oldInv.size(); i++) {
+							ItemStack stack = oldInv.getStack(i).copy();
+							if (i < inv.size()) {
+								inv.setStack(i, stack);
+							} else {
+								this.entity.dropStack(stack);
+							}
+						}
+					}
+				}
+				inventory.computeIfAbsent(group.getKey(), (k) -> new HashMap<>()).put(slot.getKey(), inv);
+				count += inv.size();
+			}
+		}
+		size = count;
+		this.inventory = inventory;
 	}
 
 	@Override
 	public void readFromNbt(CompoundTag tag) {
-		Set<String> keys = tag.getKeys();
-		for (Map.Entry<SlotType, Integer> entry : inventory.slotMap.entrySet()) {
-			String name = entry.getKey().getGroup() + ":" + entry.getKey().getName();
-			if (tag.contains(name, 9)) { // ListTag
-				ListTag list = tag.getList(name, 10);
-				int offset = entry.getValue();
-				for (int i = 0; i < list.size(); i++) {
-					CompoundTag c = list.getCompound(i);
-					ItemStack stack = ItemStack.fromTag(c);
-					if (i >= entry.getKey().getAmount()) {
-						if (!stack.isEmpty()) {
-							// If amount is lowered between loads of the entity drop excess
-							TrinketsMain.LOGGER
-									.info("[trinkets] Found item in slot that doesn't exist! Dropping on ground.");
-							entity.dropStack(stack);
+		DefaultedList<ItemStack> dropped = DefaultedList.of();
+		for (String groupKey : tag.getKeys()) {
+			CompoundTag groupTag = tag.getCompound(groupKey);
+			if (groupTag != null) {
+				Map<String, TrinketInventory> groupSlots = this.inventory.get(groupKey);
+				if (groupSlots != null) {
+					for (String slotKey : groupTag.getKeys()) {
+						CompoundTag slotTag = groupTag.getCompound(slotKey);
+						ListTag list = slotTag.getList("Items", NbtType.COMPOUND);
+						TrinketInventory inv = groupSlots.get(slotKey);
+						for (int i = 0; i < list.size(); i++) {
+							CompoundTag c = list.getCompound(i);
+							ItemStack stack = ItemStack.fromTag(c);
+							if (inv != null && i < inv.size()) {
+								inv.setStack(i, stack);
+							} else {
+								dropped.add(stack);
+							}
 						}
-					} else {
-						inventory.setStack(offset + i, stack);
+					}
+				} else {
+					for (String slotKey : groupTag.getKeys()) {
+						CompoundTag slotTag = groupTag.getCompound(slotKey);
+						ListTag list = slotTag.getList("Items", NbtType.COMPOUND);
+						for (int i = 0; i < list.size(); i++) {
+							CompoundTag c = list.getCompound(i);
+							dropped.add(ItemStack.fromTag(c));
+						}
 					}
 				}
 			}
-			keys.remove(name);
 		}
-		for (String key : keys) {
-			if (tag.getType(key) == 9) { // ListTag
-				ListTag list = tag.getList(key, 10);
-				for (int i = 0; i < list.size(); i++) {
-					CompoundTag c = list.getCompound(i);
-					ItemStack stack = ItemStack.fromTag(c);
-					if (!stack.isEmpty()) {
-						// If slot is removed between loads of the entity drop items
-						TrinketsMain.LOGGER
-								.info("[trinkets] Found item in slot that doesn't exist! Dropping on ground.");
-						entity.dropStack(stack);
-					}
-				}
-			}
+
+		for (ItemStack itemStack : dropped) {
+			this.entity.dropStack(itemStack);
 		}
 	}
 
 	@Override
 	public void writeToNbt(CompoundTag tag) {
-		for (Map.Entry<SlotType, Integer> entry : inventory.slotMap.entrySet()) {
-			ListTag list = new ListTag();
-			int offset = entry.getValue();
-			for (int i = 0; i < entry.getKey().getAmount(); i++) {
-				CompoundTag c = new CompoundTag();
-				inventory.getStack(offset + i).toTag(c);
-				list.add(c);
+		for (Map.Entry<String, Map<String, TrinketInventory>> group : this.getInventory().entrySet()) {
+			CompoundTag groupTag = new CompoundTag();
+			for (Map.Entry<String, TrinketInventory> slot : group.getValue().entrySet()) {
+				CompoundTag slotTag = new CompoundTag();
+				ListTag list = new ListTag();
+				TrinketInventory inv = slot.getValue();
+				for (int i = 0; i < inv.size(); i++) {
+					CompoundTag c = new CompoundTag();
+					inv.getStack(i).toTag(c);
+					list.add(c);
+				}
+				slotTag.put("Items", list);
+				groupTag.put(slot.getKey(), slotTag);
 			}
-			tag.put(entry.getKey().getGroup() + ":" + entry.getKey().getName(), list);
+			tag.put(group.getKey(), groupTag);
 		}
 	}
 
 	@Override
-	public TrinketInventory getInventory() {
-		return inventory;
-	}
-
-	@Override
 	public boolean isEquipped(Predicate<ItemStack> predicate) {
-		for (int i = 0; i < inventory.size(); i++) {
-			if (predicate.test(inventory.getStack(i))) {
-				return true;
+		for (Map.Entry<String, Map<String, TrinketInventory>> group : this.getInventory().entrySet()) {
+			for (Map.Entry<String, TrinketInventory> slotType : group.getValue().entrySet()) {
+				TrinketInventory inv = slotType.getValue();
+				for (int i = 0; i < inv.size(); i++) {
+					if (predicate.test(inv.getStack(i))) {
+						return true;
+					}
+				}
 			}
 		}
 		return false;
@@ -99,13 +153,23 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 	@Override
 	public List<Pair<SlotReference, ItemStack>> getEquipped(Predicate<ItemStack> predicate) {
 		List<Pair<SlotReference, ItemStack>> list = new ArrayList<>();
-		for (int i = 0; i < inventory.size(); i++) {
-			ItemStack stack = inventory.getStack(i);
-			if (predicate.test(stack)) {
-				Pair<SlotType, Integer> pair = inventory.posMap.get(i);
-				list.add(new Pair<>(new SlotReference(pair.getLeft(), pair.getRight()), stack));
+		forEach((slotReference, itemStack) -> {
+			if (predicate.test(itemStack)) {
+				list.add(new Pair<>(slotReference, itemStack));
+			}
+		});
+		return list;
+	}
+
+	@Override
+	public void forEach(BiConsumer<SlotReference, ItemStack> consumer) {
+		for (Map.Entry<String, Map<String, TrinketInventory>> group : this.getInventory().entrySet()) {
+			for (Map.Entry<String, TrinketInventory> slotType : group.getValue().entrySet()) {
+				TrinketInventory inv = slotType.getValue();
+				for (int i = 0; i < inv.size(); i++) {
+					consumer.accept(new SlotReference(inv, i), inv.getStack(i));
+				}
 			}
 		}
-		return list;
 	}
 }
