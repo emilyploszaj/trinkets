@@ -1,39 +1,32 @@
 package dev.emi.trinkets.data;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSyntaxException;
+import com.google.common.collect.Lists;
+import com.google.gson.*;
 import dev.emi.trinkets.TrinketsMain;
 import dev.emi.trinkets.TrinketsNetwork;
 import dev.emi.trinkets.api.SlotGroup;
 import dev.emi.trinkets.data.SlotLoader.GroupData;
 import dev.emi.trinkets.data.SlotLoader.SlotData;
 import io.netty.buffer.Unpooled;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import net.fabricmc.fabric.api.network.ServerSidePacketRegistry;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
+import net.fabricmc.fabric.api.resource.ResourceReloadListenerKeys;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.resource.SinglePreparationResourceReloadListener;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.tag.ServerTagManagerHolder;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.JsonHelper;
 import net.minecraft.util.profiler.Profiler;
 import net.minecraft.util.registry.Registry;
+
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.*;
 
 public class EntitySlotLoader extends SinglePreparationResourceReloadListener<Map<String, Map<String, Set<String>>>> implements IdentifiableResourceReloadListener {
 
@@ -67,7 +60,7 @@ public class EntitySlotLoader extends SinglePreparationResourceReloadListener<Ma
 								String slot = assignedSlot.getAsString();
 								String[] parsedSlot = slot.split("/");
 
-								if (parsedSlot.length > 2) {
+								if (parsedSlot.length != 2) {
 									TrinketsMain.LOGGER.error("Detected malformed slot assignment " + slot
 											+ "! Slots should be in the format 'group/slot'.");
 									continue;
@@ -83,7 +76,14 @@ public class EntitySlotLoader extends SinglePreparationResourceReloadListener<Ma
 
 							for (JsonElement entity : entities) {
 								String name = entity.getAsString();
-								Map<String, Set<String>> slots = map.computeIfAbsent(name, (k) -> new HashMap<>());
+								String id;
+
+								if (name.startsWith("#")) {
+									id = "#" + new Identifier(name.substring(1)).toString();
+								} else {
+									id = new Identifier(name).toString();
+								}
+								Map<String, Set<String>> slots = map.computeIfAbsent(id, (k) -> new HashMap<>());
 
 								if (replace) {
 									slots.clear();
@@ -108,45 +108,57 @@ public class EntitySlotLoader extends SinglePreparationResourceReloadListener<Ma
 	@Override
 	protected void apply(Map<String, Map<String, Set<String>>> loader, ResourceManager manager, Profiler profiler) {
 		Map<String, GroupData> slots = SlotLoader.INSTANCE.getSlots();
-		Map<String, Map<String, SlotGroup.Builder>> groupBuilders = new HashMap<>();
+		Map<EntityType<?>, Map<String, SlotGroup.Builder>> groupBuilders = new HashMap<>();
 
 		loader.forEach((entityName, groups) -> {
-			Map<String, SlotGroup.Builder> builders = groupBuilders.computeIfAbsent(entityName, (k) -> new HashMap<>());
-			groups.forEach((groupName, slotNames) -> {
-				GroupData group = slots.get(groupName);
+			Set<EntityType<?>> types = new HashSet<>();
 
-				if (group != null) {
-					SlotGroup.Builder builder = builders.computeIfAbsent(groupName, (k) -> {
-						if (group.getSlotId() == -1) {
-							return new SlotGroup.Builder(groupName, group.getDefaultSlot());
-						}
-						return new SlotGroup.Builder(groupName, group.getSlotId());
-					});
-					slotNames.forEach(slotName -> {
-						SlotData slotData = group.getSlot(slotName);
-
-						if (slotData != null) {
-							builder.addSlot(slotName, slotData.create(groupName, slotName));
-						} else {
-							TrinketsMain.LOGGER.error("[trinkets] Attempted to assign unknown slot " + slotName);
-						}
-					});
+			try {
+				if (entityName.startsWith("#")) {
+					types.addAll(ServerTagManagerHolder.getTagManager().getTag(Registry.ENTITY_TYPE_KEY,
+									new Identifier(entityName.substring(1)),
+									(identifier) -> new IllegalArgumentException("Unknown entity tag '" + identifier + "'"))
+									.values());
 				} else {
-					TrinketsMain.LOGGER.error("[trinkets] Attempted to assign slot from unknown group " + groupName);
+					types.add(Registry.ENTITY_TYPE.getOrEmpty(new Identifier(entityName))
+							.orElseThrow(() -> new IllegalArgumentException("Unknown entity '" + entityName + "'")));
 				}
-			});
+			} catch (IllegalArgumentException e) {
+				TrinketsMain.LOGGER.error("[trinkets] Attempted to assign unknown entity entry " + entityName);
+			}
+
+			for (EntityType<?> type : types) {
+				Map<String, SlotGroup.Builder> builders = groupBuilders.computeIfAbsent(type, (k) -> new HashMap<>());
+				groups.forEach((groupName, slotNames) -> {
+					GroupData group = slots.get(groupName);
+
+					if (group != null) {
+						SlotGroup.Builder builder = builders.computeIfAbsent(groupName, (k) -> {
+							if (group.getSlotId() == -1) {
+								return new SlotGroup.Builder(groupName, group.getDefaultSlot());
+							}
+							return new SlotGroup.Builder(groupName, group.getSlotId());
+						});
+						slotNames.forEach(slotName -> {
+							SlotData slotData = group.getSlot(slotName);
+
+							if (slotData != null) {
+								builder.addSlot(slotName, slotData.create(groupName, slotName));
+							} else {
+								TrinketsMain.LOGGER.error("[trinkets] Attempted to assign unknown slot " + slotName);
+							}
+						});
+					} else {
+						TrinketsMain.LOGGER.error("[trinkets] Attempted to assign slot from unknown group " + groupName);
+					}
+				});
+			}
 		});
 		this.slots.clear();
 
-		groupBuilders.forEach((entityName, groups) -> {
-			EntityType<?> type = Registry.ENTITY_TYPE.getOrEmpty(new Identifier(entityName)).orElse(null);
-
-			if (type != null) {
-				Map<String, SlotGroup> entitySlots = this.slots.computeIfAbsent(type, (k) -> new HashMap<>());
-				groups.forEach((groupName, groupBuilder) -> entitySlots.putIfAbsent(groupName, groupBuilder.build()));
-			} else {
-				TrinketsMain.LOGGER.error("[trinkets] Attempted to assign slots to unknown entity " + entityName);
-			}
+		groupBuilders.forEach((entity, groups) -> {
+			Map<String, SlotGroup> entitySlots = this.slots.computeIfAbsent(entity, (k) -> new HashMap<>());
+			groups.forEach((groupName, groupBuilder) -> entitySlots.putIfAbsent(groupName, groupBuilder.build()));
 		});
 	}
 
@@ -162,27 +174,31 @@ public class EntitySlotLoader extends SinglePreparationResourceReloadListener<Ma
 		this.slots.putAll(slots);
 	}
 
-	public void sync(PlayerEntity playerEntity) {
+	public void sync(ServerPlayerEntity playerEntity) {
 		PacketByteBuf buf = getSlotsPacket();
-		ServerSidePacketRegistry.INSTANCE.sendToPlayer(playerEntity, TrinketsNetwork.SYNC_SLOTS, buf);
+		ServerPlayNetworking.send(playerEntity, TrinketsNetwork.SYNC_SLOTS, buf);
 	}
 
-	public void sync(List<? extends PlayerEntity> players) {
+	public void sync(List<? extends ServerPlayerEntity> players) {
 		PacketByteBuf buf = getSlotsPacket();
-		players.forEach(player -> ServerSidePacketRegistry.INSTANCE.sendToPlayer(player, TrinketsNetwork.SYNC_SLOTS, buf));
+		players.forEach(player -> ServerPlayNetworking.send(player, TrinketsNetwork.SYNC_SLOTS, buf));
 	}
 
 	private PacketByteBuf getSlotsPacket() {
 		CompoundTag tag = new CompoundTag();
+
 		this.slots.forEach((entity, slotMap) -> {
 			CompoundTag slotsTag = new CompoundTag();
+
 			slotMap.forEach((id, slotGroup) -> {
 				CompoundTag groupTag = new CompoundTag();
 				slotGroup.write(groupTag);
 				slotsTag.put(id, groupTag);
 			});
+
 			tag.put(Registry.ENTITY_TYPE.getId(entity).toString(), slotsTag);
 		});
+
 		PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
 		buf.writeCompoundTag(tag);
 		return buf;
@@ -195,6 +211,6 @@ public class EntitySlotLoader extends SinglePreparationResourceReloadListener<Ma
 
 	@Override
 	public Collection<Identifier> getFabricDependencies() {
-		return Collections.singletonList(SlotLoader.ID);
+		return Lists.newArrayList(SlotLoader.ID, ResourceReloadListenerKeys.TAGS);
 	}
 }
