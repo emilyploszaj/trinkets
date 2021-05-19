@@ -129,8 +129,6 @@ public abstract class PlayerScreenHandlerMixin extends ScreenHandler implements 
 					slotHeights.computeIfAbsent(group, (k) -> new ArrayList<>()).add(new Pair<>(x, stacks.size()));
 					for (int i = 0; i < stacks.size(); i++) {
 						int y = (int) (pos.getRight() + (slotOffset / 2) * 18 * Math.pow(-1, slotOffset));
-						TrinketsMain.LOGGER.info(stacks.getSlotType().getGroup() + ":" + stacks.getSlotType().getName() + ":" + i);
-						TrinketsMain.LOGGER.info("X: " + x + " Y: " + y);
 						this.addSlot(new TrinketSlot(stacks, i, x, y, group, stacks.getSlotType(), i, groupOffset == 1 && i == 0));
 						slotOffset++;
 					}
