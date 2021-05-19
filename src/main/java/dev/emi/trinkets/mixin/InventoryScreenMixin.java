@@ -192,12 +192,13 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreen<Playe
 
 		Pair<Integer, Integer> pos = ((TrinketPlayerScreenHandler) handler).getGroupPos(group);
 		int slotsWidth = ((TrinketPlayerScreenHandler) handler).getSlotWidth(group) + 1;
+		List<Pair<Integer, Integer>> slotHeights = ((TrinketPlayerScreenHandler) handler).getSlotHeights(group);
 		if (group.getSlotId() == -1) slotsWidth -= 1;
 		int x = pos.getLeft() - 5 - (slotsWidth - 1) / 2 * 18;
 		int y = pos.getRight() - 5;
 		this.client.getTextureManager().bindTexture(MORE_SLOTS);
 
-		if (slotsWidth > 1) {
+		if (slotsWidth > 1 || slotHeights != null) {
 			drawTexture(matrices, x, y, 0, 0, 4, 26);
 
 			for (int i = 0; i < slotsWidth; i++) {
@@ -205,7 +206,6 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreen<Playe
 			}
 
 			drawTexture(matrices, x + slotsWidth * 18 + 4, y, 22, 0, 4, 26);
-			List<Pair<Integer, Integer>> slotHeights = ((TrinketPlayerScreenHandler) handler).getSlotHeights(group);
 			if (slotHeights != null) {
 				for (Pair<Integer, Integer> slotHeight : slotHeights) {
 					int height = slotHeight.getRight();

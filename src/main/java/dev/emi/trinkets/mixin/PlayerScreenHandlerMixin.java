@@ -131,7 +131,7 @@ public abstract class PlayerScreenHandlerMixin extends ScreenHandler implements 
 						int y = (int) (pos.getRight() + (slotOffset / 2) * 18 * Math.pow(-1, slotOffset));
 						TrinketsMain.LOGGER.info(stacks.getSlotType().getGroup() + ":" + stacks.getSlotType().getName() + ":" + i);
 						TrinketsMain.LOGGER.info("X: " + x + " Y: " + y);
-						this.addSlot(new TrinketSlot(stacks, i, x, y, group, stacks.getSlotType(), i, groupOffset == 1));
+						this.addSlot(new TrinketSlot(stacks, i, x, y, group, stacks.getSlotType(), i, groupOffset == 1 && i == 0));
 						slotOffset++;
 					}
 					groupOffset++;
