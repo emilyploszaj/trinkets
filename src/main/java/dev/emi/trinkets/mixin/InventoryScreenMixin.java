@@ -158,9 +158,11 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreen<Playe
 					int l = (slotsWidth - 1) / 2 * 18;
 					quickMoveBounds.add(new Rect2i(r.getX() - l - 5, r.getY() - 5, slotsWidth * 18 + 8, 26));
 					List<Pair<Integer, Integer>> slotHeights = ((TrinketPlayerScreenHandler) handler).getSlotHeights(group);
-					for (Pair<Integer, Integer> slotHeight : slotHeights) {
-						int height = slotHeight.getRight();
-						quickMoveBounds.add(new Rect2i(slotHeight.getLeft() - 5, r.getY() - (height - 1) / 2 * 18 - 5, 26, height + 8));
+					if (slotHeights != null) {
+						for (Pair<Integer, Integer> slotHeight : slotHeights) {
+							int height = slotHeight.getRight();
+							quickMoveBounds.add(new Rect2i(slotHeight.getLeft() - 5, r.getY() - (height - 1) / 2 * 18 - 5, 26, height + 8));
+						}
 					}
 				}
 			}
