@@ -116,11 +116,11 @@ public interface Trinket {
 	}
 
 	class SlotReference {
-		public SlotType slot;
+		public TrinketInventory inventory;
 		public int index;
 
-		public SlotReference(SlotType slot, int index) {
-			this.slot = slot;
+		public SlotReference(TrinketInventory inventory, int index) {
+			this.inventory = inventory;
 			this.index = index;
 		}
 	}

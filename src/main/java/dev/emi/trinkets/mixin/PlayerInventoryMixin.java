@@ -29,14 +29,8 @@ public abstract class PlayerInventoryMixin {
 
 	@Inject(at = @At("TAIL"), method = "updateItems")
 	public void updateItems(CallbackInfo info) {
-		TrinketsApi.getTrinketComponent(player).ifPresent(trinkets -> {
-			TrinketInventory inv = trinkets.getInventory();
-
-			for (int i = 0; i < inv.size(); i++) {
-				ItemStack stack = inv.getStack(i);
-				Pair<SlotType, Integer> p = inv.posMap.get(i);
-				TrinketsApi.getTrinket(stack.getItem()).ifPresent(trinket -> trinket.tick(stack, new Trinket.SlotReference(p.getLeft(), p.getRight()), player));
-			}
-		});
+		TrinketsApi.getTrinketComponent(player).ifPresent(trinkets ->
+				trinkets.forEach((slotReference, itemStack) ->
+						TrinketsApi.getTrinket(itemStack.getItem()).ifPresent(trinket -> trinket.tick(itemStack, slotReference, player))));
 	}
 }

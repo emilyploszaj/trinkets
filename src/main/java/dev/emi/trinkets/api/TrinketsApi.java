@@ -76,7 +76,8 @@ public class TrinketsApi {
 		TrinketsApi.registerQuickMovePredicate(new Identifier(TrinketsMain.MOD_ID, "always"), (stack, slot, entity) -> TriState.TRUE);
 		TrinketsApi.registerQuickMovePredicate(new Identifier(TrinketsMain.MOD_ID, "never"), (stack, slot, entity) -> TriState.FALSE);
 		TrinketsApi.registerValidatorPredicate(new Identifier(TrinketsMain.MOD_ID, "tag"), (stack, slot, entity) -> {
-			Tag<Item> tag = ItemTags.getTagGroup().getTagOrEmpty(new Identifier("trinkets", slot.slot.getGroup() + "/" + slot.slot.getName()));
+			SlotType slotType = slot.inventory.getSlotType();
+			Tag<Item> tag = ItemTags.getTagGroup().getTagOrEmpty(new Identifier("trinkets", slotType.getGroup() + "/" + slotType.getName()));
 			Tag<Item> all = ItemTags.getTagGroup().getTagOrEmpty(new Identifier("trinkets", "all"));
 			if (tag.contains(stack.getItem()) || all.contains(stack.getItem())) {
 				return TriState.TRUE;

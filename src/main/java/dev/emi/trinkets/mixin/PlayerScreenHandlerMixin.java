@@ -4,6 +4,7 @@ import com.mojang.datafixers.util.Function3;
 import dev.emi.trinkets.TrinketPlayerScreenHandler;
 import dev.emi.trinkets.TrinketSlot;
 import dev.emi.trinkets.TrinketsClient;
+import dev.emi.trinkets.TrinketsMain;
 import dev.emi.trinkets.api.SlotGroup;
 import dev.emi.trinkets.api.SlotType;
 import dev.emi.trinkets.api.Trinket.SlotReference;
@@ -29,9 +30,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * Adds trinket slots to the player's screen handler
@@ -47,9 +46,15 @@ public abstract class PlayerScreenHandlerMixin extends ScreenHandler implements 
 	@Unique
 	private final Map<SlotGroup, Pair<Integer, Integer>> groupPos = new HashMap<>();
 	@Unique
+	private final Map<SlotGroup, List<Pair<Integer, Integer>>> slotHeights = new HashMap<>();
+	@Unique
+	private final Map<SlotGroup, Integer> slotWidths = new HashMap<>();
+	@Unique
 	private int trinketSlotStart = 0;
 	@Unique
 	private int trinketSlotEnd = 0;
+	@Unique
+	private PlayerInventory inventory;
 
 	protected PlayerScreenHandlerMixin(ScreenHandlerType<?> type, int syncId) {
 		super(type, syncId);
@@ -57,82 +62,99 @@ public abstract class PlayerScreenHandlerMixin extends ScreenHandler implements 
 
 	@Inject(at = @At("RETURN"), method = "<init>")
 	public void init(PlayerInventory playerInv, boolean onServer, PlayerEntity owner, CallbackInfo info) {
+		this.inventory = playerInv;
 		updateTrinketSlots();
 	}
 
 	@Override
 	public void updateTrinketSlots() {
-		groupPos.clear();
-
-		while (trinketSlotStart < trinketSlotEnd) {
-			slots.remove(trinketSlotStart);
-			trinketSlotEnd--;
-		}
-
-		Map<Integer, SlotGroup> ids = new HashMap<>();
-		for (SlotGroup group : TrinketsApi.getPlayerSlots().values()) {
-			if (group.getSlotId() != -1) {
-				ids.put(group.getSlotId(), group);
-			}
-		}
-
-		for (Slot slot : this.slots) {
-			if (ids.containsKey(slot.id) && slot.inventory instanceof PlayerInventory) {
-				groupPos.put(ids.get(slot.id), new Pair<>(slot.x, slot.y));
-			}
-		}
-
-		int groupNum = 1; // Start at 1 because offhand exists
-		if (TrinketsApi.getPlayerSlots().containsKey("hand")) { // Hardcode the hand slot group to always be above the offhand, if it exists
-			groupNum++;
-			groupPos.put(TrinketsApi.getPlayerSlots().get("hand"), new Pair<>(77, 44));
-		}
-
-		for (SlotGroup group : TrinketsApi.getPlayerSlots().values()) {
-			if (!groupPos.containsKey(group)) {
-				int x = 77;
-				int y;
-				if (groupNum >= 4) {
-					x = -4 - (groupNum / 4) * 18;
-					y = 7 + (groupNum % 4) * 18;
-				} else {
-					y = 62 - groupNum * 18;
-				}
-				groupPos.put(group, new Pair<>(x, y));
-				groupNum++;
-			}
-		}
-
-		trinketSlotStart = slots.size();
-
 		TrinketsApi.getTrinketComponent(owner).ifPresent(trinkets -> {
-			TrinketInventory inv = trinkets.getInventory();
-			inv.update();
-
-			for (int i = 0; i < inv.size(); i++) {
-				Pair<SlotType, Integer> p = inv.posMap.get(i);
-				SlotGroup group = TrinketsApi.getPlayerSlots().get(p.getLeft().getGroup());
-				int groupPos = inv.groupOffsetMap.get(p.getLeft()) + p.getRight();
-				int groupAmount = inv.groupOccupancyMap.get(group);
-
-				if (group.getSlotId() == -1) {
-					groupAmount += 1;
-					groupPos += 1;
-				}
-
-				groupPos = groupPos - groupAmount / 2;
-				if (group.getSlotId() != -1 && groupPos >= 0) groupPos++;
-				Pair<Integer, Integer> pos = getGroupPos(group);
-				this.addSlot(new TrinketSlot(inv, i, pos.getLeft() + groupPos * 18, pos.getRight(), group, p.getLeft(), p.getRight(), groupPos == 0, p.getRight() == 0));
+			trinkets.update();
+			Map<String, SlotGroup> groups = trinkets.getGroups();
+			groupPos.clear();
+			while (trinketSlotStart < trinketSlotEnd) {
+				slots.remove(trinketSlotStart);
+				trinketSlotEnd--;
 			}
-		});
 
-		trinketSlotEnd = slots.size();
+			for (SlotGroup group : groups.values()) {
+				int id = group.getSlotId();
+				if (id != -1 && this.slots.size() > id) {
+					Slot slot = this.slots.get(id);
+					if (slot.inventory instanceof PlayerInventory) {
+						groupPos.put(group, new Pair<>(slot.x, slot.y));
+					}
+				}
+			}
+
+			int groupNum = 1; // Start at 1 because offhand exists
+			SlotGroup hand = groups.get("hand");
+			if (hand != null) { // Hardcode the hand slot group to always be above the offhand, if it exists
+				groupNum++;
+				groupPos.put(hand, new Pair<>(77, 44));
+			}
+
+			for (SlotGroup group : groups.values()) {
+				if (!groupPos.containsKey(group)) {
+					int x = 77;
+					int y;
+					if (groupNum >= 4) {
+						x = -4 - (groupNum / 4) * 18;
+						y = 7 + (groupNum % 4) * 18;
+					} else {
+						y = 62 - groupNum * 18;
+					}
+					groupPos.put(group, new Pair<>(x, y));
+					groupNum++;
+				}
+			}
+
+			trinketSlotStart = slots.size();
+			slotWidths.clear();
+			slotHeights.clear();
+			for (Map.Entry<String, Map<String, TrinketInventory>> entry : trinkets.getInventory().entrySet()) {
+				String groupId = entry.getKey();
+				SlotGroup group = groups.get(groupId);
+				int groupOffset = 1;
+
+				if (group.getSlotId() != -1) {
+					groupOffset++;
+				}
+				int width = 0;
+				Pair<Integer, Integer> pos = getGroupPos(group);
+				for (Map.Entry<String, TrinketInventory> slot : entry.getValue().entrySet()) {
+					TrinketInventory stacks = slot.getValue();
+					int slotOffset = 1;
+					int x = (int) (pos.getLeft() + (groupOffset / 2) * 18 * Math.pow(-1, groupOffset));
+					slotHeights.computeIfAbsent(group, (k) -> new ArrayList<>()).add(new Pair<>(x, stacks.size()));
+					for (int i = 0; i < stacks.size(); i++) {
+						int y = (int) (pos.getRight() + (slotOffset / 2) * 18 * Math.pow(-1, slotOffset));
+						this.addSlot(new TrinketSlot(stacks, i, x, y, group, stacks.getSlotType(), i, groupOffset == 1 && i == 0));
+						slotOffset++;
+					}
+					groupOffset++;
+					width++;
+				}
+				slotWidths.put(group, width);
+			}
+
+			trinketSlotEnd = slots.size();
+		});
 	}
 	
 	@Override
 	public Pair<Integer, Integer> getGroupPos(SlotGroup group) {
 		return groupPos.get(group);
+	}
+
+	@Override
+	public List<Pair<Integer, Integer>> getSlotHeights(SlotGroup group) {
+		return slotHeights.get(group);
+	}
+
+	@Override
+	public int getSlotWidth(SlotGroup group) {
+		return slotWidths.get(group);
 	}
 
 	@Inject(at = @At("HEAD"), method = "close")
@@ -157,51 +179,47 @@ public abstract class PlayerScreenHandlerMixin extends ScreenHandler implements 
 					info.setReturnValue(stack);
 				}
 			} else if (index >= 9 && index < 45) {
-				TrinketsApi.getTrinketComponent(owner).ifPresent(comp -> {
-					TrinketInventory inv = comp.getInventory();
-
-					for (int i = 0; i < inv.size(); i++) {
-						if (!slots.get(trinketSlotStart + i).canInsert(stack)) {
-							continue;
-						}
-
-						Pair<SlotType, Integer> pair = inv.posMap.get(i);
-						SlotType type = pair.getLeft();
-						SlotReference ref = new SlotReference(type, pair.getRight());
-						TriState state = TriState.DEFAULT;
-
-						for (Identifier id : type.getValidators()) {
-							Optional<Function3<ItemStack, SlotReference, LivingEntity, TriState>> function = TrinketsApi.getValidatorPredicate(id);
-							if (function.isPresent()) {
-								state = function.get().apply(stack, ref, owner);
+				TrinketsApi.getTrinketComponent(owner).ifPresent(trinkets ->
+						trinkets.forEach((slotReference, itemStack) -> {
+							int i = slotReference.index;
+							if (!slots.get(trinketSlotStart + i).canInsert(stack)) {
+								return;
 							}
-							if (state != TriState.DEFAULT) {
-								break;
-							}
-						}
 
-						if (state == TriState.DEFAULT) {
-							Optional<Function3<ItemStack, SlotReference, LivingEntity, TriState>> quickMovePredicate =
-									TrinketsApi.getQuickMovePredicate(new Identifier("trinkets", "always"));
-
-							if (quickMovePredicate.isPresent()) {
-								// FIXME: state is unused
-								state = quickMovePredicate.get().apply(stack, ref, owner);
-							}
-						}
-
-						if (this.insertItem(stack, trinketSlotStart + i, trinketSlotStart + i + 1, false)) {
-							if (owner.world.isClient) {
-								TrinketsClient.quickMoveTimer = 20;
-								TrinketsClient.quickMoveGroup = TrinketsApi.getPlayerSlots().get(type.getGroup());
-
-								if (ref.index > 0) {
-									TrinketsClient.quickMoveType = type;
+							TriState state = TriState.DEFAULT;
+							SlotType type = slotReference.inventory.getSlotType();
+							for (Identifier id : type.getValidators()) {
+								Optional<Function3<ItemStack, SlotReference, LivingEntity, TriState>> function = TrinketsApi.getValidatorPredicate(id);
+								if (function.isPresent()) {
+									state = function.get().apply(stack, slotReference, owner);
+								}
+								if (state != TriState.DEFAULT) {
+									break;
 								}
 							}
-						}
-					}
-				});
+
+							if (state == TriState.DEFAULT) {
+								Optional<Function3<ItemStack, SlotReference, LivingEntity, TriState>> quickMovePredicate =
+										TrinketsApi.getQuickMovePredicate(new Identifier("trinkets", "always"));
+
+								if (quickMovePredicate.isPresent()) {
+									// FIXME: state is unused
+									state = quickMovePredicate.get().apply(stack, slotReference, owner);
+								}
+							}
+
+							if (this.insertItem(stack, trinketSlotStart + i, trinketSlotStart + i + 1, false)) {
+								if (owner.world.isClient) {
+									TrinketsClient.quickMoveTimer = 20;
+									TrinketsClient.quickMoveGroup = TrinketsApi.getPlayerSlots().get(type.getGroup());
+
+									if (i > 0) {
+										TrinketsClient.quickMoveType = type;
+									}
+								}
+							}
+						})
+				);
 			}
 		}
 	}

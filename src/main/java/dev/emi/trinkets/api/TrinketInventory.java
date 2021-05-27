@@ -4,76 +4,44 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventories;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.Pair;
 import net.minecraft.util.collection.DefaultedList;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class TrinketInventory implements Inventory {
 
-	public LivingEntityTrinketComponent component;
-	public DefaultedList<ItemStack> stacks = DefaultedList.of();
-	// This is a really weird solution to the problem of quickly getting slot info, I plan on changing it to something more reasonable
-	public Map<SlotType, Integer> slotMap = new HashMap<SlotType, Integer>();
-	public Map<SlotType, Integer> groupOffsetMap = new HashMap<SlotType, Integer>();
-	public Map<SlotGroup, Integer> groupOccupancyMap = new HashMap<SlotGroup, Integer>();
-	public Map<Integer, Pair<SlotType, Integer>> posMap = new HashMap<Integer, Pair<SlotType, Integer>>();
-	// Four of them? This is getting out of hand
+	private final SlotType slotType;
+	private final TrinketComponent component;
 
-	public int size;
+	public DefaultedList<ItemStack> stacks;
 
-	public TrinketInventory(LivingEntityTrinketComponent comp) {
+	public TrinketInventory(SlotType slotType, TrinketComponent comp) {
 		this.component = comp;
-		this.update();
+		this.slotType = slotType;
+		this.stacks = DefaultedList.ofSize(slotType.getAmount(), ItemStack.EMPTY);
 	}
 
-	public void update() {
-		Map<String, SlotGroup> groups = TrinketsApi.getEntitySlots(component.entity.getType());
-		int i = 0;
-		for (Map.Entry<String, SlotGroup> group : groups.entrySet()) {
-			int groupOffset = 0;
-			Map<String, SlotType> slots = group.getValue().getSlots();
-			for (Map.Entry<String, SlotType> slot : slots.entrySet()) {
-				slotMap.put(slot.getValue(), i);
-				groupOffsetMap.put(slot.getValue(), groupOffset);
-				for (int j = 0; j < slot.getValue().getAmount(); j++) {
-					posMap.put(i + j, new Pair<>(slot.getValue(), j));
-				}
-				i += slot.getValue().getAmount();
-				groupOffset += slot.getValue().getAmount();
-			}
-			groupOccupancyMap.put(group.getValue(), groupOffset);
-		}
-		size = i;
-		DefaultedList<ItemStack> newStacks = DefaultedList.ofSize(size, ItemStack.EMPTY);
-		int k = 0;
-		for (; k < stacks.size(); k++) {
+	public SlotType getSlotType() {
+		return this.slotType;
+	}
 
-			if (k < newStacks.size()) {
-				newStacks.set(k, stacks.get(k));
-			} else {
-				component.entity.dropStack(stacks.get(k));
-			}
-		}
-		stacks = newStacks;
+	public TrinketComponent getComponent() {
+		return this.component;
 	}
 
 	@Override
 	public void clear() {
-		for (int i = 0; i < size; i++) {
+		for (int i = 0; i < this.size(); i++) {
 			stacks.set(i, ItemStack.EMPTY);
 		}
 	}
 
 	@Override
 	public int size() {
-		return size;
+		return this.stacks.size();
 	}
 
 	@Override
 	public boolean isEmpty() {
-		for (int i = 0; i < size; i++) {
+		for (int i = 0; i < this.size(); i++) {
 			if (!stacks.get(i).isEmpty()) {
 				return false;
 			}

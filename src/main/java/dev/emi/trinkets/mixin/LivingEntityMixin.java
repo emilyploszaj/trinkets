@@ -32,7 +32,7 @@ import java.util.UUID;
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin extends Entity {
 	@Unique
-	private final Map<Integer, ItemStack> lastEquippedTrinkets = new HashMap<>();
+	private final Map<String, ItemStack> lastEquippedTrinkets = new HashMap<>();
 	
 	@Shadow
 	public abstract AttributeContainer getAttributes();
@@ -45,69 +45,60 @@ public abstract class LivingEntityMixin extends Entity {
 	public void dropInventory(CallbackInfo info) {
 		boolean keepInv = this.world.getGameRules().getBoolean(GameRules.KEEP_INVENTORY);
 		LivingEntity entity = (LivingEntity) (Object) this;
+		TrinketsApi.getTrinketComponent(entity).ifPresent(trinkets -> trinkets.forEach((slotReference, stack) -> {
+			if (stack.isEmpty()) {
+				return;
+			}
 
-		TrinketsApi.getTrinketComponent(entity).ifPresent(trinkets -> {
-			TrinketInventory inv = trinkets.getInventory();
+			DropRule dropRule = TrinketsApi.getTrinket(stack.getItem())
+					.map(trinket -> trinket.getDropRule(stack, slotReference, entity)).orElse(DropRule.DEFAULT);
+			TrinketInventory inventory = slotReference.inventory;
 
-			for (int i = 0; i < inv.size(); i++) {
-				ItemStack stack = inv.getStack(i);
-				if (stack.isEmpty()) {
-					continue;
-				}
+			if (dropRule == DropRule.DEFAULT) {
+				dropRule = inventory.getSlotType().getDropRule();
+			}
 
-				Pair<SlotType, Integer> p = inv.posMap.get(i);
-				TrinketEnums.DropRule dropRule = TrinketsApi.getTrinket(stack.getItem())
-						.map(trinket -> trinket.getDropRule(stack, new Trinket.SlotReference(p.getLeft(), p.getRight()), entity)).orElse(DropRule.DEFAULT);
-
-				if (dropRule == TrinketEnums.DropRule.DEFAULT) {
-					dropRule = p.getLeft().getDropRule();
-				}
-
-				if (dropRule == TrinketEnums.DropRule.DEFAULT) {
-					if (keepInv && this.getType() == EntityType.PLAYER) {
-						dropRule = TrinketEnums.DropRule.ALWAYS_KEEP;
+			if (dropRule == DropRule.DEFAULT) {
+				if (keepInv && this.getType() == EntityType.PLAYER) {
+					dropRule = DropRule.ALWAYS_KEEP;
+				} else {
+					if (EnchantmentHelper.hasVanishingCurse(stack)) {
+						dropRule = DropRule.DESTROY;
 					} else {
-						if (EnchantmentHelper.hasVanishingCurse(stack)) {
-							dropRule = TrinketEnums.DropRule.DESTROY;
-						} else {
-							dropRule = TrinketEnums.DropRule.ALWAYS_DROP;
-						}
+						dropRule = DropRule.ALWAYS_DROP;
 					}
 				}
-
-				switch (dropRule) {
-					case ALWAYS_DROP:
-						dropStack(stack);
-						// Fallthrough
-					case DESTROY:
-						inv.setStack(i, ItemStack.EMPTY);
-						break;
-					default:
-						break;
-				}
 			}
-		});
+
+			switch (dropRule) {
+				case ALWAYS_DROP:
+					dropStack(stack);
+					// Fallthrough
+				case DESTROY:
+					inventory.setStack(slotReference.index, ItemStack.EMPTY);
+					break;
+				default:
+					break;
+			}
+		}));
 	}
 
 	@Inject(at = @At("TAIL"), method = "tick")
 	private void tick(CallbackInfo info) {
 		LivingEntity entity = (LivingEntity) (Object) this;
-		Optional<TrinketComponent> optional = TrinketsApi.getTrinketComponent(entity);
-
-		if (optional.isPresent()) {
-			TrinketComponent comp = optional.get();
-			TrinketInventory inv = comp.getInventory();
-
-			for (int i = 0; i < inv.size(); i++) {
-				ItemStack oldStack = getOldStack(i);
-				ItemStack newStack = inv.getStack(i);
+		TrinketsApi.getTrinketComponent(entity).ifPresent(trinkets -> {
+			Map<String, ItemStack> newlyEquippedTrinkets = new HashMap<>();
+			trinkets.forEach((ref, stack) -> {
+				TrinketInventory inventory = ref.inventory;
+				SlotType slotType = inventory.getSlotType();
+				int index = ref.index;
+				ItemStack oldStack = getOldStack(slotType, index);
+				ItemStack newStack = inventory.getStack(index);
 
 				if (!ItemStack.areEqual(newStack, oldStack)) {
-					Pair<SlotType, Integer> pair = inv.posMap.get(i);
-					SlotReference ref = new SlotReference(pair.getLeft(), pair.getRight());
 
 					if (!this.world.isClient) {
-						UUID uuid = UUID.nameUUIDFromBytes((ref.index + ref.slot.getName() + ref.slot.getGroup()).getBytes());
+						UUID uuid = UUID.nameUUIDFromBytes((ref.index + slotType.getName() + slotType.getGroup()).getBytes());
 
 						if (!oldStack.isEmpty()) {
 							Optional<Trinket> trinket = TrinketsApi.getTrinket(oldStack.getItem());
@@ -119,25 +110,22 @@ public abstract class LivingEntityMixin extends Entity {
 							trinket.ifPresent(value -> this.getAttributes().addTemporaryModifiers(value.getModifiers(newStack, ref, entity, uuid)));
 						}
 					}
-					lastEquippedTrinkets.put(i, newStack.copy());
+					newlyEquippedTrinkets.put(slotType.getGroup() + ":" + slotType.getName() + ":" + index, newStack.copy());
 
 					if (!newStack.isItemEqual(oldStack)) {
 						TrinketsApi.getTrinket(oldStack.getItem()).ifPresent(trinket -> trinket.onUnequip(oldStack, ref, entity));
 						TrinketsApi.getTrinket(newStack.getItem()).ifPresent(trinket -> trinket.onEquip(newStack, ref, entity));
 					}
 				}
-			}
-		}
+			});
+
+			lastEquippedTrinkets.clear();
+			lastEquippedTrinkets.putAll(newlyEquippedTrinkets);
+		});
 	}
 
 	@Unique
-	private ItemStack getOldStack(int i) {
-		if (lastEquippedTrinkets.containsKey(i)) {
-			ItemStack stack = lastEquippedTrinkets.get(i);
-			if (stack != null) {
-				return stack;
-			}
-		}
-		return ItemStack.EMPTY;
+	private ItemStack getOldStack(SlotType type, int index) {
+		return lastEquippedTrinkets.getOrDefault(type.getGroup() + ":" + type.getName() + ":" + index, ItemStack.EMPTY);
 	}
 }

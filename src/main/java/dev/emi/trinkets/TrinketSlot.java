@@ -6,7 +6,6 @@ import dev.emi.trinkets.api.Trinket.SlotReference;
 import net.fabricmc.fabric.api.util.TriState;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.util.Identifier;
@@ -20,26 +19,20 @@ public class TrinketSlot extends Slot {
 	private final SlotGroup group;
 	private final SlotType type;
 	private final boolean alwaysVisible;
-	private final boolean baseType;
 	private final int slotOffset;
+	private final TrinketInventory trinketInventory;
 
-	public TrinketSlot(Inventory inventory, int index, int x, int y, SlotGroup group, SlotType type, int slotOffset, boolean alwaysVisible, boolean baseType) {
+	public TrinketSlot(TrinketInventory inventory, int index, int x, int y, SlotGroup group, SlotType type, int slotOffset, boolean alwaysVisible) {
 		super(inventory, index, x, y);
 		this.group = group;
 		this.type = type;
 		this.slotOffset = slotOffset;
 		this.alwaysVisible = alwaysVisible;
-		this.baseType = baseType;
+		this.trinketInventory = inventory;
 	}
 
 	public boolean isTrinketFocused() {
-		if (TrinketsClient.activeGroup == group) {
-			return baseType || TrinketsClient.activeType == type;
-		}
-		if (TrinketsClient.quickMoveGroup == group) {
-			return baseType || TrinketsClient.quickMoveType == type;
-		}
-		return false;
+		return TrinketsClient.activeGroup == group || TrinketsClient.quickMoveGroup == group;
 	}
 
 	public Identifier getBackgroundIdentifier() {
@@ -48,14 +41,13 @@ public class TrinketSlot extends Slot {
 
 	@Override
 	public boolean canInsert(ItemStack stack) {
-		LivingEntity entity = ((TrinketInventory) inventory).component.entity;
-		return canInsert(stack, new SlotReference(type, slotOffset), entity);
+		return canInsert(stack, new SlotReference(trinketInventory, slotOffset), trinketInventory.getComponent().getEntity());
 	}
 
 	public static boolean canInsert(ItemStack stack, SlotReference slotRef, LivingEntity entity) {
 		TriState state = TriState.DEFAULT;
 
-		for (Identifier id : slotRef.slot.getValidators()) {
+		for (Identifier id : slotRef.inventory.getSlotType().getValidators()) {
 			Optional<Function3<ItemStack, SlotReference, LivingEntity, TriState>> function = TrinketsApi.getValidatorPredicate(id);
 
 			if (function.isPresent()) {
@@ -87,8 +79,7 @@ public class TrinketSlot extends Slot {
 	@Override
 	public boolean canTakeItems(PlayerEntity player) {
 		ItemStack stack = this.getStack();
-		Optional<Trinket> trinket = TrinketsApi.getTrinket(stack.getItem());
-		return trinket.map(value -> value.canUnequip(stack, new SlotReference(type, slotOffset), player)).orElse(true);
+		return TrinketsApi.getTrinket(stack.getItem()).map(value -> value.canUnequip(stack, new SlotReference(trinketInventory, slotOffset), player)).orElse(true);
 	}
 
 	@Override
