@@ -109,8 +109,7 @@ public class SlotLoader extends SinglePreparationResourceReloadListener<Map<Stri
 	static class SlotData {
 
 		private int order = 0;
-		private int amount = 1;
-		private int locked = 0;
+		private int amount = 0;
 		private String icon = "";
 		private final Set<String> quickMove = new HashSet<>();
 		private final Set<String> validators = new HashSet<>();
@@ -120,7 +119,7 @@ public class SlotLoader extends SinglePreparationResourceReloadListener<Map<Stri
 			Identifier finalIcon = new Identifier(icon);
 			Set<Identifier> finalValidators = validators.stream().map(Identifier::new).collect(Collectors.toSet());
 			Set<Identifier> finalQuickMove = quickMove.stream().map(Identifier::new).collect(Collectors.toSet());
-			return new SlotType(group, name, order, amount, locked, finalIcon, finalQuickMove, finalValidators, DropRule.valueOf(dropRule));
+			return new SlotType(group, name, order, amount, finalIcon, finalQuickMove, finalValidators, DropRule.valueOf(dropRule));
 		}
 
 		void read(JsonObject jsonObject) {
@@ -129,11 +128,8 @@ public class SlotLoader extends SinglePreparationResourceReloadListener<Map<Stri
 			int jsonOrder = JsonHelper.getInt(jsonObject, "order", order);
 			order = replace ? jsonOrder : Math.max(jsonOrder, order);
 
-			int jsonAmount = JsonHelper.getInt(jsonObject, "amount", amount);
+			int jsonAmount = JsonHelper.getInt(jsonObject, "amount", 1);
 			amount = replace ? jsonAmount : Math.max(jsonAmount, amount);
-
-			int jsonLocked = JsonHelper.getInt(jsonObject, "locked", locked);
-			locked = replace ? jsonLocked : Math.max(jsonLocked, locked);
 
 			icon = JsonHelper.getString(jsonObject, "icon", icon);
 

@@ -19,19 +19,17 @@ public class SlotType {
 	private final String name;
 	private final int order;
 	private final int amount;
-	private final int locked;
 	private final Identifier icon;
 	private final Set<Identifier> quickMove;
 	private final Set<Identifier> validators;
 	private final DropRule dropRule;
 
-	public SlotType(String group, String name, int order, int amount, int locked, Identifier icon,
+	public SlotType(String group, String name, int order, int amount, Identifier icon,
 			Set<Identifier> quickMove, Set<Identifier> validators, DropRule dropRule) {
 		this.group = group;
 		this.name = name;
 		this.order = order;
 		this.amount = amount;
-		this.locked = locked;
 		this.icon = icon;
 		this.quickMove = quickMove;
 		this.validators = validators;
@@ -52,10 +50,6 @@ public class SlotType {
 
 	public int getAmount() {
 		return amount;
-	}
-
-	public int getLocked() {
-		return locked;
 	}
 
 	public Identifier getIcon() {
@@ -84,7 +78,6 @@ public class SlotType {
 		tag.putString("Name", name);
 		tag.putInt("Order", order);
 		tag.putInt("Amount", amount);
-		tag.putInt("Locked", locked);
 		tag.putString("Icon", icon.toString());
 		ListTag quickMoveList = new ListTag();
 
@@ -109,7 +102,6 @@ public class SlotType {
 		String name = slotData.getString("Name");
 		int order = slotData.getInt("Order");
 		int amount = slotData.getInt("Amount");
-		int locked = slotData.getInt("Locked");
 		Identifier icon = new Identifier(slotData.getString("Icon"));
 		ListTag quickMoveList = slotData.getList("QuickMove", NbtType.STRING);
 		Set<Identifier> quickMove = new HashSet<>();
@@ -129,7 +121,7 @@ public class SlotType {
 		if (TrinketEnums.DropRule.has(dropRuleName)) {
 			dropRule = TrinketEnums.DropRule.valueOf(dropRuleName);
 		}
-		return new SlotType(group, name, order, amount, locked, icon, quickMove, validators, dropRule);
+		return new SlotType(group, name, order, amount, icon, quickMove, validators, dropRule);
 	}
 
 	@Override

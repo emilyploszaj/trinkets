@@ -124,6 +124,7 @@ public abstract class PlayerScreenHandlerMixin extends ScreenHandler implements 
 				Pair<Integer, Integer> pos = getGroupPos(group);
 				for (Map.Entry<String, TrinketInventory> slot : entry.getValue().entrySet()) {
 					TrinketInventory stacks = slot.getValue();
+					if (stacks.size() == 0) continue;
 					int slotOffset = 1;
 					int x = (int) (pos.getLeft() + (groupOffset / 2) * 18 * Math.pow(-1, groupOffset));
 					slotHeights.computeIfAbsent(group, (k) -> new ArrayList<>()).add(new Pair<>(x, stacks.size()));
