@@ -40,6 +40,14 @@ public class TestTrinket extends TrinketItem implements TrinketRenderer {
 	}
 
 	@Override
+	public Multimap<String, EntityAttributeModifier> getSlotModifiers(ItemStack stack, SlotReference slot, LivingEntity entity, UUID uuid) {
+		Multimap<String, EntityAttributeModifier> modifiers = super.getSlotModifiers(stack, slot, entity, uuid);
+		EntityAttributeModifier slotModifier = new EntityAttributeModifier(uuid, "trinkets-testmod:extra_ring", 1, EntityAttributeModifier.Operation.ADDITION);
+		modifiers.put("offhand:ring", slotModifier);
+		return modifiers;
+	}
+
+	@Override
 	@Environment(EnvType.CLIENT)
 	public void render(ItemStack stack, SlotReference slotReference, EntityModel<? extends LivingEntity> contextModel, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, LivingEntity entity, float limbAngle, float limbDistance, float tickDelta, float animationProgress, float headYaw, float headPitch) {
 		BipedEntityModel<LivingEntity> model = this.getModel();

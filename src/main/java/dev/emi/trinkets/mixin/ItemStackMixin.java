@@ -53,9 +53,9 @@ public abstract class ItemStackMixin {
 			ItemStack self = (ItemStack) (Object) this;
 			Set<SlotType> slots = Sets.newHashSet();
 			UUID uuid = UUID.randomUUID();
-			Map<SlotType, Multimap<EntityAttribute, EntityAttributeModifier>> attributes = Maps.newHashMap();
-			Multimap<EntityAttribute, EntityAttributeModifier> defaultAttribute = null;
-			boolean allAttributesSame = true;
+			Map<SlotType, Pair<Multimap<EntityAttribute, EntityAttributeModifier>, Multimap<String, EntityAttributeModifier>>> modifiers = Maps.newHashMap();
+			Pair<Multimap<EntityAttribute, EntityAttributeModifier>, Multimap<String, EntityAttributeModifier>> defaultModifier = null;
+			boolean allModifiersSame = true;
 			int slotCount = 0;
 
 			for (Map.Entry<String, Map<String, TrinketInventory>> group : comp.getInventory().entrySet()) {
@@ -71,14 +71,19 @@ public abstract class ItemStackMixin {
 								Trinket trinket = optional.get();
 								Multimap<EntityAttribute, EntityAttributeModifier> map =
 										trinket.getModifiers(self, new SlotReference(trinketInventory, i), player, uuid);
+								Multimap<String, EntityAttributeModifier> slotMap =
+										trinket.getSlotModifiers(self, new SlotReference(trinketInventory, i), player, uuid);
+								Pair<Multimap<EntityAttribute, EntityAttributeModifier>, Multimap<String, EntityAttributeModifier>> combined = new Pair<>(map, slotMap);
 
-								if (defaultAttribute == null) {
-									defaultAttribute = map;
-								} else if (allAttributesSame) {
-									allAttributesSame = areMapsEqual(defaultAttribute, map);
+								if (defaultModifier == null) {
+									defaultModifier = combined;
+								} else if (allModifiersSame) {
+									allModifiersSame = arePairsEqual(defaultModifier, combined);
 								}
 
-								attributes.put(slotType, map);
+								Pair<Multimap<EntityAttribute, EntityAttributeModifier>, Multimap<String, EntityAttributeModifier>> existing = modifiers.computeIfAbsent(slotType, (k) -> combined);
+								existing.getLeft().putAll(map);
+								existing.getRight().putAll(slotMap);
 							}
 						}
 					}
@@ -102,23 +107,51 @@ public abstract class ItemStackMixin {
 				}
 			}
 
-			if (attributes.size() > 0) {
-				if (allAttributesSame) {
-					if (defaultAttribute != null && !defaultAttribute.isEmpty()) {
+			if (modifiers.size() > 0) {
+				if (allModifiersSame) {
+					if (defaultModifier != null && (!defaultModifier.getRight().isEmpty() || !defaultModifier.getLeft().isEmpty())) {
 						list.add(new TranslatableText("trinkets.tooltip.attributes.all").formatted(Formatting.GRAY));
-						addAttributes(list, defaultAttribute);
+						addAttributes(list, defaultModifier.getLeft());
+						addSlotModifiers(list, defaultModifier.getRight());
 					}
 				} else {
-					for (SlotType type : attributes.keySet()) {
-						if (attributes.get(type).isEmpty()) continue;
-
+					for (SlotType type : modifiers.keySet()) {
+						Pair<Multimap<EntityAttribute, EntityAttributeModifier>, Multimap<String, EntityAttributeModifier>> modifierPair = modifiers.get(type);
+						Multimap<EntityAttribute, EntityAttributeModifier> attributes = modifierPair.getLeft();
+						Multimap<String, EntityAttributeModifier> slotModifiers = modifierPair.getRight();
 						list.add(new TranslatableText("trinkets.tooltip.attributes.single",
 								type.getTranslation().formatted(Formatting.BLUE)).formatted(Formatting.GRAY));
-						addAttributes(list, attributes.get(type));
+						addAttributes(list, attributes);
+						addSlotModifiers(list, slotModifiers);
 					}
 				}
 			}
 		});
+	}
+
+	@Unique
+	private void addSlotModifiers(List<Text> list, Multimap<String, EntityAttributeModifier> map) {
+		if (!map.isEmpty()) {
+			for (Map.Entry<String, EntityAttributeModifier> entry : map.entries()) {
+				EntityAttributeModifier modifier = entry.getValue();
+				double g = modifier.getValue();
+
+				if (modifier.getOperation() != EntityAttributeModifier.Operation.ADDITION) {
+					g *= 100.0D;
+				}
+
+				String[] key = entry.getKey().split(":");
+				String group = key[0];
+				String slot = key[1];
+
+				if (g > 0.0D) {
+					list.add(new TranslatableText("attribute.modifier.plus." + modifier.getOperation().getId(), MODIFIER_FORMAT.format(g), new TranslatableText("trinkets.slot." + group + "." + slot)).formatted(Formatting.BLUE));
+				} else if (g < 0.0D) {
+					g *= -1.0D;
+					list.add(new TranslatableText("attribute.modifier.take." + modifier.getOperation().getId(), MODIFIER_FORMAT.format(g), new TranslatableText("trinkets.slot." + group + "." + slot)).formatted(Formatting.RED));
+				}
+			}
+		}
 	}
 
 	// `equals` doesn't test thoroughly
@@ -148,7 +181,10 @@ public abstract class ItemStackMixin {
 	}
 
 	@Unique
-	private boolean areMapsEqual(Multimap<EntityAttribute, EntityAttributeModifier> map1, Multimap<EntityAttribute, EntityAttributeModifier> map2) {
+	private boolean arePairsEqual(Pair<Multimap<EntityAttribute, EntityAttributeModifier>, Multimap<String, EntityAttributeModifier>> pair1,
+								  Pair<Multimap<EntityAttribute, EntityAttributeModifier>, Multimap<String, EntityAttributeModifier>> pair2) {
+		Multimap<EntityAttribute, EntityAttributeModifier> map1 = pair1.getLeft();
+		Multimap<EntityAttribute, EntityAttributeModifier> map2 = pair2.getLeft();
 		if (map1.size() != map2.size()) {
 			return false;
 		} else {
@@ -175,6 +211,36 @@ public abstract class ItemStackMixin {
 				}
 			}
 		}
+
+		Multimap<String, EntityAttributeModifier> slotMap1 = pair1.getRight();
+		Multimap<String, EntityAttributeModifier> slotMap2 = pair2.getRight();
+		if (slotMap1.size() != slotMap2.size()) {
+			return false;
+		} else {
+			for (String key : slotMap1.keySet()) {
+				if (!slotMap2.containsKey(key)) {
+					return false;
+				}
+
+				Collection<EntityAttributeModifier> col1 = slotMap1.get(key);
+				Collection<EntityAttributeModifier> col2 = slotMap2.get(key);
+
+				if (col1.size() != col2.size()) {
+					return false;
+				} else {
+					Iterator<EntityAttributeModifier> iter = col2.iterator();
+
+					for (EntityAttributeModifier modifier : col1) {
+						EntityAttributeModifier eam = iter.next();
+
+						if (!modifier.toTag().equals(eam.toTag())) {
+							return false;
+						}
+					}
+				}
+			}
+		}
+
 		return true;
 	}
 }
