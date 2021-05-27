@@ -9,11 +9,11 @@ import java.util.List;
  * Interface for putting methods onto the player's screen handler
  */
 public interface TrinketPlayerScreenHandler {
-	
+
 	/**
 	 * Called to inform the player's slot handler that it needs to remove and re-add its trinket slots to reflect new changes
 	 */
-	void updateTrinketSlots();
+	void updateTrinketSlots(boolean slotsChanged);
 
 	Pair<Integer, Integer> getGroupPos(SlotGroup group);
 

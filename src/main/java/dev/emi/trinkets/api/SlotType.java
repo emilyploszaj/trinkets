@@ -10,6 +10,7 @@ import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 public class SlotType {
@@ -129,5 +130,18 @@ public class SlotType {
 			dropRule = TrinketEnums.DropRule.valueOf(dropRuleName);
 		}
 		return new SlotType(group, name, order, amount, locked, icon, quickMove, validators, dropRule);
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		SlotType slotType = (SlotType) o;
+		return group.equals(slotType.group) && name.equals(slotType.name);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(group, name);
 	}
 }
