@@ -63,13 +63,13 @@ public abstract class PlayerScreenHandlerMixin extends ScreenHandler implements 
 	@Inject(at = @At("RETURN"), method = "<init>")
 	public void init(PlayerInventory playerInv, boolean onServer, PlayerEntity owner, CallbackInfo info) {
 		this.inventory = playerInv;
-		updateTrinketSlots();
+		updateTrinketSlots(true);
 	}
 
 	@Override
-	public void updateTrinketSlots() {
+	public void updateTrinketSlots(boolean slotsChanged) {
 		TrinketsApi.getTrinketComponent(owner).ifPresent(trinkets -> {
-			trinkets.update();
+			if (slotsChanged) trinkets.update();
 			Map<String, SlotGroup> groups = trinkets.getGroups();
 			groupPos.clear();
 			while (trinketSlotStart < trinketSlotEnd) {

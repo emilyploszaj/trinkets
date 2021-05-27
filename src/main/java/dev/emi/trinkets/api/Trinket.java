@@ -107,6 +107,16 @@ public interface Trinket {
 		return map;
 	}
 
+	/**
+	 * Returns the Slot Modifiers for a stack in a slot. Child implementations should remain pure.
+	 * Keys should be in the format "group:slot".
+	 *
+	 * @param uuid The UUID to use for creating attributes
+	 */
+	default Multimap<String, EntityAttributeModifier> getSlotModifiers(ItemStack stack, SlotReference slot, LivingEntity entity, UUID uuid) {
+		return HashMultimap.create();
+	}
+
 	default void onBreak(ItemStack stack, SlotReference slot, LivingEntity entity) {
 		// TODO
 	}
