@@ -3,6 +3,8 @@ package dev.emi.trinkets.data;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.gson.*;
+
+import dev.emi.trinkets.TrinketPlayerScreenHandler;
 import dev.emi.trinkets.TrinketsMain;
 import dev.emi.trinkets.TrinketsNetwork;
 import dev.emi.trinkets.api.SlotGroup;
@@ -13,10 +15,10 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.fabricmc.fabric.api.resource.ResourceReloadListenerKeys;
 import net.minecraft.entity.EntityType;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.resource.ResourceManager;
-import net.minecraft.resource.SinglePreparationResourceReloadListener;
+import net.minecraft.resource.SinglePreparationResourceReloader;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.tag.ServerTagManagerHolder;
 import net.minecraft.util.Identifier;
@@ -28,7 +30,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.*;
 
-public class EntitySlotLoader extends SinglePreparationResourceReloadListener<Map<String, Map<String, Set<String>>>> implements IdentifiableResourceReloadListener {
+public class EntitySlotLoader extends SinglePreparationResourceReloader<Map<String, Map<String, Set<String>>>> implements IdentifiableResourceReloadListener {
 
 	public static final EntitySlotLoader INSTANCE = new EntitySlotLoader();
 
@@ -134,10 +136,7 @@ public class EntitySlotLoader extends SinglePreparationResourceReloadListener<Ma
 
 					if (group != null) {
 						SlotGroup.Builder builder = builders.computeIfAbsent(groupName, (k) -> {
-							if (group.getSlotId() == -1) {
-								return new SlotGroup.Builder(groupName, group.getDefaultSlot());
-							}
-							return new SlotGroup.Builder(groupName, group.getSlotId());
+							return new SlotGroup.Builder(groupName, group.getSlotId(), group.getOrder());
 						});
 						slotNames.forEach(slotName -> {
 							SlotData slotData = group.getSlot(slotName);
@@ -182,16 +181,17 @@ public class EntitySlotLoader extends SinglePreparationResourceReloadListener<Ma
 	public void sync(List<? extends ServerPlayerEntity> players) {
 		PacketByteBuf buf = getSlotsPacket();
 		players.forEach(player -> ServerPlayNetworking.send(player, TrinketsNetwork.SYNC_SLOTS, buf));
+		players.forEach(player -> ((TrinketPlayerScreenHandler) player.playerScreenHandler).updateTrinketSlots(true));
 	}
 
 	private PacketByteBuf getSlotsPacket() {
-		CompoundTag tag = new CompoundTag();
+		NbtCompound tag = new NbtCompound();
 
 		this.slots.forEach((entity, slotMap) -> {
-			CompoundTag slotsTag = new CompoundTag();
+			NbtCompound slotsTag = new NbtCompound();
 
 			slotMap.forEach((id, slotGroup) -> {
-				CompoundTag groupTag = new CompoundTag();
+				NbtCompound groupTag = new NbtCompound();
 				slotGroup.write(groupTag);
 				slotsTag.put(id, groupTag);
 			});
@@ -200,7 +200,7 @@ public class EntitySlotLoader extends SinglePreparationResourceReloadListener<Ma
 		});
 
 		PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
-		buf.writeCompoundTag(tag);
+		buf.writeNbt(tag);
 		return buf;
 	}
 

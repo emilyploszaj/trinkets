@@ -6,9 +6,7 @@ import dev.emi.trinkets.TrinketsClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.screen.slot.Slot;
-import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
@@ -31,8 +29,8 @@ public abstract class HandledScreenMixin extends Screen {
 	@Unique
 	private static final Identifier BLANK_BACK = new Identifier("trinkets", "textures/gui/blank_back.png");
 
-	protected HandledScreenMixin(Text title) {
-		super(title);
+	private HandledScreenMixin() {
+		super(null);
 	}
 
 	@Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/render/item/ItemRenderer;zOffset:F",
@@ -41,16 +39,14 @@ public abstract class HandledScreenMixin extends Screen {
 		// Items are drawn at z + 150 (normal items are drawn at 250)
 		// Item tooltips (count, item bar) are drawn at z + 200 (normal itmes are drawn at 300)
 		// Inventory tooltip is drawn at 400
-		if (slot instanceof TrinketSlot) {
+		if (slot instanceof TrinketSlot ts) {
 			assert this.client != null;
-			TrinketSlot ts = (TrinketSlot) slot;
 			Identifier id = ts.getBackgroundIdentifier();
 
 			if (slot.getStack().isEmpty() && id != null) {
-				// TODO apply this transformation at parse?
-				this.client.getTextureManager().bindTexture(new Identifier(id.getNamespace(), "textures/" + id.getPath() + ".png"));
+				RenderSystem.setShaderTexture(0, id);
 			} else {
-				this.client.getTextureManager().bindTexture(BLANK_BACK);
+				RenderSystem.setShaderTexture(0, BLANK_BACK);
 			}
 
 			RenderSystem.enableDepthTest();
@@ -62,21 +58,25 @@ public abstract class HandledScreenMixin extends Screen {
 				this.itemRenderer.zOffset = 170F;
 			} else {
 				drawTexture(matrices, slot.x, slot.y, 0, 0, 0, 16, 16, 16, 16);
-				this.client.getTextureManager().bindTexture(MORE_SLOTS);
+				RenderSystem.setShaderTexture(0, MORE_SLOTS);
 				drawTexture(matrices, slot.x - 1, slot.y - 1, 0, 4, 4, 18, 18, 256, 256);
 			}
 		}
+		if (TrinketsClient.activeGroup != null && TrinketsClient.activeGroup.getSlotId() == slot.id) {
+			this.itemRenderer.zOffset = 170F;
+		}
+
 	}
 
 	@Inject(at = @At("HEAD"), method = "isPointOverSlot", cancellable = true)
 	private void isPointOverSlot(Slot slot, double pointX, double pointY, CallbackInfoReturnable<Boolean> info) {
 		if (TrinketsClient.activeGroup != null) {
-			if (slot instanceof TrinketSlot) {
-				if (!((TrinketSlot) slot).isTrinketFocused()) {
+			if (slot instanceof TrinketSlot ts) {
+				if (!ts.isTrinketFocused()) {
 					info.setReturnValue(false);
 				}
 			} else {
-				if (!(slot.inventory instanceof PlayerInventory) || slot.id != TrinketsClient.activeGroup.getSlotId()) {
+				if (slot.id != TrinketsClient.activeGroup.getSlotId()) {
 					info.setReturnValue(false);
 				}
 			}

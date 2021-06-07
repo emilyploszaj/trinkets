@@ -16,7 +16,7 @@ public class TrinketsTest implements ModInitializer {
 	@Override
 	public void onInitialize() {
 		LOGGER.info("[Trinkets Testmod] test mod was initialized!");
-		TEST_TRINKET = Registry.register(Registry.ITEM, identifier("test"), new TestTrinket(new Item.Settings().maxCount(1)));
+		TEST_TRINKET = Registry.register(Registry.ITEM, identifier("test"), new TestTrinket(new Item.Settings().maxCount(1).maxDamage(100)));
 	}
 
 	private static Identifier identifier(String id) {

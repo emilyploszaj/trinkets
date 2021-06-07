@@ -1,3 +1,4 @@
 {
-  "icon": "trinkets:item/empty_trinket_slot_belt"
+  "icon": "trinkets:gui/slots/belt",
+  "order": -1024
 }

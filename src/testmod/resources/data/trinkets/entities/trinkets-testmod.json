@@ -2,11 +2,27 @@
   "entities": ["player"],
   "slots": [
     "hand/glove",
+    "hand/ring",
     "offhand/glove",
     "offhand/ring",
     "head/hat",
+    "head/face",
     "chest/necklace",
+    "chest/back",
+    "chest/cape",
     "legs/belt",
-    "feet/shoes"
+    "feet/aglet",
+    "feet/shoes",
+    "extra1/charm",
+    "extra2/charm",
+    "extra3/charm",
+    "extra4/charm",
+    "extra5/charm",
+    "extra6/charm",
+    "extra7/charm",
+    "extra8/charm",
+    "extra9/charm",
+    "extra10/charm",
+    "extra11/charm"
   ]
 }

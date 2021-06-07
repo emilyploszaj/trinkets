@@ -42,8 +42,7 @@
 	"custom": {
 		"cardinal-components": [
 			"trinkets:trinkets"
-		],
-		"modmenu:api": true
+		]
 	},
 	"mixins": [
 		"trinkets.mixins.json"

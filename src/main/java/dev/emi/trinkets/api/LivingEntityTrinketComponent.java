@@ -1,21 +1,28 @@
 package dev.emi.trinkets.api;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.BiConsumer;
+import java.util.function.Predicate;
+
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import dev.emi.trinkets.api.Trinket.SlotReference;
+
 import dev.onyxstudios.cca.api.v3.component.sync.AutoSyncedComponent;
 import net.fabricmc.fabric.api.util.NbtType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtList;
 import net.minecraft.util.Pair;
 import net.minecraft.util.collection.DefaultedList;
-
-import java.util.*;
-import java.util.function.BiConsumer;
-import java.util.function.Predicate;
 
 public class LivingEntityTrinketComponent implements TrinketComponent, AutoSyncedComponent {
 
@@ -67,7 +74,11 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 							if (i < inv.size()) {
 								inv.setStack(i, stack);
 							} else {
-								this.entity.dropStack(stack);
+								if (this.entity instanceof PlayerEntity player) {
+									player.getInventory().offerOrDrop(stack);
+								} else {
+									this.entity.dropStack(stack);
+								}
 							}
 						}
 					}
@@ -97,7 +108,7 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 	@Override
 	public void addTemporaryModifiers(Multimap<String, EntityAttributeModifier> modifiers) {
 		for (Map.Entry<String, Collection<EntityAttributeModifier>> entry : modifiers.asMap().entrySet()) {
-			String[] keys = entry.getKey().split(":");
+			String[] keys = entry.getKey().split("/");
 			String group = keys[0];
 			String slot = keys[1];
 			for (EntityAttributeModifier modifier : entry.getValue()) {
@@ -115,7 +126,7 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 	@Override
 	public void addPersistentModifiers(Multimap<String, EntityAttributeModifier> modifiers) {
 		for (Map.Entry<String, Collection<EntityAttributeModifier>> entry : modifiers.asMap().entrySet()) {
-			String[] keys = entry.getKey().split(":");
+			String[] keys = entry.getKey().split("/");
 			String group = keys[0];
 			String slot = keys[1];
 			for (EntityAttributeModifier modifier : entry.getValue()) {
@@ -133,7 +144,7 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 	@Override
 	public void removeModifiers(Multimap<String, EntityAttributeModifier> modifiers) {
 		for (Map.Entry<String, Collection<EntityAttributeModifier>> entry : modifiers.asMap().entrySet()) {
-			String[] keys = entry.getKey().split(":");
+			String[] keys = entry.getKey().split("/");
 			String group = keys[0];
 			String slot = keys[1];
 			for (EntityAttributeModifier modifier : entry.getValue()) {
@@ -153,7 +164,7 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 		Multimap<String, EntityAttributeModifier> result = HashMultimap.create();
 		for (Map.Entry<String, Map<String, TrinketInventory>> group : this.getInventory().entrySet()) {
 			for (Map.Entry<String, TrinketInventory> slotType : group.getValue().entrySet()) {
-				result.putAll(group.getKey() + ":" + slotType.getKey(), slotType.getValue().getModifiers().values());
+				result.putAll(group.getKey() + "/" + slotType.getKey(), slotType.getValue().getModifiers().values());
 			}
 		}
 
@@ -170,16 +181,16 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 	}
 
 	@Override
-	public void readFromNbt(CompoundTag tag) {
+	public void readFromNbt(NbtCompound tag) {
 		DefaultedList<ItemStack> dropped = DefaultedList.of();
 		for (String groupKey : tag.getKeys()) {
-			CompoundTag groupTag = tag.getCompound(groupKey);
+			NbtCompound groupTag = tag.getCompound(groupKey);
 			if (groupTag != null) {
 				Map<String, TrinketInventory> groupSlots = this.inventory.get(groupKey);
 				if (groupSlots != null) {
 					for (String slotKey : groupTag.getKeys()) {
-						CompoundTag slotTag = groupTag.getCompound(slotKey);
-						ListTag list = slotTag.getList("Items", NbtType.COMPOUND);
+						NbtCompound slotTag = groupTag.getCompound(slotKey);
+						NbtList list = slotTag.getList("Items", NbtType.COMPOUND);
 						TrinketInventory inv = groupSlots.get(slotKey);
 
 						if (inv != null) {
@@ -187,8 +198,8 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 						}
 
 						for (int i = 0; i < list.size(); i++) {
-							CompoundTag c = list.getCompound(i);
-							ItemStack stack = ItemStack.fromTag(c);
+							NbtCompound c = list.getCompound(i);
+							ItemStack stack = ItemStack.fromNbt(c);
 							if (inv != null && i < inv.size()) {
 								inv.setStack(i, stack);
 							} else {
@@ -198,11 +209,11 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 					}
 				} else {
 					for (String slotKey : groupTag.getKeys()) {
-						CompoundTag slotTag = groupTag.getCompound(slotKey);
-						ListTag list = slotTag.getList("Items", NbtType.COMPOUND);
+						NbtCompound slotTag = groupTag.getCompound(slotKey);
+						NbtList list = slotTag.getList("Items", NbtType.COMPOUND);
 						for (int i = 0; i < list.size(); i++) {
-							CompoundTag c = list.getCompound(i);
-							dropped.add(ItemStack.fromTag(c));
+							NbtCompound c = list.getCompound(i);
+							dropped.add(ItemStack.fromNbt(c));
 						}
 					}
 				}
@@ -215,16 +226,16 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 	}
 
 	@Override
-	public void writeToNbt(CompoundTag tag) {
+	public void writeToNbt(NbtCompound tag) {
 		for (Map.Entry<String, Map<String, TrinketInventory>> group : this.getInventory().entrySet()) {
-			CompoundTag groupTag = new CompoundTag();
+			NbtCompound groupTag = new NbtCompound();
 			for (Map.Entry<String, TrinketInventory> slot : group.getValue().entrySet()) {
-				CompoundTag slotTag = new CompoundTag();
-				ListTag list = new ListTag();
+				NbtCompound slotTag = new NbtCompound();
+				NbtList list = new NbtList();
 				TrinketInventory inv = slot.getValue();
 				for (int i = 0; i < inv.size(); i++) {
-					CompoundTag c = new CompoundTag();
-					inv.getStack(i).toTag(c);
+					NbtCompound c = new NbtCompound();
+					inv.getStack(i).writeNbt(c);
 					list.add(c);
 				}
 				slotTag.put("Metadata", inv.toTag());

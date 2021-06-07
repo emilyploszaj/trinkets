@@ -19,7 +19,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class PlayerManagerMixin {
 
 	@Inject(at = @At("TAIL"), method = "onPlayerConnect")
-	public void onPlayerConnect(ClientConnection connection, ServerPlayerEntity player, CallbackInfo cb) {
+	private void onPlayerConnect(ClientConnection connection, ServerPlayerEntity player, CallbackInfo cb) {
 		EntitySlotLoader.INSTANCE.sync(player);
 	}
 }

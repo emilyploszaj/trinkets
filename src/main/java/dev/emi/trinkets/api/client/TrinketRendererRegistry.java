@@ -10,6 +10,9 @@ public class TrinketRendererRegistry {
 
 	private static final Map<Item, TrinketRenderer> RENDERERS = new HashMap<>();
 
+	/**
+	 * Registers a trinket renderer for the provided item
+	 */
 	public static void registerRenderer(Item item, TrinketRenderer trinketRenderer) {
 		RENDERERS.put(item, trinketRenderer);
 	}

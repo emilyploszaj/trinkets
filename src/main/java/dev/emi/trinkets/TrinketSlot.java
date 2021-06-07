@@ -1,16 +1,18 @@
 package dev.emi.trinkets;
 
-import com.mojang.datafixers.util.Function3;
-import dev.emi.trinkets.api.*;
-import dev.emi.trinkets.api.Trinket.SlotReference;
-import net.fabricmc.fabric.api.util.TriState;
+import dev.emi.trinkets.api.SlotGroup;
+import dev.emi.trinkets.api.SlotReference;
+import dev.emi.trinkets.api.SlotType;
+import dev.emi.trinkets.api.TrinketInventory;
+import dev.emi.trinkets.api.TrinketsApi;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.util.Identifier;
-
-import java.util.Optional;
 
 /**
  * A gui slot for a trinket slot
@@ -22,7 +24,8 @@ public class TrinketSlot extends Slot {
 	private final int slotOffset;
 	private final TrinketInventory trinketInventory;
 
-	public TrinketSlot(TrinketInventory inventory, int index, int x, int y, SlotGroup group, SlotType type, int slotOffset, boolean alwaysVisible) {
+	public TrinketSlot(TrinketInventory inventory, int index, int x, int y, SlotGroup group, SlotType type, int slotOffset,
+			boolean alwaysVisible) {
 		super(inventory, index, x, y);
 		this.group = group;
 		this.type = type;
@@ -32,7 +35,12 @@ public class TrinketSlot extends Slot {
 	}
 
 	public boolean isTrinketFocused() {
-		return TrinketsClient.activeGroup == group || TrinketsClient.quickMoveGroup == group;
+		if (TrinketsClient.activeGroup == group) {
+			return slotOffset == 0 || TrinketsClient.activeType == type;
+		} else if (TrinketsClient.quickMoveGroup == group) {
+			return slotOffset == 0 || TrinketsClient.quickMoveType == type && TrinketsClient.quickMoveTimer > 0;
+		}
+		return false;
 	}
 
 	public Identifier getBackgroundIdentifier() {
@@ -45,32 +53,11 @@ public class TrinketSlot extends Slot {
 	}
 
 	public static boolean canInsert(ItemStack stack, SlotReference slotRef, LivingEntity entity) {
-		TriState state = TriState.DEFAULT;
+		boolean res = TrinketsApi.evaluatePredicateSet(slotRef.inventory().getSlotType().getValidatorPredicates(),
+			stack, slotRef, entity);
 
-		for (Identifier id : slotRef.inventory.getSlotType().getValidators()) {
-			Optional<Function3<ItemStack, SlotReference, LivingEntity, TriState>> function = TrinketsApi.getValidatorPredicate(id);
-
-			if (function.isPresent()) {
-				state = function.get().apply(stack, slotRef, entity);
-			}
-
-			if (state != TriState.DEFAULT) {
-				break;
-			}
-		}
-
-		if (state == TriState.DEFAULT) {
-			Optional<Function3<ItemStack, SlotReference, LivingEntity, TriState>> validatorPredicate =
-					TrinketsApi.getValidatorPredicate(new Identifier("trinkets", "tag"));
-
-			if (validatorPredicate.isPresent()) {
-				state = validatorPredicate.get().apply(stack, slotRef, entity);
-			}
-		}
-
-		if (state.get()) {
-			Optional<Trinket> trinket = TrinketsApi.getTrinket(stack.getItem());
-			return trinket.map(value -> value.canEquip(stack, slotRef, entity)).orElse(true);
+		if (res) {
+			return TrinketsApi.getTrinket(stack.getItem()).canEquip(stack, slotRef, entity);
 		}
 
 		return false;
@@ -79,14 +66,30 @@ public class TrinketSlot extends Slot {
 	@Override
 	public boolean canTakeItems(PlayerEntity player) {
 		ItemStack stack = this.getStack();
-		return TrinketsApi.getTrinket(stack.getItem()).map(value -> value.canUnequip(stack, new SlotReference(trinketInventory, slotOffset), player)).orElse(true);
+		return TrinketsApi.getTrinket(stack.getItem())
+			.canUnequip(stack, new SlotReference(trinketInventory, slotOffset), player);
 	}
 
 	@Override
-	public boolean doDrawHoveringEffect() {
+	public boolean isEnabled() {
 		if (alwaysVisible) {
+			if (x < 0) {
+				if (trinketInventory.getComponent().getEntity().world.isClient) {
+					MinecraftClient client = MinecraftClient.getInstance();
+					Screen s = client.currentScreen;
+					if (s instanceof InventoryScreen screen) {
+						if (screen.getRecipeBookWidget().isOpen()) {
+							return false;
+						}
+					}
+				}
+			}
 			return true;
 		}
 		return isTrinketFocused();
+	}
+
+	public SlotType getType() {
+		return type;
 	}
 }

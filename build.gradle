@@ -1,11 +1,11 @@
 plugins {
-	id 'fabric-loom' version '0.5-SNAPSHOT'
+	id 'fabric-loom' version '0.8-SNAPSHOT'
 	id "com.github.fudge.forgedflowerloom" version "2.0.0"
 	id 'maven-publish'
 }
 
-sourceCompatibility = JavaVersion.VERSION_1_8
-targetCompatibility = JavaVersion.VERSION_1_8
+//sourceCompatibility = JavaVersion.VERSION_1_8
+//targetCompatibility = JavaVersion.VERSION_1_8
 
 archivesBaseName = project.archives_base_name
 version = project.mod_version
@@ -14,7 +14,7 @@ group = project.maven_group
 repositories {
 	maven {
 		name = "Ladysnake Libs"
-		url = "https://dl.bintray.com/ladysnake/libs"
+		url = "https://ladysnake.jfrog.io/artifactory/mods"
 	}
 	maven { url = "https://jitpack.io" }
 }
@@ -30,18 +30,20 @@ dependencies {
 	// Base Fabric dependencies
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-	modCompile "net.fabricmc:fabric-loader:${project.loader_version}"
+	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
 	// Mod dependencies
-	modCompile "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-	modCompile include("io.github.onyxstudios.Cardinal-Components-API:cardinal-components-base:${project.cca_version}")
-	modCompile include("io.github.onyxstudios.Cardinal-Components-API:cardinal-components-entity:${project.cca_version}")
+	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+	modImplementation "io.github.onyxstudios.Cardinal-Components-API:cardinal-components-base:${project.cca_version}"
+	include "io.github.onyxstudios.Cardinal-Components-API:cardinal-components-base:${project.cca_version}"
+	modImplementation "io.github.onyxstudios.Cardinal-Components-API:cardinal-components-entity:${project.cca_version}"
+	include "io.github.onyxstudios.Cardinal-Components-API:cardinal-components-entity:${project.cca_version}"
 
 	// Dev Runtime
 	testmodImplementation sourceSets.main.output
-	modRuntime("io.github.prospector:modmenu:${project.mod_menu_version}") {
+	/*modRuntime("io.github.prospector:modmenu:${project.mod_menu_version}") {
 		transitive = false
-	}
+	}*/
 	//modRuntime ("com.github.SuperCoder7979:databreaker:0.2.5") {
 	//	exclude module : "fabric-loader"
 	//}
@@ -62,13 +64,13 @@ tasks.withType(JavaCompile).configureEach {
 	// If Javadoc is generated, this must be specified in that task too.
 	it.options.encoding = "UTF-8"
 
-	// The Minecraft launcher currently installs Java 8 for users, so your mod probably wants to target Java 8 too
+	/*/ The Minecraft launcher currently installs Java 8 for users, so your mod probably wants to target Java 8 too
 	// JDK 9 introduced a new way of specifying this that will make sure no newer classes or methods are used.
 	// We'll use that if it's available, but otherwise we'll use the older option.
 	def targetVersion = 8
 	if (JavaVersion.current().isJava9Compatible()) {
 		it.options.release = targetVersion
-	}
+	}*/
 }
 
 java {

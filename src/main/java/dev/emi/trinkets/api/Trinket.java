@@ -1,19 +1,24 @@
 package dev.emi.trinkets.api;
 
-import com.google.common.collect.HashMultimap;
+import java.util.ArrayList;
+import java.util.Optional;
+import java.util.UUID;
+
+import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
+
+import dev.emi.trinkets.mixin.accessor.LivingEntityAccessor;
+import net.fabricmc.fabric.api.util.NbtType;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtList;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
-
-import java.util.Optional;
-import java.util.UUID;
 
 public interface Trinket {
 
@@ -45,6 +50,7 @@ public interface Trinket {
 	 * @param entity The entity that unequipped the stack
 	 */
 	default void onUnequip(ItemStack stack, SlotReference slot, LivingEntity entity) {
+		System.out.println(stack);
 	}
 
 	/**
@@ -74,26 +80,29 @@ public interface Trinket {
 	/**
 	 * Returns the Entity Attribute Modifiers for a stack in a slot. Child implementations should
 	 * remain pure
+	 * <p>
+	 * If modifiers do not change based on stack, slot, or entity, caching based on passed UUID
+	 * should be considered
 	 *
 	 * @param uuid The UUID to use for creating attributes
 	 */
 	default Multimap<EntityAttribute, EntityAttributeModifier> getModifiers(ItemStack stack,
 			SlotReference slot, LivingEntity entity, UUID uuid) {
-		Multimap<EntityAttribute, EntityAttributeModifier> map = HashMultimap.create();
+		Multimap<EntityAttribute, EntityAttributeModifier> map = Multimaps.newMultimap(Maps.newLinkedHashMap(), ArrayList::new);
 
 		if (stack.hasTag() && stack.getTag().contains("TrinketAttributeModifiers", 9)) {
-			ListTag list = stack.getTag().getList("TrinketAttributeModifiers", 10);
+			NbtList list = stack.getTag().getList("TrinketAttributeModifiers", 10);
 
-			for (int i = 0; i < list.size(); ++i) {
-				CompoundTag tag = list.getCompound(i);
+			for (int i = 0; i < list.size(); i++) {
+				NbtCompound tag = list.getCompound(i);
 
-				// TODO Determine and setup a slot naming scheme for tags, probably just group:slot, and uncomment the second condition
-				if (!tag.contains("Slot", 8)/* || tag.getString("Slot").equals(equipmentSlot.getName())*/) {
+				if (!tag.contains("Slot", NbtType.STRING) || tag.getString("Slot")
+						.equals(slot.inventory().getSlotType().getGroup() + "/" + slot.inventory().getSlotType().getName())) {
 					Optional<EntityAttribute> optional = Registry.ATTRIBUTE
 							.getOrEmpty(Identifier.tryParse(tag.getString("AttributeName")));
 
 					if (optional.isPresent()) {
-						EntityAttributeModifier entityAttributeModifier = EntityAttributeModifier.fromTag(tag);
+						EntityAttributeModifier entityAttributeModifier = EntityAttributeModifier.fromNbt(tag);
 
 						if (entityAttributeModifier != null
 								&& entityAttributeModifier.getId().getLeastSignificantBits() != 0L
@@ -108,30 +117,21 @@ public interface Trinket {
 	}
 
 	/**
-	 * Returns the Slot Modifiers for a stack in a slot. Child implementations should remain pure.
-	 * Keys should be in the format "group:slot".
-	 *
-	 * @param uuid The UUID to use for creating attributes
+	 * Called by Trinkets when a trinket is broken on the client if {@link TrinketsApi#onTrinketBroken}
+	 * is called by the consumer in {@link ItemStack#damage(int, LivingEntity, Consumer)} server side
+	 * <p>
+	 * The default implementation works the same as breaking vanilla equipment, a sound is played and
+	 * particles are spawned based on the item
+	 * 
+	 * @param stack The stack being broken
+	 * @param slot The slot the stack is being broken in
+	 * @param entity The entity that is breaking the stack
 	 */
-	default Multimap<String, EntityAttributeModifier> getSlotModifiers(ItemStack stack, SlotReference slot, LivingEntity entity, UUID uuid) {
-		return HashMultimap.create();
-	}
-
 	default void onBreak(ItemStack stack, SlotReference slot, LivingEntity entity) {
-		// TODO
+		((LivingEntityAccessor) entity).invokePlayEquipmentBreakEffects(stack);
 	}
 
 	default TrinketEnums.DropRule getDropRule(ItemStack stack, SlotReference slot, LivingEntity entity) {
 		return TrinketEnums.DropRule.DEFAULT;
-	}
-
-	class SlotReference {
-		public TrinketInventory inventory;
-		public int index;
-
-		public SlotReference(TrinketInventory inventory, int index) {
-			this.inventory = inventory;
-			this.index = index;
-		}
 	}
 }

@@ -1,0 +1,12 @@
+{
+	"icon": "trinkets:gui/slots/charm",
+	"drop_rule": "keep",
+	"validator_predicates": [
+	],
+	"quick_move_predicates": [
+		"trinkets:relevant"
+	],
+	"tooltip_predicates": [
+		"trinkets:relevant"
+	]
+}

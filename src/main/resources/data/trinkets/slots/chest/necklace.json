@@ -1,3 +1,4 @@
 {
-  "icon": "trinkets:item/empty_trinket_slot_necklace"
+  "icon": "trinkets:gui/slots/necklace",
+  "order": -1024
 }

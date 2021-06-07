@@ -1,6 +1,9 @@
 package dev.emi.trinkets;
 
 import com.google.common.collect.Multimap;
+
+import dev.emi.trinkets.api.SlotAttributes;
+import dev.emi.trinkets.api.SlotReference;
 import dev.emi.trinkets.api.TrinketItem;
 import dev.emi.trinkets.api.client.TrinketRenderer;
 import dev.emi.trinkets.client.TrinketModel;
@@ -31,19 +34,20 @@ public class TestTrinket extends TrinketItem implements TrinketRenderer {
 	}
 
 	@Override
+	public void tick(ItemStack stack, SlotReference slot, LivingEntity entity) {
+		/*stack.damage(1, entity, e -> {
+			TrinketsApi.onTrinketBroken(stack, slot, entity);
+		});*/
+	}
+
+	@Override
 	public Multimap<EntityAttribute, EntityAttributeModifier> getModifiers(ItemStack stack, SlotReference slot, LivingEntity entity, UUID uuid) {
 		Multimap<EntityAttribute, EntityAttributeModifier> modifiers = super.getModifiers(stack, slot, entity, uuid);
 		EntityAttributeModifier speedModifier = new EntityAttributeModifier(uuid, "trinkets-testmod:movement_speed",
 				0.4, EntityAttributeModifier.Operation.MULTIPLY_TOTAL);
 		modifiers.put(EntityAttributes.GENERIC_MOVEMENT_SPEED, speedModifier);
-		return modifiers;
-	}
-
-	@Override
-	public Multimap<String, EntityAttributeModifier> getSlotModifiers(ItemStack stack, SlotReference slot, LivingEntity entity, UUID uuid) {
-		Multimap<String, EntityAttributeModifier> modifiers = super.getSlotModifiers(stack, slot, entity, uuid);
-		EntityAttributeModifier slotModifier = new EntityAttributeModifier(uuid, "trinkets-testmod:extra_ring", 1, EntityAttributeModifier.Operation.ADDITION);
-		modifiers.put("offhand:ring", slotModifier);
+		SlotAttributes.addSlotModifier(modifiers, "offhand/ring", uuid, 6, EntityAttributeModifier.Operation.ADDITION);
+		SlotAttributes.addSlotModifier(modifiers, "hand/glove", uuid, 1, EntityAttributeModifier.Operation.ADDITION);
 		return modifiers;
 	}
 

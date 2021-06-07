@@ -1,18 +1,5 @@
 package dev.emi.trinkets.data;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.gson.*;
-import dev.emi.trinkets.TrinketsMain;
-import dev.emi.trinkets.api.SlotType;
-import dev.emi.trinkets.api.TrinketEnums.DropRule;
-import dev.emi.trinkets.data.SlotLoader.GroupData;
-import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
-import net.minecraft.resource.ResourceManager;
-import net.minecraft.resource.SinglePreparationResourceReloadListener;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.JsonHelper;
-import net.minecraft.util.profiler.Profiler;
-
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashMap;
@@ -21,7 +8,27 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class SlotLoader extends SinglePreparationResourceReloadListener<Map<String, GroupData>> implements IdentifiableResourceReloadListener {
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonSyntaxException;
+
+import dev.emi.trinkets.TrinketsMain;
+import dev.emi.trinkets.api.SlotType;
+import dev.emi.trinkets.api.TrinketEnums.DropRule;
+import dev.emi.trinkets.data.SlotLoader.GroupData;
+import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
+import net.minecraft.resource.ResourceManager;
+import net.minecraft.resource.SinglePreparationResourceReloader;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.JsonHelper;
+import net.minecraft.util.profiler.Profiler;
+
+public class SlotLoader extends SinglePreparationResourceReloader<Map<String, GroupData>> implements IdentifiableResourceReloadListener {
 
 	public static final SlotLoader INSTANCE = new SlotLoader();
 
@@ -86,19 +93,21 @@ public class SlotLoader extends SinglePreparationResourceReloadListener<Map<Stri
 
 	static class GroupData {
 
-		private String defaultSlot = "";
 		private int slotId = -1;
+		private int order = 0;
 		private final Map<String, SlotData> slots = new HashMap<>();
 
 		void read(JsonObject jsonObject) {
-			defaultSlot = JsonHelper.getString(jsonObject, "default_slot", defaultSlot);
 			slotId = JsonHelper.getInt(jsonObject, "slot_id", slotId);
+			order = JsonHelper.getInt(jsonObject, "order", order);
 		}
 
-		int getSlotId() { return slotId; }
+		int getSlotId() {
+			return slotId;
+		}
 
-		String getDefaultSlot() {
-			return defaultSlot;
+		int getOrder() {
+			return order;
 		}
 
 		SlotData getSlot(String name) {
@@ -107,64 +116,91 @@ public class SlotLoader extends SinglePreparationResourceReloadListener<Map<Stri
 	}
 
 	static class SlotData {
+		private static final Set<Identifier> DEFAULT_QUICK_MOVE_PREDICATES = ImmutableSet.of(new Identifier("trinkets", "all"));
+		private static final Set<Identifier> DEFAULT_VALIDATOR_PREDICATES = ImmutableSet.of(new Identifier("trinkets", "tag"));
+		private static final Set<Identifier> DEFAULT_TOOLTIP_PREDICATES = ImmutableSet.of(new Identifier("trinkets", "all"));
 
 		private int order = 0;
-		private int amount = 1;
-		private int locked = 0;
+		private int amount = -1;
 		private String icon = "";
-		private final Set<String> quickMove = new HashSet<>();
-		private final Set<String> validators = new HashSet<>();
+		private final Set<String> quickMovePredicates = new HashSet<>();
+		private final Set<String> validatorPredicates = new HashSet<>();
+		private final Set<String> tooltipPredicates = new HashSet<>();
 		private String dropRule = DropRule.DEFAULT.toString();
 
 		SlotType create(String group, String name) {
 			Identifier finalIcon = new Identifier(icon);
-			Set<Identifier> finalValidators = validators.stream().map(Identifier::new).collect(Collectors.toSet());
-			Set<Identifier> finalQuickMove = quickMove.stream().map(Identifier::new).collect(Collectors.toSet());
-			return new SlotType(group, name, order, amount, locked, finalIcon, finalQuickMove, finalValidators, DropRule.valueOf(dropRule));
+			finalIcon = new Identifier(finalIcon.getNamespace(), "textures/" + finalIcon.getPath() + ".png");
+			Set<Identifier> finalValidatorPredicates = validatorPredicates.stream().map(Identifier::new).collect(Collectors.toSet());
+			Set<Identifier> finalQuickMovePredicates = quickMovePredicates.stream().map(Identifier::new).collect(Collectors.toSet());
+			Set<Identifier> finalTooltipPredicates = tooltipPredicates.stream().map(Identifier::new).collect(Collectors.toSet());
+			if (finalValidatorPredicates.isEmpty()) {
+				finalValidatorPredicates = DEFAULT_VALIDATOR_PREDICATES;
+			}
+			if (finalQuickMovePredicates.isEmpty()) {
+				finalQuickMovePredicates = DEFAULT_QUICK_MOVE_PREDICATES;
+			}
+			if (finalTooltipPredicates.isEmpty()) {
+				finalTooltipPredicates = DEFAULT_TOOLTIP_PREDICATES;
+			}
+			if (amount == -1) {
+				amount = 1;
+			}
+			return new SlotType(group, name, order, amount, finalIcon, finalQuickMovePredicates, finalValidatorPredicates,
+				finalTooltipPredicates, DropRule.valueOf(dropRule));
 		}
 
 		void read(JsonObject jsonObject) {
 			boolean replace = JsonHelper.getBoolean(jsonObject, "replace", false);
 
-			int jsonOrder = JsonHelper.getInt(jsonObject, "order", order);
-			order = replace ? jsonOrder : Math.max(jsonOrder, order);
+			order = JsonHelper.getInt(jsonObject, "order", order);
 
 			int jsonAmount = JsonHelper.getInt(jsonObject, "amount", amount);
 			amount = replace ? jsonAmount : Math.max(jsonAmount, amount);
 
-			int jsonLocked = JsonHelper.getInt(jsonObject, "locked", locked);
-			locked = replace ? jsonLocked : Math.max(jsonLocked, locked);
-
 			icon = JsonHelper.getString(jsonObject, "icon", icon);
 
-			JsonArray jsonQuickMoves = JsonHelper.getArray(jsonObject, "quick_move", new JsonArray());
+			JsonArray jsonQuickMovePredicates = JsonHelper.getArray(jsonObject, "quick_move_predicates", new JsonArray());
 
-			if (jsonQuickMoves != null) {
+			if (jsonQuickMovePredicates != null) {
 
-				if (replace && jsonQuickMoves.size() > 0) {
-					quickMove.clear();
+				if (replace && jsonQuickMovePredicates.size() > 0) {
+					quickMovePredicates.clear();
 				}
 
-				for (JsonElement jsonQuickMove : jsonQuickMoves) {
-					quickMove.add(jsonQuickMove.getAsString());
+				for (JsonElement jsonQuickMovePredicate : jsonQuickMovePredicates) {
+					quickMovePredicates.add(jsonQuickMovePredicate.getAsString());
 				}
 			}
 
-			String jsonDropRule = JsonHelper.getString(jsonObject, "drop_rule", dropRule);
+			String jsonDropRule = JsonHelper.getString(jsonObject, "drop_rule", dropRule).toUpperCase();
 
 			if (DropRule.has(jsonDropRule)) {
 				dropRule = jsonDropRule;
 			}
-			JsonArray jsonValidators = JsonHelper.getArray(jsonObject, "validators", new JsonArray());
+			JsonArray jsonValidatorPredicates = JsonHelper.getArray(jsonObject, "validator_predicates", new JsonArray());
 
-			if (jsonValidators != null) {
+			if (jsonValidatorPredicates != null) {
 
-				if (replace && jsonValidators.size() > 0) {
-					validators.clear();
+				if (replace && jsonValidatorPredicates.size() > 0) {
+					validatorPredicates.clear();
 				}
 
-				for (JsonElement jsonValidator : jsonValidators) {
-					validators.add(jsonValidator.getAsString());
+				for (JsonElement jsonValidatorPredicate : jsonValidatorPredicates) {
+					validatorPredicates.add(jsonValidatorPredicate.getAsString());
+				}
+			}
+
+			JsonArray jsonTooltipPredicates = JsonHelper.getArray(jsonObject, "tooltip_predicates", new JsonArray());
+
+			if (jsonTooltipPredicates != null) {
+
+				if (replace && jsonTooltipPredicates.size() > 0) {
+					tooltipPredicates.clear();
+				}
+
+				for (JsonElement jsonTooltipPredicate : jsonTooltipPredicates) {
+					tooltipPredicates.add(jsonTooltipPredicate.getAsString());
 				}
 			}
 		}

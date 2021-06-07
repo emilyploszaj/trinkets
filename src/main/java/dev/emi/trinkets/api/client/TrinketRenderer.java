@@ -1,6 +1,6 @@
 package dev.emi.trinkets.api.client;
 
-import dev.emi.trinkets.api.Trinket;
+import dev.emi.trinkets.api.SlotReference;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.render.VertexConsumerProvider;
@@ -24,7 +24,7 @@ public interface TrinketRenderer {
 	 * @param slotReference The exact slot for the item being rendered
 	 * @param contextModel The model this Trinket is being rendered on
 	 */
-	void render(ItemStack stack, Trinket.SlotReference slotReference, EntityModel<? extends LivingEntity> contextModel,
+	void render(ItemStack stack, SlotReference slotReference, EntityModel<? extends LivingEntity> contextModel,
 				MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, LivingEntity entity,
 				float limbAngle, float limbDistance, float tickDelta, float animationProgress, float headYaw,
 				float headPitch);
@@ -37,8 +37,8 @@ public interface TrinketRenderer {
 	 * @param entity The wearer of the trinket
 	 * @param model The model to align to the body movement
 	 */
-	static void followBodyRotations(final LivingEntity entity,
-									final BipedEntityModel<LivingEntity> model) {
+	@SuppressWarnings("unchecked")
+	static void followBodyRotations(final LivingEntity entity, final BipedEntityModel<LivingEntity> model) {
 
 		EntityRenderer<? super LivingEntity> render = MinecraftClient.getInstance()
 				.getEntityRenderDispatcher().getRenderer(entity);
@@ -59,8 +59,8 @@ public interface TrinketRenderer {
 	/**
 	 * Translates the rendering context to the center of the player's face
 	 */
-	static void translateToFace(MatrixStack matrices, PlayerEntityModel<AbstractClientPlayerEntity> model, AbstractClientPlayerEntity player, float headYaw,
-			float headPitch) {
+	static void translateToFace(MatrixStack matrices, PlayerEntityModel<AbstractClientPlayerEntity> model,
+			AbstractClientPlayerEntity player, float headYaw, float headPitch) {
 
 		if (player.isInSwimmingPose() || player.isFallFlying()) {
 			matrices.multiply(Vec3f.POSITIVE_Z.getDegreesQuaternion(model.head.roll));
@@ -80,7 +80,8 @@ public interface TrinketRenderer {
 	/**
 	 * Translates the rendering context to the center of the player's chest/torso segment
 	 */
-	static void translateToChest(MatrixStack matrices, PlayerEntityModel<AbstractClientPlayerEntity> model, AbstractClientPlayerEntity player) {
+	static void translateToChest(MatrixStack matrices, PlayerEntityModel<AbstractClientPlayerEntity> model,
+			AbstractClientPlayerEntity player) {
 
 		if (player.isInSneakingPose() && !model.riding && !player.isSwimming()) {
 			matrices.translate(0.0F, 0.2F, 0.0F);
@@ -93,7 +94,8 @@ public interface TrinketRenderer {
 	/**
 	 * Translates the rendering context to the center of the bottom of the player's right arm
 	 */
-	static void translateToRightArm(MatrixStack matrices, PlayerEntityModel<AbstractClientPlayerEntity> model, AbstractClientPlayerEntity player) {
+	static void translateToRightArm(MatrixStack matrices, PlayerEntityModel<AbstractClientPlayerEntity> model,
+			AbstractClientPlayerEntity player) {
 
 		if (player.isInSneakingPose() && !model.riding && !player.isSwimming()) {
 			matrices.translate(0.0F, 0.2F, 0.0F);
@@ -109,7 +111,8 @@ public interface TrinketRenderer {
 	/**
 	 * Translates the rendering context to the center of the bottom of the player's left arm
 	 */
-	static void translateToLeftArm(MatrixStack matrices, PlayerEntityModel<AbstractClientPlayerEntity> model, AbstractClientPlayerEntity player) {
+	static void translateToLeftArm(MatrixStack matrices, PlayerEntityModel<AbstractClientPlayerEntity> model,
+			AbstractClientPlayerEntity player) {
 
 		if (player.isInSneakingPose() && !model.riding && !player.isSwimming()) {
 			matrices.translate(0.0F, 0.2F, 0.0F);
@@ -125,7 +128,8 @@ public interface TrinketRenderer {
 	/**
 	 * Translates the rendering context to the center of the bottom of the player's right leg
 	 */
-	static void translateToRightLeg(MatrixStack matrices, PlayerEntityModel<AbstractClientPlayerEntity> model, AbstractClientPlayerEntity player) {
+	static void translateToRightLeg(MatrixStack matrices, PlayerEntityModel<AbstractClientPlayerEntity> model,
+			AbstractClientPlayerEntity player) {
 
 		if (player.isInSneakingPose() && !model.riding && !player.isSwimming()) {
 			matrices.translate(0.0F, 0.0F, 0.25F);
@@ -140,7 +144,8 @@ public interface TrinketRenderer {
 	/**
 	 * Translates the rendering context to the center of the bottom of the player's left leg
 	 */
-	static void translateToLeftLeg(MatrixStack matrices, PlayerEntityModel<AbstractClientPlayerEntity> model, AbstractClientPlayerEntity player) {
+	static void translateToLeftLeg(MatrixStack matrices, PlayerEntityModel<AbstractClientPlayerEntity> model,
+			AbstractClientPlayerEntity player) {
 
 		if (player.isInSneakingPose() && !model.riding && !player.isSwimming()) {
 			matrices.translate(0.0F, 0.0F, 0.25F);

@@ -1,9 +1,10 @@
 package dev.emi.trinkets;
 
-import dev.emi.trinkets.api.SlotGroup;
-import net.minecraft.util.Pair;
-
 import java.util.List;
+
+import dev.emi.trinkets.api.SlotGroup;
+import dev.emi.trinkets.api.SlotType;
+import net.minecraft.util.Pair;
 
 /**
  * Interface for putting methods onto the player's screen handler
@@ -19,5 +20,9 @@ public interface TrinketPlayerScreenHandler {
 
 	List<Pair<Integer, Integer>> getSlotHeights(SlotGroup group);
 
+	List<SlotType> getSlotTypes(SlotGroup group);
+
 	int getSlotWidth(SlotGroup group);
+
+	int getGroupCount();
 }

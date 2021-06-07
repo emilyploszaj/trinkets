@@ -8,8 +8,8 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventories;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtList;
 import net.minecraft.util.collection.DefaultedList;
 
 import java.util.*;
@@ -192,35 +192,35 @@ public class TrinketInventory implements Inventory {
 		}
 	}
 
-	public CompoundTag toTag() {
-		CompoundTag compoundTag = new CompoundTag();
+	public NbtCompound toTag() {
+		NbtCompound NbtCompound = new NbtCompound();
 		if (!this.persistentModifiers.isEmpty()) {
-			ListTag listTag = new ListTag();
+			NbtList NbtList = new NbtList();
 			for (EntityAttributeModifier entityAttributeModifier : this.persistentModifiers) {
-				listTag.add(entityAttributeModifier.toTag());
+				NbtList.add(entityAttributeModifier.toNbt());
 			}
 
-			compoundTag.put("PersistentModifiers", listTag);
+			NbtCompound.put("PersistentModifiers", NbtList);
 		}
 		if (!this.modifiers.isEmpty()) {
-			ListTag listTag = new ListTag();
+			NbtList NbtList = new NbtList();
 			this.modifiers.forEach((uuid, modifier) -> {
 				if (!this.persistentModifiers.contains(modifier)) {
-					listTag.add(modifier.toTag());
+					NbtList.add(modifier.toNbt());
 				}
 			});
 
-			compoundTag.put("CachedModifiers", listTag);
+			NbtCompound.put("CachedModifiers", NbtList);
 		}
-		return compoundTag;
+		return NbtCompound;
 	}
 
-	public void fromTag(CompoundTag tag) {
+	public void fromTag(NbtCompound tag) {
 		if (tag.contains("PersistentModifiers", 9)) {
-			ListTag listTag = tag.getList("PersistentModifiers", 10);
+			NbtList NbtList = tag.getList("PersistentModifiers", 10);
 
-			for(int i = 0; i < listTag.size(); ++i) {
-				EntityAttributeModifier entityAttributeModifier = EntityAttributeModifier.fromTag(listTag.getCompound(i));
+			for(int i = 0; i < NbtList.size(); ++i) {
+				EntityAttributeModifier entityAttributeModifier = EntityAttributeModifier.fromNbt(NbtList.getCompound(i));
 				if (entityAttributeModifier != null) {
 					this.addPersistentModifier(entityAttributeModifier);
 				}
@@ -228,10 +228,10 @@ public class TrinketInventory implements Inventory {
 		}
 
 		if (tag.contains("CachedModifiers", 9)) {
-			ListTag listTag = tag.getList("CachedModifiers", 10);
+			NbtList NbtList = tag.getList("CachedModifiers", 10);
 
-			for (int i = 0; i < listTag.size(); ++i) {
-				EntityAttributeModifier entityAttributeModifier = EntityAttributeModifier.fromTag(listTag.getCompound(i));
+			for (int i = 0; i < NbtList.size(); ++i) {
+				EntityAttributeModifier entityAttributeModifier = EntityAttributeModifier.fromNbt(NbtList.getCompound(i));
 				if (entityAttributeModifier != null) {
 					this.cachedModifiers.add(entityAttributeModifier);
 					this.addModifier(entityAttributeModifier);
@@ -242,28 +242,28 @@ public class TrinketInventory implements Inventory {
 		}
 	}
 
-	public CompoundTag getSyncTag() {
-		CompoundTag compoundTag = new CompoundTag();
+	public NbtCompound getSyncTag() {
+		NbtCompound NbtCompound = new NbtCompound();
 		if (!this.modifiers.isEmpty()) {
-			ListTag listTag = new ListTag();
+			NbtList NbtList = new NbtList();
 			for (Map.Entry<UUID, EntityAttributeModifier> modifier : this.modifiers.entrySet()) {
-				listTag.add(modifier.getValue().toTag());
+				NbtList.add(modifier.getValue().toNbt());
 			}
 
-			compoundTag.put("Modifiers", listTag);
+			NbtCompound.put("Modifiers", NbtList);
 		}
-		return compoundTag;
+		return NbtCompound;
 	}
 
-	public void applySyncTag(CompoundTag tag) {
+	public void applySyncTag(NbtCompound tag) {
 		this.modifiers.clear();
 		this.persistentModifiers.clear();
 		this.modifiersByOperation.clear();
 		if (tag.contains("Modifiers", 9)) {
-			ListTag listTag = tag.getList("Modifiers", 10);
+			NbtList NbtList = tag.getList("Modifiers", 10);
 
-			for (int i = 0; i < listTag.size(); ++i) {
-				EntityAttributeModifier entityAttributeModifier = EntityAttributeModifier.fromTag(listTag.getCompound(i));
+			for (int i = 0; i < NbtList.size(); ++i) {
+				EntityAttributeModifier entityAttributeModifier = EntityAttributeModifier.fromNbt(NbtList.getCompound(i));
 				if (entityAttributeModifier != null) {
 					this.addModifier(entityAttributeModifier);
 				}

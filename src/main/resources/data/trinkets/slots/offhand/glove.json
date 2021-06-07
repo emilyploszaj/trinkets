@@ -1,3 +1,4 @@
 {
-  "icon": "trinkets:item/empty_trinket_slot_glove_mirrored"
+  "icon": "trinkets:gui/slots/glove_mirrored",
+  "order": -512
 }

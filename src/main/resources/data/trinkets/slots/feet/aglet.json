@@ -1,3 +1,4 @@
 {
-  "icon": "trinkets:item/empty_trinket_slot_aglet"
+  "icon": "trinkets:gui/slots/aglet",
+  "order": -1024
 }

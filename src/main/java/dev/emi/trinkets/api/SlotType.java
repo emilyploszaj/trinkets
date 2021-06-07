@@ -2,10 +2,10 @@ package dev.emi.trinkets.api;
 
 import dev.emi.trinkets.api.TrinketEnums.DropRule;
 import net.fabricmc.fabric.api.util.NbtType;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.StringTag;
-import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtList;
+import net.minecraft.nbt.NbtString;
+import net.minecraft.nbt.NbtElement;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
 
@@ -19,22 +19,22 @@ public class SlotType {
 	private final String name;
 	private final int order;
 	private final int amount;
-	private final int locked;
 	private final Identifier icon;
-	private final Set<Identifier> quickMove;
-	private final Set<Identifier> validators;
+	private final Set<Identifier> quickMovePredicates;
+	private final Set<Identifier> validatorPredicates;
+	private final Set<Identifier> tooltipPredicates;
 	private final DropRule dropRule;
 
-	public SlotType(String group, String name, int order, int amount, int locked, Identifier icon,
-			Set<Identifier> quickMove, Set<Identifier> validators, DropRule dropRule) {
+	public SlotType(String group, String name, int order, int amount, Identifier icon, Set<Identifier> quickMovePredicates,
+			Set<Identifier> validatorPredicates, Set<Identifier> tooltipPredicates, DropRule dropRule) {
 		this.group = group;
 		this.name = name;
 		this.order = order;
 		this.amount = amount;
-		this.locked = locked;
 		this.icon = icon;
-		this.quickMove = quickMove;
-		this.validators = validators;
+		this.quickMovePredicates = quickMovePredicates;
+		this.validatorPredicates = validatorPredicates;
+		this.tooltipPredicates = tooltipPredicates;
 		this.dropRule = dropRule;
 	}
 
@@ -54,20 +54,20 @@ public class SlotType {
 		return amount;
 	}
 
-	public int getLocked() {
-		return locked;
-	}
-
 	public Identifier getIcon() {
 		return icon;
 	}
 
-	public Set<Identifier> getQuickMove() {
-		return quickMove;
+	public Set<Identifier> getQuickMovePredicates() {
+		return quickMovePredicates;
 	}
 
-	public Set<Identifier> getValidators() {
-		return validators;
+	public Set<Identifier> getValidatorPredicates() {
+		return validatorPredicates;
+	}
+
+	public Set<Identifier> getTooltipPredicates() {
+		return tooltipPredicates;
 	}
 
 	public DropRule getDropRule() {
@@ -78,50 +78,61 @@ public class SlotType {
 		return new TranslatableText("trinkets.slot." + this.group + "." + this.name);
 	}
 
-	public void write(CompoundTag data) {
-		CompoundTag tag = new CompoundTag();
+	public void write(NbtCompound data) {
+		NbtCompound tag = new NbtCompound();
 		tag.putString("Group", group);
 		tag.putString("Name", name);
 		tag.putInt("Order", order);
 		tag.putInt("Amount", amount);
-		tag.putInt("Locked", locked);
 		tag.putString("Icon", icon.toString());
-		ListTag quickMoveList = new ListTag();
+		NbtList quickMovePredicateList = new NbtList();
 
-		for (Identifier id : quickMove) {
-			quickMoveList.add(StringTag.of(id.toString()));
+		for (Identifier id : quickMovePredicates) {
+			quickMovePredicateList.add(NbtString.of(id.toString()));
 		}
-		tag.put("QuickMove", quickMoveList);
+		tag.put("QuickMovePredicates", quickMovePredicateList);
 
-		ListTag validatorList = new ListTag();
+		NbtList validatorPredicateList = new NbtList();
 
-		for (Identifier id : validators) {
-			validatorList.add(StringTag.of(id.toString()));
+		for (Identifier id : validatorPredicates) {
+			validatorPredicateList.add(NbtString.of(id.toString()));
 		}
-		tag.put("Validators", validatorList);
+		tag.put("ValidatorPredicates", validatorPredicateList);
+
+		NbtList tooltipPredicateList = new NbtList();
+
+		for (Identifier id : tooltipPredicates) {
+			tooltipPredicateList.add(NbtString.of(id.toString()));
+		}
+		tag.put("TooltipPredicates", tooltipPredicateList);
 		tag.putString("DropRule", dropRule.toString());
 		data.put("SlotData", tag);
 	}
 
-	public static SlotType read(CompoundTag data) {
-		CompoundTag slotData = data.getCompound("SlotData");
+	public static SlotType read(NbtCompound data) {
+		NbtCompound slotData = data.getCompound("SlotData");
 		String group = slotData.getString("Group");
 		String name = slotData.getString("Name");
 		int order = slotData.getInt("Order");
 		int amount = slotData.getInt("Amount");
-		int locked = slotData.getInt("Locked");
 		Identifier icon = new Identifier(slotData.getString("Icon"));
-		ListTag quickMoveList = slotData.getList("QuickMove", NbtType.STRING);
-		Set<Identifier> quickMove = new HashSet<>();
+		NbtList quickMoveList = slotData.getList("QuickMovePredicates", NbtType.STRING);
+		Set<Identifier> quickMovePredicates = new HashSet<>();
 
-		for (Tag tag : quickMoveList) {
-			quickMove.add(new Identifier(tag.toString()));
+		for (NbtElement tag : quickMoveList) {
+			quickMovePredicates.add(new Identifier(tag.asString()));
 		}
-		ListTag validatorList = slotData.getList("Validators", NbtType.STRING);
-		Set<Identifier> validators = new HashSet<>();
+		NbtList validatorList = slotData.getList("ValidatorPredicates", NbtType.STRING);
+		Set<Identifier> validatorPredicates = new HashSet<>();
 
-		for (Tag tag : validatorList) {
-			validators.add(new Identifier(tag.toString()));
+		for (NbtElement tag : validatorList) {
+			validatorPredicates.add(new Identifier(tag.asString()));
+		}
+		NbtList tooltipList = slotData.getList("TooltipPredicates", NbtType.STRING);
+		Set<Identifier> tooltipPredicates = new HashSet<>();
+
+		for (NbtElement tag : tooltipList) {
+			tooltipPredicates.add(new Identifier(tag.asString()));
 		}
 		String dropRuleName = slotData.getString("DropRule");
 		DropRule dropRule = DropRule.DEFAULT;
@@ -129,7 +140,7 @@ public class SlotType {
 		if (TrinketEnums.DropRule.has(dropRuleName)) {
 			dropRule = TrinketEnums.DropRule.valueOf(dropRuleName);
 		}
-		return new SlotType(group, name, order, amount, locked, icon, quickMove, validators, dropRule);
+		return new SlotType(group, name, order, amount, icon, quickMovePredicates, validatorPredicates, tooltipPredicates, dropRule);
 	}
 
 	@Override
