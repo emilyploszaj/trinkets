@@ -102,13 +102,12 @@ publishing {
 }
 
 void setupRepositories(RepositoryHandler repositories) {
-	def ENV = System.getenv();
-	if (ENV.MAVEN_URL) {
+	if (project.hasProperty("mavenUrl")) {
         repositories.maven {
-            url ENV.MAVEN_URL
+            url project.mavenUrl
             credentials {
-                username ENV.MAVEN_USERNAME
-                password ENV.MAVEN_PASSWWORD
+                username project.mavenUsername
+                password project.mavenPassword
             }
         }
     }

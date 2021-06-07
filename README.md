@@ -15,8 +15,8 @@ repositories {
 		url = "https://maven.terraformersmc.com/"
 	}
 	maven {
-		name = "NerdHubMC"
-		url = "https://maven.abusedmaster.xyz/"
+		name = "Ladysnake Libs"
+		url = "https://ladysnake.jfrog.io/artifactory/mods"
 	}
 }
 ```
