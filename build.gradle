@@ -90,19 +90,26 @@ jar {
 publishing {
 	publications {
 		mavenJava(MavenPublication) {
-			// add all the jars that should be included when publishing to maven
-			artifact(remapJar) {
-				builtBy remapJar
-			}
-			artifact(sourcesJar) {
-				builtBy remapSourcesJar
-			}
+            artifact(sourcesJar) {
+                builtBy remapSourcesJar
+            }
+            afterEvaluate {
+                artifact remapJar
+            }
 		}
 	}
+    setupRepositories(repositories)
+}
 
-	// Select the repositories you want to publish to
-	// To publish to maven local, no extra repositories are necessary. Just use the task `publishToMavenLocal`.
-	repositories {
-		// See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
-	}
+void setupRepositories(RepositoryHandler repositories) {
+	def ENV = System.getenv();
+	if (ENV.MAVEN_URL) {
+        repositories.maven {
+            url ENV.MAVEN_URL
+            credentials {
+                username ENV.MAVEN_USERNAME
+                password ENV.MAVEN_PASSWWORD
+            }
+        }
+    }
 }
