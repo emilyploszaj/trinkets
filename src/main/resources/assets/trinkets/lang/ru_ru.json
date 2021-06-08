@@ -1,0 +1,20 @@
+{
+	"trinkets.tooltip.slots.any" : "Надевается в §9любой§r брелковый слот",
+	"trinkets.tooltip.slots.list" : "Можно надеть в брелковые слоты:",
+	"trinkets.tooltip.slots.single" : "Можно надеть в брелковый слот %d",
+	"trinkets.tooltip.attributes.all" : "Когда надето:",
+	"trinkets.tooltip.attributes.single" : "Когда надето в брелковый слот %d:",
+	"trinkets.tooltip.attributes.slots" : "%d Слотов",
+	"trinkets.slot.head.face": "Лица",
+	"trinkets.slot.head.hat": "Головы",
+	"trinkets.slot.chest.necklace": "Шеи",
+	"trinkets.slot.chest.back": "Спины",
+	"trinkets.slot.chest.cape": "Плаща",
+	"trinkets.slot.legs.belt": "Пояса",
+	"trinkets.slot.feet.aglet": "Сережек",
+	"trinkets.slot.feet.shoes": "Обуви",
+	"trinkets.slot.hand.glove": "Перчаток",
+	"trinkets.slot.offhand.glove": "Перчаток",
+	"trinkets.slot.hand.ring": "Кольца",
+	"trinkets.slot.offhand.ring": "Кольца"
+}
