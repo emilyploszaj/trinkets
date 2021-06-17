@@ -50,7 +50,6 @@ public interface Trinket {
 	 * @param entity The entity that unequipped the stack
 	 */
 	default void onUnequip(ItemStack stack, SlotReference slot, LivingEntity entity) {
-		System.out.println(stack);
 	}
 
 	/**
