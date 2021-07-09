@@ -64,7 +64,7 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreen<Playe
 		currentBounds = new Rect2i(0, 0, 0, 0);
 	}
 
-	@Inject(at = @At("TAIL"), method = "tick")
+	@Inject(at = @At("TAIL"), method = "handledScreenTick")
 	private void tick(CallbackInfo info) {
 		if (group != null) {
 			if (TrinketsClient.activeType != null) {
