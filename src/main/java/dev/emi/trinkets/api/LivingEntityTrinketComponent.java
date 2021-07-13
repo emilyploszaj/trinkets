@@ -234,8 +234,7 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 				NbtList list = new NbtList();
 				TrinketInventory inv = slot.getValue();
 				for (int i = 0; i < inv.size(); i++) {
-					NbtCompound c = new NbtCompound();
-					inv.getStack(i).writeNbt(c);
+					NbtCompound c = inv.getStack(i).writeNbt(new NbtCompound());
 					list.add(c);
 				}
 				slotTag.put("Metadata", inv.toTag());

@@ -4,19 +4,20 @@
   "compatibilityLevel": "JAVA_8",
   "mixins": [
     "CreativeInventoryScreenMixin",
-      "LivingEntityMixin",
-      "PlayerInventoryMixin",
-      "PlayerManagerMixin",
-      "PlayerScreenHandlerMixin"
-    ],
+    "LivingEntityMixin",
+    "PlayerInventoryMixin",
+    "PlayerManagerMixin",
+    "PlayerScreenHandlerMixin",
+    "ExperienceOrbEntityMixin"
+  ],
   "client": [
-      "accessor.LivingEntityAccessor",
-      "ClickableWidgetMixin",
-      "HandledScreenMixin",
-      "InventoryScreenMixin",
-      "ItemStackMixin",
-      "PlayerEntityRendererMixin"
-    ],
+    "accessor.LivingEntityAccessor",
+    "ClickableWidgetMixin",
+    "HandledScreenMixin",
+    "InventoryScreenMixin",
+    "ItemStackMixin",
+    "PlayerEntityRendererMixin"
+  ],
   "injectors": {
     "defaultRequire": 1
   }
