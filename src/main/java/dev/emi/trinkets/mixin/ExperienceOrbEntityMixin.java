@@ -50,7 +50,11 @@ public class ExperienceOrbEntityMixin {
 			TrinketComponent comp = optional.get();
 			List<Pair<SlotReference, ItemStack>> list = 
 				comp.getEquipped(stack -> stack.isDamaged() && EnchantmentHelper.getLevel(Enchantments.MENDING, stack) > 0);
-			int selected = mendingPlayer.getRandom().nextInt(size + list.size());
+			int totalSize = size + list.size();
+			if (totalSize == 0) {
+				return entry;
+			}
+			int selected = mendingPlayer.getRandom().nextInt(totalSize);
 			if (selected < list.size()) {
 				Pair<SlotReference, ItemStack> pair = list.get(selected);
 				Map<EquipmentSlot, ItemStack> dummyMap = Maps.newHashMap();
