@@ -1,8 +1,22 @@
 package dev.emi.trinkets.data;
 
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonSyntaxException;
 
 import dev.emi.trinkets.TrinketPlayerScreenHandler;
 import dev.emi.trinkets.TrinketsMain;
@@ -17,6 +31,7 @@ import net.fabricmc.fabric.api.resource.ResourceReloadListenerKeys;
 import net.minecraft.entity.EntityType;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.resource.Resource;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.resource.SinglePreparationResourceReloader;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -25,10 +40,6 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.JsonHelper;
 import net.minecraft.util.profiler.Profiler;
 import net.minecraft.util.registry.Registry;
-
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.*;
 
 public class EntitySlotLoader extends SinglePreparationResourceReloader<Map<String, Map<String, Set<String>>>> implements IdentifiableResourceReloadListener {
 
@@ -46,58 +57,61 @@ public class EntitySlotLoader extends SinglePreparationResourceReloader<Map<Stri
 
 		for (Identifier identifier : resourceManager.findResources(dataType, (stringx) -> stringx.endsWith(".json"))) {
 			try {
-				InputStreamReader reader = new InputStreamReader(resourceManager.getResource(identifier).getInputStream());
-				JsonObject jsonObject = JsonHelper.deserialize(GSON, reader, JsonObject.class);
+				for (Resource resource : resourceManager.getAllResources(identifier)) {
+					InputStreamReader reader = new InputStreamReader(resource.getInputStream());
+					JsonObject jsonObject = JsonHelper.deserialize(GSON, reader, JsonObject.class);
 
-				if (jsonObject != null) {
+					if (jsonObject != null) {
 
-					try {
-						boolean replace = JsonHelper.getBoolean(jsonObject, "replace", false);
-						JsonArray assignedSlots = JsonHelper.getArray(jsonObject, "slots", new JsonArray());
-						Map<String, Set<String>> groups = new HashMap<>();
+						try {
+							boolean replace = JsonHelper.getBoolean(jsonObject, "replace", false);
+							JsonArray assignedSlots = JsonHelper.getArray(jsonObject, "slots", new JsonArray());
+							Map<String, Set<String>> groups = new HashMap<>();
 
-						if (assignedSlots != null) {
+							if (assignedSlots != null) {
 
-							for (JsonElement assignedSlot : assignedSlots) {
-								String slot = assignedSlot.getAsString();
-								String[] parsedSlot = slot.split("/");
+								for (JsonElement assignedSlot : assignedSlots) {
+									String slot = assignedSlot.getAsString();
+									String[] parsedSlot = slot.split("/");
 
-								if (parsedSlot.length != 2) {
-									TrinketsMain.LOGGER.error("Detected malformed slot assignment " + slot
-											+ "! Slots should be in the format 'group/slot'.");
-									continue;
+									if (parsedSlot.length != 2) {
+										TrinketsMain.LOGGER.error("Detected malformed slot assignment " + slot
+												+ "! Slots should be in the format 'group/slot'.");
+										continue;
+									}
+									String group = parsedSlot[0];
+									String name = parsedSlot[1];
+									groups.computeIfAbsent(group, (k) -> new HashSet<>()).add(name);
 								}
-								String group = parsedSlot[0];
-								String name = parsedSlot[1];
-								groups.computeIfAbsent(group, (k) -> new HashSet<>()).add(name);
 							}
-						}
-						JsonArray entities = JsonHelper.getArray(jsonObject, "entities", new JsonArray());
+							JsonArray entities = JsonHelper.getArray(jsonObject, "entities", new JsonArray());
 
-						if (!groups.isEmpty() && entities != null) {
+							if (!groups.isEmpty() && entities != null) {
 
-							for (JsonElement entity : entities) {
-								String name = entity.getAsString();
-								String id;
+								for (JsonElement entity : entities) {
+									String name = entity.getAsString();
+									String id;
 
-								if (name.startsWith("#")) {
-									id = "#" + new Identifier(name.substring(1)).toString();
-								} else {
-									id = new Identifier(name).toString();
+									if (name.startsWith("#")) {
+										id = "#" + new Identifier(name.substring(1)).toString();
+									} else {
+										id = new Identifier(name).toString();
+									}
+									Map<String, Set<String>> slots = map.computeIfAbsent(id, (k) -> new HashMap<>());
+
+									if (replace) {
+										slots.clear();
+									}
+									groups.forEach((groupName, slotNames) -> slots.computeIfAbsent(groupName, (k) -> new HashSet<>())
+											.addAll(slotNames));
 								}
-								Map<String, Set<String>> slots = map.computeIfAbsent(id, (k) -> new HashMap<>());
-
-								if (replace) {
-									slots.clear();
-								}
-								groups.forEach((groupName, slotNames) -> slots.computeIfAbsent(groupName, (k) -> new HashSet<>())
-										.addAll(slotNames));
 							}
+						} catch (JsonSyntaxException e) {
+							TrinketsMain.LOGGER.error("[trinkets] Syntax error while reading data for " + identifier.getPath());
+							e.printStackTrace();
 						}
-					} catch (JsonSyntaxException e) {
-						TrinketsMain.LOGGER.error("[trinkets] Syntax error while reading data for " + identifier.getPath());
-						e.printStackTrace();
 					}
+						
 				}
 			} catch (IOException e) {
 				TrinketsMain.LOGGER.error("[trinkets] Unknown IO error while reading slot data!");

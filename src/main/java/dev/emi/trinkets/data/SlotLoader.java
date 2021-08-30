@@ -22,6 +22,7 @@ import dev.emi.trinkets.api.SlotType;
 import dev.emi.trinkets.api.TrinketEnums.DropRule;
 import dev.emi.trinkets.data.SlotLoader.GroupData;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
+import net.minecraft.resource.Resource;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.resource.SinglePreparationResourceReloader;
 import net.minecraft.util.Identifier;
@@ -43,30 +44,32 @@ public class SlotLoader extends SinglePreparationResourceReloader<Map<String, Gr
 	protected Map<String, GroupData> prepare(ResourceManager resourceManager, Profiler profiler) {
 		Map<String, GroupData> map = new HashMap<>();
 		String dataType = "slots";
-
 		for (Identifier identifier : resourceManager.findResources(dataType, (stringx) -> stringx.endsWith(".json"))) {
 
 			try {
-				InputStreamReader reader = new InputStreamReader(resourceManager.getResource(identifier).getInputStream());
-				JsonObject jsonObject = JsonHelper.deserialize(GSON, reader, JsonObject.class);
+				for (Resource resource : resourceManager.getAllResources(identifier)) {
+					InputStreamReader reader = new InputStreamReader(resource.getInputStream());
+					JsonObject jsonObject = JsonHelper.deserialize(GSON, reader, JsonObject.class);
 
-				if (jsonObject != null) {
-					String path = identifier.getPath();
-					String[] parsed = path.substring(dataType.length() + 1, path.length() - FILE_SUFFIX_LENGTH).split("/");
-					String groupName = parsed[0];
-					String fileName = parsed[parsed.length - 1];
-					GroupData group = map.computeIfAbsent(groupName, (k) -> new GroupData());
+					if (jsonObject != null) {
+						String path = identifier.getPath();
+						String[] parsed = path.substring(dataType.length() + 1, path.length() - FILE_SUFFIX_LENGTH).split("/");
+						String groupName = parsed[0];
+						String fileName = parsed[parsed.length - 1];
+						GroupData group = map.computeIfAbsent(groupName, (k) -> new GroupData());
 
-					try {
-						if (fileName.equals("group")) {
-							group.read(jsonObject);
-						} else {
-							SlotData slot = group.slots.computeIfAbsent(fileName, (k) -> new SlotData());
-							slot.read(jsonObject);
+						try {
+							if (fileName.equals("group")) {
+								group.read(jsonObject);
+							} else {
+								System.out.println("Loading slot from" + identifier);
+								SlotData slot = group.slots.computeIfAbsent(fileName, (k) -> new SlotData());
+								slot.read(jsonObject);
+							}
+						} catch (JsonSyntaxException e) {
+							TrinketsMain.LOGGER.error("[trinkets] Syntax error while reading data for " + path);
+							e.printStackTrace();
 						}
-					} catch (JsonSyntaxException e) {
-						TrinketsMain.LOGGER.error("[trinkets] Syntax error while reading data for " + path);
-						e.printStackTrace();
 					}
 				}
 			} catch (IOException e) {
