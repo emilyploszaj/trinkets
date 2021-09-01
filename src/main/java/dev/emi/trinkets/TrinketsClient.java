@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import net.minecraft.util.Pair;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.commons.lang3.tuple.Triple;
 
@@ -36,6 +37,38 @@ public class TrinketsClient implements ClientModInitializer {
 
 	@Override
 	public void onInitializeClient() {
+		ClientPlayNetworking.registerGlobalReceiver(TrinketsNetwork.SYNC_CONTENT, (client, handler, buf, responseSender) -> {
+			int entityId = buf.readInt();
+			NbtCompound data = buf.readNbt();
+
+			if (data != null) {
+				List<Pair<String, ItemStack>> entries = new ArrayList<>();
+				for (String key : data.getKeys()) {
+					ItemStack stack = ItemStack.fromNbt(data.getCompound(key));
+					entries.add(new Pair<>(key, stack));
+				}
+				client.execute(() -> {
+					Entity entity = client.world.getEntityById(entityId);
+					if (entity instanceof LivingEntity) {
+						TrinketsApi.getTrinketComponent((LivingEntity) entity).ifPresent(trinkets -> {
+							for (Pair<String, ItemStack> entry : entries) {
+								String[] split = entry.getLeft().split("/");
+								String group = split[0];
+								String slot = split[1];
+								int index = Integer.parseInt(split[2]);
+								Map<String, TrinketInventory> slots = trinkets.getInventory().get(group);
+								if (slots != null) {
+									TrinketInventory inv = slots.get(slot);
+									if (inv != null && index < inv.size()) {
+										inv.setStack(index, entry.getRight());
+									}
+								}
+							}
+						});
+					}
+				});
+			}
+		});
 		ClientPlayNetworking.registerGlobalReceiver(TrinketsNetwork.SYNC_MODIFIERS, (client, handler, buf, responseSender) -> {
 			int entityId = buf.readInt();
 			NbtCompound data = buf.readNbt();
