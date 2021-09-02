@@ -4,11 +4,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 
+import dev.emi.trinkets.TrinketsMain;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -109,6 +111,7 @@ public abstract class LivingEntityMixin extends Entity {
 		LivingEntity entity = (LivingEntity) (Object) this;
 		TrinketsApi.getTrinketComponent(entity).ifPresent(trinkets -> {
 			Map<String, ItemStack> newlyEquippedTrinkets = new HashMap<>();
+			Map<String, ItemStack> contentUpdates = new HashMap<>();
 			trinkets.clearCachedModifiers();
 			trinkets.forEach((ref, stack) -> {
 				TrinketInventory inventory = ref.inventory();
@@ -116,11 +119,14 @@ public abstract class LivingEntityMixin extends Entity {
 				int index = ref.index();
 				ItemStack oldStack = getOldStack(slotType, index);
 				ItemStack newStack = inventory.getStack(index);
-				newlyEquippedTrinkets.put(slotType.getGroup() + "/" + slotType.getName() + "/" + index, newStack.copy());
+				ItemStack copy = newStack.copy();
+				String newRef = slotType.getGroup() + "/" + slotType.getName() + "/" + index;
+				newlyEquippedTrinkets.put(newRef, copy);
 
 				if (!ItemStack.areEqual(newStack, oldStack)) {
 
 					if (!this.world.isClient) {
+						contentUpdates.put(newRef, copy);
 						UUID uuid = SlotAttributes.getUuid(ref);
 
 						if (!oldStack.isEmpty()) {
@@ -170,22 +176,36 @@ public abstract class LivingEntityMixin extends Entity {
 			if (!this.world.isClient) {
 				Set<TrinketInventory> inventoriesToSend = trinkets.getTrackingUpdates();
 
-				if (!inventoriesToSend.isEmpty()) {
+				if (!contentUpdates.isEmpty() || !inventoriesToSend.isEmpty()) {
 					PacketByteBuf buf = PacketByteBufs.create();
-					NbtCompound tag = new NbtCompound();
 					buf.writeInt(entity.getId());
+					NbtCompound tag = new NbtCompound();
+
 					for (TrinketInventory trinketInventory : inventoriesToSend) {
 						tag.put(trinketInventory.getSlotType().getGroup() + "/" + trinketInventory.getSlotType().getName(), trinketInventory.getSyncTag());
 					}
+
+					buf.writeNbt(tag);
+					tag = new NbtCompound();
+
+					for (Map.Entry<String, ItemStack> entry : contentUpdates.entrySet()) {
+						tag.put(entry.getKey(), entry.getValue().writeNbt(new NbtCompound()));
+					}
+
 					buf.writeNbt(tag);
 
 					for (ServerPlayerEntity player : PlayerLookup.tracking(entity)) {
-						ServerPlayNetworking.send(player, TrinketsNetwork.SYNC_MODIFIERS, buf);
+						ServerPlayNetworking.send(player, TrinketsNetwork.SYNC_INVENTORY, buf);
 					}
-					if (entity instanceof ServerPlayerEntity) {
-						ServerPlayNetworking.send((ServerPlayerEntity) entity, TrinketsNetwork.SYNC_MODIFIERS, buf);
-						((TrinketPlayerScreenHandler) ((ServerPlayerEntity) entity).playerScreenHandler).updateTrinketSlots(false);
+
+					if (entity instanceof ServerPlayerEntity serverPlayer) {
+						ServerPlayNetworking.send(serverPlayer, TrinketsNetwork.SYNC_INVENTORY, buf);
+
+						if (!inventoriesToSend.isEmpty()) {
+							((TrinketPlayerScreenHandler) serverPlayer.playerScreenHandler).updateTrinketSlots(false);
+						}
 					}
+
 					inventoriesToSend.clear();
 				}
 			}

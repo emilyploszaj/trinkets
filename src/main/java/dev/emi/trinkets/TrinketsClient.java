@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import net.minecraft.client.network.AbstractClientPlayerEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.Pair;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.commons.lang3.tuple.Triple;
 
@@ -36,40 +39,64 @@ public class TrinketsClient implements ClientModInitializer {
 
 	@Override
 	public void onInitializeClient() {
-		ClientPlayNetworking.registerGlobalReceiver(TrinketsNetwork.SYNC_MODIFIERS, (client, handler, buf, responseSender) -> {
+		ClientPlayNetworking.registerGlobalReceiver(TrinketsNetwork.SYNC_INVENTORY, (client, handler, buf, responseSender) -> {
 			int entityId = buf.readInt();
-			NbtCompound data = buf.readNbt();
+			NbtCompound inventoryData = buf.readNbt();
+			NbtCompound contentData = buf.readNbt();
+			List<Pair<String, ItemStack>> contentUpdates = new ArrayList<>();
+			List<Triple<String, String, NbtCompound>> inventoryUpdates = new ArrayList<>();
 
-			if (data != null) {
-				List<Triple<String, String, NbtCompound>> entries = new ArrayList<>();
-				for (String key : data.getKeys()) {
+			if (inventoryData != null) {
+				for (String key : inventoryData.getKeys()) {
 					String[] split = key.split("/");
 					String group = split[0];
 					String slot = split[1];
-					NbtCompound tag = data.getCompound(key);
-					entries.add(new ImmutableTriple<>(group, slot, tag));
+					NbtCompound tag = inventoryData.getCompound(key);
+					inventoryUpdates.add(new ImmutableTriple<>(group, slot, tag));
 				}
-				client.execute(() -> {
-					Entity entity = client.world.getEntityById(entityId);
-					if (entity instanceof LivingEntity) {
-						TrinketsApi.getTrinketComponent((LivingEntity) entity).ifPresent(trinkets -> {
-							for (Triple<String, String, NbtCompound> entry : entries) {
-								Map<String, TrinketInventory> slots = trinkets.getInventory().get(entry.getLeft());
-								if (slots != null) {
-									TrinketInventory inv = slots.get(entry.getMiddle());
-									if (inv != null) {
-										inv.applySyncTag(entry.getRight());
-									}
+			}
+
+			if (contentData != null) {
+				for (String key : contentData.getKeys()) {
+					ItemStack stack = ItemStack.fromNbt(contentData.getCompound(key));
+					contentUpdates.add(new Pair<>(key, stack));
+				}
+			}
+
+			client.execute(() -> {
+				Entity entity = client.world.getEntityById(entityId);
+				if (entity instanceof LivingEntity) {
+					TrinketsApi.getTrinketComponent((LivingEntity) entity).ifPresent(trinkets -> {
+						for (Triple<String, String, NbtCompound> entry : inventoryUpdates) {
+							Map<String, TrinketInventory> slots = trinkets.getInventory().get(entry.getLeft());
+							if (slots != null) {
+								TrinketInventory inv = slots.get(entry.getMiddle());
+								if (inv != null) {
+									inv.applySyncTag(entry.getRight());
 								}
 							}
+						}
 
-							if (entity == client.player) {
-								((TrinketPlayerScreenHandler) client.player.playerScreenHandler).updateTrinketSlots(false);
+						if (entity instanceof PlayerEntity && ((PlayerEntity) entity).playerScreenHandler instanceof TrinketPlayerScreenHandler screenHandler) {
+							screenHandler.updateTrinketSlots(false);
+						}
+
+						for (Pair<String, ItemStack> entry : contentUpdates) {
+							String[] split = entry.getLeft().split("/");
+							String group = split[0];
+							String slot = split[1];
+							int index = Integer.parseInt(split[2]);
+							Map<String, TrinketInventory> slots = trinkets.getInventory().get(group);
+							if (slots != null) {
+								TrinketInventory inv = slots.get(slot);
+								if (inv != null && index < inv.size()) {
+									inv.setStack(index, entry.getRight());
+								}
 							}
-						});
-					}
-				});
-			}
+						}
+					});
+				}
+			});
 		});
 		ClientPlayNetworking.registerGlobalReceiver(TrinketsNetwork.SYNC_SLOTS, (client, handler, buf, responseSender) -> {
 			NbtCompound data = buf.readNbt();
@@ -101,6 +128,10 @@ public class TrinketsClient implements ClientModInitializer {
 
 					if (player != null) {
 						((TrinketPlayerScreenHandler) player.playerScreenHandler).updateTrinketSlots(true);
+
+						for (AbstractClientPlayerEntity clientWorldPlayer : player.clientWorld.getPlayers()) {
+							((TrinketPlayerScreenHandler) clientWorldPlayer.playerScreenHandler).updateTrinketSlots(true);
+						}
 					}
 				});
 			}
