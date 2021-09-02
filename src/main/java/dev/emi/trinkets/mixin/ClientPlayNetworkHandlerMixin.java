@@ -13,12 +13,19 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
+/**
+ * Copies slot EAMs to players client-side when changing dimensions
+ *
+ * @author C4
+ */
 @Mixin(ClientPlayNetworkHandler.class)
 public class ClientPlayNetworkHandlerMixin {
 
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerEntity;setId(I)V"), method = "onPlayerRespawn", locals = LocalCapture.CAPTURE_FAILSOFT)
     private void onPlayerRespawn(PlayerRespawnS2CPacket packet, CallbackInfo ci, RegistryKey<?> registryKey, DimensionType dimensionType, ClientPlayerEntity clientPlayerEntity, int i, String string, ClientPlayerEntity clientPlayerEntity2) {
-        TrinketInventory.copyFrom(clientPlayerEntity, clientPlayerEntity2);
-        ((TrinketPlayerScreenHandler) clientPlayerEntity2.playerScreenHandler).updateTrinketSlots(false);
+        if (packet.shouldKeepPlayerAttributes()) {
+            TrinketInventory.copyFrom(clientPlayerEntity, clientPlayerEntity2);
+            ((TrinketPlayerScreenHandler) clientPlayerEntity2.playerScreenHandler).updateTrinketSlots(false);
+        }
     }
 }
