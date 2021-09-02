@@ -143,7 +143,7 @@ public abstract class LivingEntityMixin extends Entity {
 
 						if (!newStack.isEmpty()) {
 							Trinket trinket = TrinketsApi.getTrinket(newStack.getItem());
-							Multimap<EntityAttribute, EntityAttributeModifier> map = trinket.getModifiers(oldStack, ref, entity, uuid);
+							Multimap<EntityAttribute, EntityAttributeModifier> map = trinket.getModifiers(newStack, ref, entity, uuid);
 							Multimap<String, EntityAttributeModifier> slotMap = HashMultimap.create();
 							Set<SlotEntityAttribute> toRemove = Sets.newHashSet();
 							for (EntityAttribute attr : map.keySet()) {
