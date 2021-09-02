@@ -3,6 +3,7 @@
   "package": "dev.emi.trinkets.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
+    "accessor.ScreenHandlerAccessor",
     "CreativeInventoryScreenMixin",
     "LivingEntityMixin",
     "PlayerInventoryMixin",
@@ -13,6 +14,7 @@
   "client": [
     "accessor.LivingEntityAccessor",
     "ClickableWidgetMixin",
+    "ClientPlayNetworkHandlerMixin",
     "HandledScreenMixin",
     "InventoryScreenMixin",
     "ItemStackMixin",

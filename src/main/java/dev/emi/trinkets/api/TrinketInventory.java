@@ -190,6 +190,27 @@ public class TrinketInventory implements Inventory {
 		for (EntityAttributeModifier persistentModifier : other.persistentModifiers) {
 			this.addPersistentModifier(persistentModifier);
 		}
+		this.update();
+	}
+
+	public static void copyFrom(LivingEntity previous, LivingEntity current) {
+		TrinketsApi.getTrinketComponent(previous).ifPresent(prevTrinkets -> {
+			TrinketsApi.getTrinketComponent(current).ifPresent(currentTrinkets -> {
+				Map<String, Map<String, TrinketInventory>> prevMap = prevTrinkets.getInventory();
+				Map<String, Map<String, TrinketInventory>> currentMap = currentTrinkets.getInventory();
+				for (Map.Entry<String, Map<String, TrinketInventory>> entry : prevMap.entrySet()) {
+					Map<String, TrinketInventory> currentInvs = currentMap.get(entry.getKey());
+					if (currentInvs != null) {
+						for (Map.Entry<String, TrinketInventory> invEntry : entry.getValue().entrySet()) {
+							TrinketInventory currentInv = currentInvs.get(invEntry.getKey());
+							if (currentInv != null) {
+								currentInv.copyFrom(invEntry.getValue());
+							}
+						}
+					}
+				}
+			});
+		});
 	}
 
 	public NbtCompound toTag() {

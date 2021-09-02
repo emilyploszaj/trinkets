@@ -10,6 +10,7 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 
+import dev.emi.trinkets.TrinketsMain;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -173,38 +174,38 @@ public abstract class LivingEntityMixin extends Entity {
 			});
 
 			if (!this.world.isClient) {
-
-				if (!contentUpdates.isEmpty()) {
-					PacketByteBuf buf = PacketByteBufs.create();
-					NbtCompound tag = new NbtCompound();
-					buf.writeInt(entity.getId());
-					for (Map.Entry<String, ItemStack> entry : contentUpdates.entrySet()) {
-						tag.put(entry.getKey(), entry.getValue().writeNbt(new NbtCompound()));
-					}
-					buf.writeNbt(tag);
-
-					for (ServerPlayerEntity player : PlayerLookup.tracking(entity)) {
-						ServerPlayNetworking.send(player, TrinketsNetwork.SYNC_CONTENT, buf);
-					}
-				}
 				Set<TrinketInventory> inventoriesToSend = trinkets.getTrackingUpdates();
 
-				if (!inventoriesToSend.isEmpty()) {
+				if (!contentUpdates.isEmpty() || !inventoriesToSend.isEmpty()) {
 					PacketByteBuf buf = PacketByteBufs.create();
-					NbtCompound tag = new NbtCompound();
 					buf.writeInt(entity.getId());
+					NbtCompound tag = new NbtCompound();
+
 					for (TrinketInventory trinketInventory : inventoriesToSend) {
 						tag.put(trinketInventory.getSlotType().getGroup() + "/" + trinketInventory.getSlotType().getName(), trinketInventory.getSyncTag());
 					}
+
+					buf.writeNbt(tag);
+					tag = new NbtCompound();
+
+					for (Map.Entry<String, ItemStack> entry : contentUpdates.entrySet()) {
+						tag.put(entry.getKey(), entry.getValue().writeNbt(new NbtCompound()));
+					}
+
 					buf.writeNbt(tag);
 
 					for (ServerPlayerEntity player : PlayerLookup.tracking(entity)) {
-						ServerPlayNetworking.send(player, TrinketsNetwork.SYNC_MODIFIERS, buf);
+						ServerPlayNetworking.send(player, TrinketsNetwork.SYNC_INVENTORY, buf);
 					}
-					if (entity instanceof ServerPlayerEntity) {
-						ServerPlayNetworking.send((ServerPlayerEntity) entity, TrinketsNetwork.SYNC_MODIFIERS, buf);
-						((TrinketPlayerScreenHandler) ((ServerPlayerEntity) entity).playerScreenHandler).updateTrinketSlots(false);
+
+					if (entity instanceof ServerPlayerEntity serverPlayer) {
+						ServerPlayNetworking.send(serverPlayer, TrinketsNetwork.SYNC_INVENTORY, buf);
+
+						if (!inventoriesToSend.isEmpty()) {
+							((TrinketPlayerScreenHandler) serverPlayer.playerScreenHandler).updateTrinketSlots(false);
+						}
 					}
+
 					inventoriesToSend.clear();
 				}
 			}
