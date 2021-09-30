@@ -4,7 +4,6 @@
   "compatibilityLevel": "JAVA_8",
   "mixins": [
     "accessor.ScreenHandlerAccessor",
-    "CreativeInventoryScreenMixin",
     "LivingEntityMixin",
     "PlayerInventoryMixin",
     "PlayerManagerMixin",
@@ -15,6 +14,7 @@
     "accessor.LivingEntityAccessor",
     "ClickableWidgetMixin",
     "ClientPlayNetworkHandlerMixin",
+    "CreativeInventoryScreenMixin",
     "HandledScreenMixin",
     "InventoryScreenMixin",
     "ItemStackMixin",
