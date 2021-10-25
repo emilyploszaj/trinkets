@@ -1,6 +1,7 @@
 package dev.emi.trinkets.mixin;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -9,6 +10,7 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 
+import net.minecraft.tag.ItemTags;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -41,6 +43,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.world.GameRules;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
  * Trinket dropping on death, trinket EAMs, and trinket equip/unequip calls
@@ -57,6 +60,19 @@ public abstract class LivingEntityMixin extends Entity {
 
 	private LivingEntityMixin() {
 		super(null, null);
+	}
+
+	@Inject(at = @At("HEAD"), method = "canFreeze", cancellable = true)
+	private void canFreeze(CallbackInfoReturnable<Boolean> cir) {
+		var component = TrinketsApi.getTrinketComponent((LivingEntity) (Object) this);
+		if (component.isPresent()) {
+			for (var equipped : component.get().getAllEquipped()) {
+				if (equipped.getRight().isIn(ItemTags.FREEZE_IMMUNE_WEARABLES)) {
+					cir.setReturnValue(false);
+					break;
+				}
+			}
+		}
 	}
 
 	@Inject(at = @At("TAIL"), method = "dropInventory")
