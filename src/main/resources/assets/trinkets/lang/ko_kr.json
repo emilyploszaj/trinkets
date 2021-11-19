@@ -1,0 +1,20 @@
+{
+	"trinkets.tooltip.slots.any" : "§9모든§r 장신구 슬롯에 장착할 수 있습니다.",
+	"trinkets.tooltip.slots.list" : "장신구 슬롯에 장착할 수 있습니다:",
+	"trinkets.tooltip.slots.single" : "%d 트링켓 슬롯에 장착할 수 있습니다.",
+	"trinkets.tooltip.attributes.all" : "장착된 경우:",
+	"trinkets.tooltip.attributes.single" : "%d 트링켓 슬롯에 장착된 경우:",
+	"trinkets.tooltip.attributes.slots" : "%d 슬롯",
+	"trinkets.slot.head.face": "얼굴",
+	"trinkets.slot.head.hat": "모자",
+	"trinkets.slot.chest.necklace": "목걸이",
+	"trinkets.slot.chest.back": "등",
+	"trinkets.slot.chest.cape": "망토",
+	"trinkets.slot.legs.belt": "벨트",
+	"trinkets.slot.feet.aglet": "쇠붙이",
+	"trinkets.slot.feet.shoes": "신발",
+	"trinkets.slot.hand.glove": "장갑",
+	"trinkets.slot.offhand.glove": "장갑",
+	"trinkets.slot.hand.ring": "반지",
+	"trinkets.slot.offhand.ring": "반지"
+}
