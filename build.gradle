@@ -64,7 +64,7 @@ tasks.withType(JavaCompile).configureEach {
 	// If Javadoc is generated, this must be specified in that task too.
 	it.options.encoding = "UTF-8"
 
-	// Minecraft 1.17 (21w19a) upwards uses Java 16.
+	// Minecraft 1.18 (1.18-pre1) upwards uses Java 17.
 	it.options.release = 17
 }
 
