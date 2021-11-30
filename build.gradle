@@ -1,6 +1,6 @@
 plugins {
 	id 'fabric-loom' version '0.10-SNAPSHOT'
-	//id "com.github.fudge.forgedflowerloom" version "2.0.0"
+	id "com.github.fudge.forgedflowerloom" version "2.0.0"
 	id 'maven-publish'
 }
 
