@@ -1,7 +1,7 @@
 {
   "required": true,
   "package": "dev.emi.trinkets.mixin",
-  "compatibilityLevel": "JAVA_8",
+  "compatibilityLevel": "JAVA_17",
   "mixins": [
     "accessor.ScreenHandlerAccessor",
     "LivingEntityMixin",
