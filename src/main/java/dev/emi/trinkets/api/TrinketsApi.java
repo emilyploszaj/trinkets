@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
-import com.google.common.collect.Multimap;
 import com.mojang.datafixers.util.Function3;
 
 import dev.emi.trinkets.TrinketsMain;
