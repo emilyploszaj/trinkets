@@ -1,8 +1,6 @@
 package dev.emi.trinkets.api;
 
 import dev.emi.trinkets.TrinketSlot;
-import java.util.Map;
-import java.util.Optional;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
