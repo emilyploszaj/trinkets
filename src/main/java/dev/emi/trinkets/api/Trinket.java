@@ -89,8 +89,8 @@ public interface Trinket {
 			SlotReference slot, LivingEntity entity, UUID uuid) {
 		Multimap<EntityAttribute, EntityAttributeModifier> map = Multimaps.newMultimap(Maps.newLinkedHashMap(), ArrayList::new);
 
-		if (stack.hasTag() && stack.getTag().contains("TrinketAttributeModifiers", 9)) {
-			NbtList list = stack.getTag().getList("TrinketAttributeModifiers", 10);
+		if (stack.hasNbt() && stack.getNbt().contains("TrinketAttributeModifiers", 9)) {
+			NbtList list = stack.getNbt().getList("TrinketAttributeModifiers", 10);
 
 			for (int i = 0; i < list.size(); i++) {
 				NbtCompound tag = list.getCompound(i);
