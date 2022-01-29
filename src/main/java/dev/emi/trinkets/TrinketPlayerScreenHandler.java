@@ -4,7 +4,6 @@ import java.util.List;
 
 import dev.emi.trinkets.api.SlotGroup;
 import dev.emi.trinkets.api.SlotType;
-import net.minecraft.util.Pair;
 
 /**
  * Interface for putting methods onto the player's screen handler
@@ -14,15 +13,21 @@ public interface TrinketPlayerScreenHandler {
 	/**
 	 * Called to inform the player's slot handler that it needs to remove and re-add its trinket slots to reflect new changes
 	 */
-	void updateTrinketSlots(boolean slotsChanged);
+	void trinkets$updateTrinketSlots(boolean slotsChanged);
 
-	Pair<Integer, Integer> getGroupPos(SlotGroup group);
+	int trinkets$getGroupNum(SlotGroup group);
 
-	List<Pair<Integer, Integer>> getSlotHeights(SlotGroup group);
+	Point trinkets$getGroupPos(SlotGroup group);
 
-	List<SlotType> getSlotTypes(SlotGroup group);
+	List<Point> trinkets$getSlotHeights(SlotGroup group);
 
-	int getSlotWidth(SlotGroup group);
+	List<SlotType> trinkets$getSlotTypes(SlotGroup group);
 
-	int getGroupCount();
+	int trinkets$getSlotWidth(SlotGroup group);
+
+	int trinkets$getGroupCount();
+
+	int trinkets$getTrinketSlotStart();
+
+	int trinkets$getTrinketSlotEnd();
 }

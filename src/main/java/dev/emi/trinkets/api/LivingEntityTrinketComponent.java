@@ -266,7 +266,7 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 			}
 
 			if (this.entity instanceof PlayerEntity player) {
-				((TrinketPlayerScreenHandler) player.playerScreenHandler).updateTrinketSlots(false);
+				((TrinketPlayerScreenHandler) player.playerScreenHandler).trinkets$updateTrinketSlots(false);
 			}
 		}
 	}

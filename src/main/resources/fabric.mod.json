@@ -39,6 +39,7 @@
 			"dev.emi.trinkets.TrinketsMain"
 		]
 	},
+  "accessWidener": "trinkets.accesswidener",
 	"custom": {
 		"cardinal-components": [
 			"trinkets:trinkets"

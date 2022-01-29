@@ -1,23 +1,184 @@
 package dev.emi.trinkets.mixin;
 
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import dev.emi.trinkets.CreativeTrinketSlot;
+import dev.emi.trinkets.Point;
+import dev.emi.trinkets.SurvivalTrinketSlot;
+import dev.emi.trinkets.TrinketPlayerScreenHandler;
+import dev.emi.trinkets.TrinketScreen;
+import dev.emi.trinkets.TrinketScreenManager;
+import dev.emi.trinkets.TrinketsClient;
+import dev.emi.trinkets.api.SlotGroup;
+import dev.emi.trinkets.api.TrinketsApi;
+import net.minecraft.client.gui.screen.ingame.AbstractInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
+import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen.CreativeScreenHandler;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.util.math.Rect2i;
+import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
+import net.minecraft.screen.slot.Slot;
 import net.minecraft.util.collection.DefaultedList;
 
 /**
- * Makes trinket slots not show up in the creative inventory in weird bad places
+ * Delegates drawing and slot group selection logic
  * 
  * @author Emi
  */
 @Mixin(CreativeInventoryScreen.class)
-public class CreativeInventoryScreenMixin {
+public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScreen<CreativeScreenHandler> implements TrinketScreen {
+	@Shadow
+	private static int selectedTab;
+	@Shadow
+	protected abstract void setSelectedTab(ItemGroup group);
+
+	private CreativeInventoryScreenMixin() {
+		super(null, null, null);
+	}
 
 	@Redirect(at = @At(value = "INVOKE", target = "net/minecraft/util/collection/DefaultedList.size()I"), method = "setSelectedTab")
 	private int size(DefaultedList<ItemStack> list) {
 		return 46;
+	}
+
+	@Inject(at = @At("HEAD"), method = "setSelectedTab")
+	private void setSelectedTab(ItemGroup g, CallbackInfo info) {
+		if (g != ItemGroup.INVENTORY) {
+			TrinketScreenManager.removeSelections();
+		}
+	}
+
+	@Inject(at = @At(value = "INVOKE", target = "net/minecraft/screen/slot/Slot.<init>(Lnet/minecraft/inventory/Inventory;III)V"), method = "setSelectedTab")
+	private void addCreativeTrinketSlots(ItemGroup g, CallbackInfo info) {
+		TrinketPlayerScreenHandler handler = trinkets$getHandler();
+		for (int i = handler.trinkets$getTrinketSlotStart(); i < handler.trinkets$getTrinketSlotEnd(); i++) {
+			Slot slot = this.client.player.playerScreenHandler.slots.get(i);
+			if (slot instanceof SurvivalTrinketSlot ts) {
+				SlotGroup group = TrinketsApi.getPlayerSlots().get(ts.getType().getGroup());
+				Rect2i rect = trinkets$getGroupRect(group);
+				Point pos = trinkets$getHandler().trinkets$getGroupPos(group);
+				int xOff = rect.getX() + 1 - pos.x();
+				int yOff = rect.getY() + 1 - pos.y();
+				((CreativeScreenHandler) this.handler).slots.add(new CreativeTrinketSlot(ts, ts.getIndex(), ts.x + xOff, ts.y + yOff));
+			}
+		}
+	}
+
+	@Inject(at = @At("HEAD"), method = "init")
+	private void init(CallbackInfo info) {
+		TrinketScreenManager.init(this);
+	}
+
+	@Inject(at = @At("HEAD"), method = "removed")
+	private void removed(CallbackInfo info) {
+		TrinketScreenManager.removeSelections();
+	}
+
+	@Inject(at = @At("TAIL"), method = "handledScreenTick")
+	private void tick(CallbackInfo info) {
+		TrinketScreenManager.tick();
+	}
+
+	@Inject(at = @At("HEAD"), method = "render")
+	private void render(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo info) {
+		if (selectedTab == ItemGroup.INVENTORY.getIndex()) {
+			TrinketScreenManager.update(mouseX, mouseY);
+		}
+	}
+
+	@Inject(at = @At(value = "INVOKE", target = "net/minecraft/client/gui/screen/ingame/InventoryScreen.drawEntity(IIIFFLnet/minecraft/entity/LivingEntity;)V"), method = "drawBackground")
+	private void drawBackground(MatrixStack matrices, float delta, int mouseX, int mouseY, CallbackInfo info) {
+		if (selectedTab == ItemGroup.INVENTORY.getIndex()) {
+			TrinketScreenManager.drawExtraGroups(this, matrices);
+		}
+	}
+
+	@Inject(at = @At("TAIL"), method = "drawForeground")
+	private void drawForeground(MatrixStack matrices, int mouseX, int mouseY, CallbackInfo info) {
+		if (selectedTab == ItemGroup.INVENTORY.getIndex()) {
+			TrinketScreenManager.drawActiveGroup(this, matrices);
+		}
+	}
+	
+	@Inject(at = @At("HEAD"), method = "isClickOutsideBounds", cancellable = true)
+	private void isClickOutsideBounds(double mouseX, double mouseY, int left, int top, int button, CallbackInfoReturnable<Boolean> info) {
+		if (selectedTab == ItemGroup.INVENTORY.getIndex() && TrinketScreenManager.isClickInsideTrinketBounds(mouseX, mouseY)) {
+			info.setReturnValue(false);
+		}
+	}
+
+	@Inject(at = @At("HEAD"), method = "isClickInTab", cancellable = true)
+	private void isClickInTab(ItemGroup group, double mouseX, double mouseY, CallbackInfoReturnable<Boolean> info) {
+		if (TrinketsClient.activeGroup != null) {
+			info.setReturnValue(false);
+		}
+	}
+	
+	@Inject(at = @At("HEAD"), method = "renderTabTooltipIfHovered", cancellable = true)
+	private void renderTabTooltipIfHovered(MatrixStack matrices, ItemGroup group, int mouseX, int mouseY, CallbackInfoReturnable<Boolean> info) {
+		if (TrinketsClient.activeGroup != null) {
+			info.setReturnValue(false);
+		}
+	}
+
+	@Override
+	public TrinketPlayerScreenHandler trinkets$getHandler() {
+		return (TrinketPlayerScreenHandler) this.client.player.playerScreenHandler;
+	}
+
+	@Override
+	public Rect2i trinkets$getGroupRect(SlotGroup group) {
+		int groupNum = trinkets$getHandler().trinkets$getGroupNum(group);
+		if (groupNum <= 3) {
+			// Look what else do you want me to do
+			return switch (groupNum) {
+				case 1 -> new Rect2i(15, 19, 17, 17);
+				case 2 -> new Rect2i(126, 19, 17, 17);
+				case 3 -> new Rect2i(145, 19, 17, 17);
+				case -5 -> new Rect2i(53, 5, 17, 17);
+				case -6 -> new Rect2i(53, 32, 17, 17);
+				case -7 -> new Rect2i(107, 5, 17, 17);
+				case -8 -> new Rect2i(107, 32, 17, 17);
+				case -45 -> new Rect2i(34, 19, 17, 17);
+				default -> new Rect2i(0, 0, 0, 0);
+			};
+		}
+		Point pos = trinkets$getHandler().trinkets$getGroupPos(group);
+		if (pos != null) {
+			return new Rect2i(pos.x() - 1, pos.y() - 1, 17, 17);
+		}
+		return new Rect2i(0, 0, 0, 0);
+	}
+
+	@Override
+	public Slot trinkets$getFocusedSlot() {
+		return this.focusedSlot;
+	}
+
+	@Override
+	public int trinkets$getX() {
+		return this.x;
+	}
+
+	@Override
+	public int trinkets$getY() {
+		return this.y;
+	}
+
+	@Override
+	public boolean trinkets$isRecipeBookOpen() {
+		return false;
+	}
+
+	@Override
+	public void trinkets$updateTrinketSlots() {
+		setSelectedTab(ItemGroup.GROUPS[selectedTab]);
 	}
 }

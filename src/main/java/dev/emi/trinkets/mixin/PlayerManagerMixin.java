@@ -22,6 +22,6 @@ public abstract class PlayerManagerMixin {
 	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayerEntity;onSpawn()V"), method = "onPlayerConnect")
 	private void onPlayerConnect(ClientConnection connection, ServerPlayerEntity player, CallbackInfo cb) {
 		EntitySlotLoader.INSTANCE.sync(player);
-		((TrinketPlayerScreenHandler) player.playerScreenHandler).updateTrinketSlots(false);
+		((TrinketPlayerScreenHandler) player.playerScreenHandler).trinkets$updateTrinketSlots(false);
 	}
 }

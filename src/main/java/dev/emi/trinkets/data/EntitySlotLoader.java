@@ -198,7 +198,7 @@ public class EntitySlotLoader extends SinglePreparationResourceReloader<Map<Stri
 	public void sync(List<? extends ServerPlayerEntity> players) {
 		PacketByteBuf buf = getSlotsPacket();
 		players.forEach(player -> ServerPlayNetworking.send(player, TrinketsNetwork.SYNC_SLOTS, buf));
-		players.forEach(player -> ((TrinketPlayerScreenHandler) player.playerScreenHandler).updateTrinketSlots(true));
+		players.forEach(player -> ((TrinketPlayerScreenHandler) player.playerScreenHandler).trinkets$updateTrinketSlots(true));
 	}
 
 	private PacketByteBuf getSlotsPacket() {

@@ -8,9 +8,11 @@
     "PlayerInventoryMixin",
     "PlayerManagerMixin",
     "PlayerScreenHandlerMixin",
+    "ServerPlayNetworkHandlerMixin",
     "ExperienceOrbEntityMixin"
   ],
   "client": [
+    "accessor.CreativeSlotAccessor",
     "accessor.LivingEntityAccessor",
     "ClickableWidgetMixin",
     "ClientPlayNetworkHandlerMixin",

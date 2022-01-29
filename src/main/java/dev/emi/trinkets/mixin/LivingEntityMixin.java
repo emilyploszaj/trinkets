@@ -1,7 +1,6 @@
 package dev.emi.trinkets.mixin;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -10,13 +9,13 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 
-import net.minecraft.tag.ItemTags;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import dev.emi.trinkets.TrinketPlayerScreenHandler;
 import dev.emi.trinkets.TrinketsNetwork;
@@ -34,16 +33,19 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.AttributeContainer;
 import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.tag.ItemTags;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.GameRules;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
  * Trinket dropping on death, trinket EAMs, and trinket equip/unequip calls
@@ -109,7 +111,7 @@ public abstract class LivingEntityMixin extends Entity {
 
 			switch (dropRule) {
 				case DROP:
-					dropStack(stack);
+					dropFromEntity(stack);
 					// Fallthrough
 				case DESTROY:
 					inventory.setStack(ref.index(), ItemStack.EMPTY);
@@ -118,6 +120,18 @@ public abstract class LivingEntityMixin extends Entity {
 					break;
 			}
 		}));
+	}
+
+	private void dropFromEntity(ItemStack stack) {
+		ItemEntity entity = dropStack(stack);
+		// Mimic player drop behavior for only players
+		if (entity != null && ((Entity) this) instanceof PlayerEntity) {
+			entity.setPos(entity.getX(), this.getEyeY() - 0.3, entity.getZ());
+			entity.setPickupDelay(40);
+			float magnitude = this.random.nextFloat() * 0.5f;
+			float angle = this.random.nextFloat() * ((float)Math.PI * 2);
+			entity.setVelocity(-MathHelper.sin(angle) * magnitude, 0.2f, MathHelper.cos(angle) * magnitude);
+		}
 	}
 
 	@Inject(at = @At("TAIL"), method = "tick")
@@ -216,7 +230,7 @@ public abstract class LivingEntityMixin extends Entity {
 						ServerPlayNetworking.send(serverPlayer, TrinketsNetwork.SYNC_INVENTORY, buf);
 
 						if (!inventoriesToSend.isEmpty()) {
-							((TrinketPlayerScreenHandler) serverPlayer.playerScreenHandler).updateTrinketSlots(false);
+							((TrinketPlayerScreenHandler) serverPlayer.playerScreenHandler).trinkets$updateTrinketSlots(false);
 						}
 					}
 

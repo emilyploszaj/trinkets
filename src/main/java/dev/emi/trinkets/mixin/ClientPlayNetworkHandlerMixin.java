@@ -25,7 +25,7 @@ public class ClientPlayNetworkHandlerMixin {
     private void onPlayerRespawn(PlayerRespawnS2CPacket packet, CallbackInfo ci, RegistryKey<?> registryKey, DimensionType dimensionType, ClientPlayerEntity clientPlayerEntity, int i, String string, ClientPlayerEntity clientPlayerEntity2) {
         if (packet.shouldKeepPlayerAttributes()) {
             TrinketInventory.copyFrom(clientPlayerEntity, clientPlayerEntity2);
-            ((TrinketPlayerScreenHandler) clientPlayerEntity2.playerScreenHandler).updateTrinketSlots(false);
+            ((TrinketPlayerScreenHandler) clientPlayerEntity2.playerScreenHandler).trinkets$updateTrinketSlots(false);
         }
     }
 }

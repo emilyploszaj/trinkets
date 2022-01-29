@@ -1,13 +1,7 @@
 package dev.emi.trinkets.mixin;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import dev.emi.trinkets.TrinketSlot;
-import dev.emi.trinkets.TrinketsClient;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.util.Identifier;
+
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -16,6 +10,16 @@ import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+import dev.emi.trinkets.TrinketSlot;
+import dev.emi.trinkets.TrinketsClient;
+import dev.emi.trinkets.mixin.accessor.CreativeSlotAccessor;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen.CreativeSlot;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.screen.slot.Slot;
+import net.minecraft.util.Identifier;
 
 /**
  * Draws trinket slot backs, adjusts z location of draw calls, and makes non-trinket slots un-interactable while a trinket slot group is focused
@@ -76,7 +80,11 @@ public abstract class HandledScreenMixin extends Screen {
 					info.setReturnValue(false);
 				}
 			} else {
-				if (slot.id != TrinketsClient.activeGroup.getSlotId()) {
+				if (slot instanceof CreativeSlot cs) {
+					if (((CreativeSlotAccessor) cs).getSlot().id != TrinketsClient.activeGroup.getSlotId()) {
+						info.setReturnValue(false);
+					}
+				} else if (slot.id != TrinketsClient.activeGroup.getSlotId()) {
 					info.setReturnValue(false);
 				}
 			}
