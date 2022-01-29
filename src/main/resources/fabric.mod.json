@@ -9,7 +9,7 @@
 		{
 			"name": "Emi",
 			"contact": {
-				"github": "https://github.com/emilyalexandra"
+				"github": "https://github.com/emilyploszaj"
 			}
 		},
 		{
@@ -21,7 +21,7 @@
 	],
 	"contact": {
 		"homepage": "https://www.curseforge.com/minecraft/mc-mods/trinkets-fabric",
-		"sources": "https://github.com/emilyalexandra/trinkets"
+		"sources": "https://github.com/emilyploszaj/trinkets"
 	},
 
 	"license": "MIT",
