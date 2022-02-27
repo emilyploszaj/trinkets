@@ -1,6 +1,6 @@
 plugins {
-	id 'fabric-loom' version '0.10-SNAPSHOT'
-	//id "com.github.fudge.forgedflowerloom" version "2.0.0"
+	id 'fabric-loom' version '0.11-SNAPSHOT'
+	id 'io.github.juuxel.loom-quiltflower' version '1.6.0'
 	id 'maven-publish'
 }
 
@@ -13,15 +13,15 @@ group = project.maven_group
 
 
 loom {
-	accessWidener = file("src/main/resources/trinkets.accesswidener")
+	accessWidenerPath = file("src/main/resources/trinkets.accesswidener")
 }
 
 repositories {
+	maven { url = "https://maven.terraformersmc.com" }
 	maven {
 		name = "Ladysnake Libs"
 		url = "https://ladysnake.jfrog.io/artifactory/mods"
 	}
-	maven { url = "https://jitpack.io" }
 }
 
 sourceSets {
@@ -39,19 +39,14 @@ dependencies {
 
 	// Mod dependencies
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-	modImplementation "io.github.onyxstudios.Cardinal-Components-API:cardinal-components-base:${project.cca_version}"
-	include "io.github.onyxstudios.Cardinal-Components-API:cardinal-components-base:${project.cca_version}"
-	modImplementation "io.github.onyxstudios.Cardinal-Components-API:cardinal-components-entity:${project.cca_version}"
-	include "io.github.onyxstudios.Cardinal-Components-API:cardinal-components-entity:${project.cca_version}"
+	modImplementation include("dev.onyxstudios.cardinal-components-api:cardinal-components-base:${project.cca_version}")
+	modImplementation include("dev.onyxstudios.cardinal-components-api:cardinal-components-entity:${project.cca_version}")
 
 	// Dev Runtime
 	testmodImplementation sourceSets.main.output
-	/*modRuntime("io.github.prospector:modmenu:${project.mod_menu_version}") {
+	modImplementation("com.terraformersmc:modmenu:${project.mod_menu_version}") {
 		transitive = false
-	}*/
-	//modRuntime ("com.github.SuperCoder7979:databreaker:0.2.5") {
-	//	exclude module : "fabric-loader"
-	//}
+	}
 }
 
 processResources {
