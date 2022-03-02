@@ -28,7 +28,6 @@ import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.fabricmc.fabric.api.resource.ResourceReloadListenerKeys;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.entity.EntityType;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
@@ -36,12 +35,10 @@ import net.minecraft.resource.Resource;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.resource.SinglePreparationResourceReloader;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.tag.TagKey;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.JsonHelper;
 import net.minecraft.util.profiler.Profiler;
 import net.minecraft.util.registry.Registry;
-import net.minecraft.util.registry.RegistryEntry;
 
 public class EntitySlotLoader extends SinglePreparationResourceReloader<Map<String, Map<String, Set<String>>>> implements IdentifiableResourceReloadListener {
 
@@ -137,7 +134,9 @@ public class EntitySlotLoader extends SinglePreparationResourceReloader<Map<Stri
 
 			try {
 				if (entityName.startsWith("#")) {
-					// FIXME: registry tags not populated yet, might need to make this lazy
+					// TODO rewrite this to work with the new tag system
+					TrinketsMain.LOGGER.error("[trinkets] Attempted to assign entity entry to tag");
+					/*
 					TagKey<EntityType<?>> tag = TagKey.of(Registry.ENTITY_TYPE_KEY, new Identifier(entityName.substring(1)));
 					List<? extends EntityType<?>> entityTypes = Registry.ENTITY_TYPE.getEntryList(tag)
 							.orElseThrow(() -> new IllegalArgumentException("Unknown entity tag '" + entityName + "'"))
@@ -145,7 +144,7 @@ public class EntitySlotLoader extends SinglePreparationResourceReloader<Map<Stri
 							.map(RegistryEntry::value)
 							.toList();
 
-					types.addAll(entityTypes);
+					types.addAll(entityTypes);*/
 				} else {
 					types.add(Registry.ENTITY_TYPE.getOrEmpty(new Identifier(entityName))
 							.orElseThrow(() -> new IllegalArgumentException("Unknown entity '" + entityName + "'")));
