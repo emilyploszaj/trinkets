@@ -5,6 +5,7 @@ import dev.emi.trinkets.api.TrinketInventory;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.network.packet.s2c.play.PlayerRespawnS2CPacket;
+import net.minecraft.util.registry.RegistryEntry;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.dimension.DimensionType;
 import org.spongepowered.asm.mixin.Mixin;
@@ -22,7 +23,7 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 public class ClientPlayNetworkHandlerMixin {
 
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerEntity;setId(I)V"), method = "onPlayerRespawn", locals = LocalCapture.CAPTURE_FAILSOFT)
-    private void onPlayerRespawn(PlayerRespawnS2CPacket packet, CallbackInfo ci, RegistryKey<?> registryKey, DimensionType dimensionType, ClientPlayerEntity clientPlayerEntity, int i, String string, ClientPlayerEntity clientPlayerEntity2) {
+    private void onPlayerRespawn(PlayerRespawnS2CPacket packet, CallbackInfo ci, RegistryKey<?> registryKey, RegistryEntry<?> registryEntry, ClientPlayerEntity clientPlayerEntity, int i, String string, ClientPlayerEntity clientPlayerEntity2) {
         if (packet.shouldKeepPlayerAttributes()) {
             TrinketInventory.copyFrom(clientPlayerEntity, clientPlayerEntity2);
             ((TrinketPlayerScreenHandler) clientPlayerEntity2.playerScreenHandler).trinkets$updateTrinketSlots(false);

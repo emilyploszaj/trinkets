@@ -1,12 +1,6 @@
 package dev.emi.trinkets.api;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Consumer;
 import com.mojang.datafixers.util.Function3;
-
 import dev.emi.trinkets.TrinketsMain;
 import dev.emi.trinkets.TrinketsNetwork;
 import dev.emi.trinkets.data.EntitySlotLoader;
@@ -22,9 +16,15 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.tag.ItemTags;
-import net.minecraft.tag.Tag;
+import net.minecraft.tag.TagKey;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.registry.Registry;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Consumer;
 
 public class TrinketsApi {
 	public static final ComponentKey<TrinketComponent> TRINKET_COMPONENT = ComponentRegistryV3.INSTANCE
@@ -119,12 +119,13 @@ public class TrinketsApi {
 	static {
 		TrinketsApi.registerTrinketPredicate(new Identifier("trinkets", "all"), (stack, ref, entity) -> TriState.TRUE);
 		TrinketsApi.registerTrinketPredicate(new Identifier("trinkets", "none"), (stack, ref, entity) -> TriState.FALSE);
-		Identifier trinketsAll = new Identifier("trinkets", "all");
+		TagKey<Item> trinketsAll = TagKey.of(Registry.ITEM_KEY, new Identifier("trinkets", "all"));
+
 		TrinketsApi.registerTrinketPredicate(new Identifier("trinkets", "tag"), (stack, ref, entity) -> {
 			SlotType slot = ref.inventory().getSlotType();
-			Tag<Item> tag = ItemTags.getTagGroup().getTagOrEmpty(new Identifier("trinkets", slot.getGroup() + "/" + slot.getName()));
-			Tag<Item> all = ItemTags.getTagGroup().getTagOrEmpty(trinketsAll);
-			if (tag.contains(stack.getItem()) || all.contains(stack.getItem())) {
+			TagKey<Item> tag = TagKey.of(Registry.ITEM_KEY, new Identifier("trinkets", slot.getGroup() + "/" + slot.getName()));
+
+			if (stack.isIn(tag) || stack.isIn(trinketsAll)) {
 				return TriState.TRUE;
 			}
 			return TriState.DEFAULT;

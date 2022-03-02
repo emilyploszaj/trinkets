@@ -1,5 +1,5 @@
 {
-  "entities": ["player"],
+  "entities": ["player", "#some_entities,"],
   "slots": [
     "hand/glove",
     "hand/ring",
