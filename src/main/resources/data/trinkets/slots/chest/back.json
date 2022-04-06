@@ -1,4 +1,7 @@
 {
   "icon": "trinkets:gui/slots/back",
-  "order": -512
+  "order": -512,
+  "validator_predicates": ["trinkets:tag"],
+  "quick_move_predicates": ["trinkets:all"],
+  "tooltip_predicates": ["trinkets:all"]
 }
