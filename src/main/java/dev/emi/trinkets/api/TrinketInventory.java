@@ -141,6 +141,10 @@ public class TrinketInventory implements Inventory {
 		}
 	}
 
+	public void removeCachedModifier(EntityAttributeModifier attributeModifier) {
+		this.cachedModifiers.remove(attributeModifier);
+	}
+
 	public void clearCachedModifiers() {
 		for (EntityAttributeModifier cachedModifier : this.cachedModifiers) {
 			this.removeModifier(cachedModifier.getId());

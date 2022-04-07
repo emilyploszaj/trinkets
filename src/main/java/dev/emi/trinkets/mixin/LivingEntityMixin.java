@@ -140,7 +140,6 @@ public abstract class LivingEntityMixin extends Entity {
 		TrinketsApi.getTrinketComponent(entity).ifPresent(trinkets -> {
 			Map<String, ItemStack> newlyEquippedTrinkets = new HashMap<>();
 			Map<String, ItemStack> contentUpdates = new HashMap<>();
-			trinkets.clearCachedModifiers();
 			trinkets.forEach((ref, stack) -> {
 				TrinketInventory inventory = ref.inventory();
 				SlotType slotType = inventory.getSlotType();
