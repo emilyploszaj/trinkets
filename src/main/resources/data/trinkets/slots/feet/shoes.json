@@ -1,7 +1,5 @@
 {
   "icon": "trinkets:gui/slots/shoes",
   "order": -512,
-  "validator_predicates": ["trinkets:tag"],
-  "quick_move_predicates": ["trinkets:all"],
-  "tooltip_predicates": ["trinkets:all"]
+  "validator_predicates": ["trinkets:tag"]
 }
