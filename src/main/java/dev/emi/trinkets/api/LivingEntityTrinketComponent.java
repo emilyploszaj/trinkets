@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 
@@ -17,6 +18,7 @@ import dev.emi.trinkets.TrinketPlayerScreenHandler;
 import dev.onyxstudios.cca.api.v3.component.sync.AutoSyncedComponent;
 import net.fabricmc.fabric.api.util.NbtType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -224,9 +226,34 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 				}
 			}
 		}
-
 		for (ItemStack itemStack : dropped) {
 			this.entity.dropStack(itemStack);
+		}
+		Multimap<String, EntityAttributeModifier> slotMap = HashMultimap.create();
+		this.forEach((ref, stack) -> {
+			if (!stack.isEmpty()) {
+				UUID uuid = SlotAttributes.getUuid(ref);
+				Trinket trinket = TrinketsApi.getTrinket(stack.getItem());
+				Multimap<EntityAttribute, EntityAttributeModifier> map = trinket.getModifiers(stack, ref, entity, uuid);
+				for (EntityAttribute entityAttribute : map.keySet()) {
+					if (entityAttribute instanceof SlotAttributes.SlotEntityAttribute slotEntityAttribute) {
+						slotMap.putAll(slotEntityAttribute.slot, map.get(entityAttribute));
+					}
+				}
+			}
+		});
+		for (Map.Entry<String, Map<String, TrinketInventory>> groupEntry : this.getInventory().entrySet()) {
+			for (Map.Entry<String, TrinketInventory> slotEntry : groupEntry.getValue().entrySet()) {
+				String group = groupEntry.getKey();
+				String slot = slotEntry.getKey();
+				String key = group + "/" + slot;
+				Collection<EntityAttributeModifier> modifiers = slotMap.get(key);
+				TrinketInventory inventory = slotEntry.getValue();
+				for (EntityAttributeModifier modifier : modifiers) {
+					inventory.removeCachedModifier(modifier);
+				}
+				inventory.clearCachedModifiers();
+			}
 		}
 	}
 

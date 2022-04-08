@@ -1,4 +1,5 @@
 {
   "icon": "trinkets:gui/slots/face",
-  "order": -1024
+  "order": -1024,
+  "validator_predicates": ["trinkets:tag"]
 }
