@@ -104,16 +104,16 @@ public abstract class ItemStackMixin {
 			}
 
 			if (slots.size() == slotCount && slotCount > 1) {
-				list.add(new TranslatableText("trinkets.tooltip.slots.any").formatted(Formatting.GRAY));
+				list.add(Text.translatable("trinkets.tooltip.slots.any").formatted(Formatting.GRAY));
 			} else if (slots.size() > 1) {
-				list.add(new TranslatableText("trinkets.tooltip.slots.list").formatted(Formatting.GRAY));
+				list.add(Text.translatable("trinkets.tooltip.slots.list").formatted(Formatting.GRAY));
 				for (SlotType type : slots) {
 					list.add(type.getTranslation().formatted(Formatting.BLUE));
 				}
 			} else if (slots.size() == 1) {
 				// Should only run once
 				for (SlotType type : slots) {
-					list.add(new TranslatableText("trinkets.tooltip.slots.single",
+					list.add(Text.translatable("trinkets.tooltip.slots.single",
 							type.getTranslation().formatted(Formatting.BLUE)).formatted(Formatting.GRAY));
 				}
 			}
@@ -121,12 +121,12 @@ public abstract class ItemStackMixin {
 			if (modifiers.size() > 0) {
 				if (allModifiersSame) {
 					if (defaultModifier != null && !defaultModifier.isEmpty()) {
-						list.add(new TranslatableText("trinkets.tooltip.attributes.all").formatted(Formatting.GRAY));
+						list.add(Text.translatable("trinkets.tooltip.attributes.all").formatted(Formatting.GRAY));
 						addAttributes(list, defaultModifier);
 					}
 				} else {
 					for (SlotType type : modifiers.keySet()) {
-						list.add(new TranslatableText("trinkets.tooltip.attributes.single",
+						list.add(Text.translatable("trinkets.tooltip.attributes.single",
 								type.getTranslation().formatted(Formatting.BLUE)).formatted(Formatting.GRAY));
 						addAttributes(list, modifiers.get(type));
 					}
@@ -151,16 +151,16 @@ public abstract class ItemStackMixin {
 					g *= 100.0D;
 				}
 
-				Text text = new TranslatableText(attribute.getTranslationKey());
+				Text text = Text.translatable(attribute.getTranslationKey());
 				if (attribute instanceof SlotAttributes.SlotEntityAttribute) {
-					text = new TranslatableText("trinkets.tooltip.attributes.slots", text);
+					text = Text.translatable("trinkets.tooltip.attributes.slots", text);
 				}
 				if (g > 0.0D) {
-					list.add(new TranslatableText("attribute.modifier.plus." + modifier.getOperation().getId(),
+					list.add(Text.translatable("attribute.modifier.plus." + modifier.getOperation().getId(),
 						ItemStack.MODIFIER_FORMAT.format(g), text).formatted(Formatting.BLUE));
 				} else if (g < 0.0D) {
 					g *= -1.0D;
-					list.add(new TranslatableText("attribute.modifier.take." + modifier.getOperation().getId(),
+					list.add(Text.translatable("attribute.modifier.take." + modifier.getOperation().getId(),
 						ItemStack.MODIFIER_FORMAT.format(g), text).formatted(Formatting.RED));
 				}
 			}

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -44,12 +45,13 @@ public class SlotLoader extends SinglePreparationResourceReloader<Map<String, Gr
 	protected Map<String, GroupData> prepare(ResourceManager resourceManager, Profiler profiler) {
 		Map<String, GroupData> map = new HashMap<>();
 		String dataType = "slots";
-		for (Identifier identifier : resourceManager.findResources(dataType, (stringx) -> stringx.endsWith(".json"))) {
+		for (Map.Entry<Identifier, List<Resource>> entry : resourceManager.findAllResources(dataType, id -> id.getPath().endsWith(".json")).entrySet()) {
+			Identifier identifier = entry.getKey();
 
 			if (identifier.getNamespace().equals(TrinketsMain.MOD_ID)) {
 
 				try {
-					for (Resource resource : resourceManager.getAllResources(identifier)) {
+					for (Resource resource : entry.getValue()) {
 						InputStreamReader reader = new InputStreamReader(resource.getInputStream());
 						JsonObject jsonObject = JsonHelper.deserialize(GSON, reader, JsonObject.class);
 
