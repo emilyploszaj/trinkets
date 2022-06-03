@@ -1,0 +1,20 @@
+{
+  "trinkets.tooltip.slots.any" : "Uitrustbaar in §9alle§r trinket slots",
+  "trinkets.tooltip.slots.list" : "Uitrustbaar in de trinket slots:",
+  "trinkets.tooltip.slots.single" : "Uitrustbaar in de %d trinket slot",
+  "trinkets.tooltip.attributes.all" : "Wanneer uitgerust:",
+  "trinkets.tooltip.attributes.single" : "Wanneer uitgerust in de %d trinket slot:",
+  "trinkets.tooltip.attributes.slots" : "%d Slots",
+  "trinkets.slot.head.face": "Gezicht",
+  "trinkets.slot.head.hat": "Hoed",
+  "trinkets.slot.chest.necklace": "Ketting",
+  "trinkets.slot.chest.back": "Rug",
+  "trinkets.slot.chest.cape": "Kaap",
+  "trinkets.slot.legs.belt": "Riem",
+  "trinkets.slot.feet.aglet": "Aglet",
+  "trinkets.slot.feet.shoes": "Schoenen",
+  "trinkets.slot.hand.glove": "Handschoenen",
+  "trinkets.slot.offhand.glove": "Handschoenen",
+  "trinkets.slot.hand.ring": "Ring",
+  "trinkets.slot.offhand.ring": "Ring"
+}

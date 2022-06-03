@@ -48,6 +48,7 @@ public abstract class ItemStackMixin {
 	private void getTooltip(PlayerEntity player, TooltipContext context, CallbackInfoReturnable<List<Text>> info, List<Text> list) {
 		TrinketsApi.getTrinketComponent(player).ifPresent(comp -> {
 			ItemStack self = (ItemStack) (Object) this;
+			boolean canEquipAnywhere = true;
 			Set<SlotType> slots = Sets.newHashSet();
 			Map<SlotType, Multimap<EntityAttribute, EntityAttributeModifier>> modifiers = Maps.newHashMap();
 			Multimap<EntityAttribute, EntityAttributeModifier> defaultModifier = null;
@@ -55,13 +56,17 @@ public abstract class ItemStackMixin {
 			int slotCount = 0;
 
 			for (Map.Entry<String, Map<String, TrinketInventory>> group : comp.getInventory().entrySet()) {
+				outer:
 				for (Map.Entry<String, TrinketInventory> inventory : group.getValue().entrySet()) {
 					TrinketInventory trinketInventory = inventory.getValue();
 					SlotType slotType = trinketInventory.getSlotType();
+					slotCount++;
+					boolean anywhereButHidden = false;
 					for (int i = 0; i < trinketInventory.size(); i++) {
 						SlotReference ref = new SlotReference(trinketInventory, i);
 						boolean res = TrinketsApi.evaluatePredicateSet(slotType.getTooltipPredicates(), self, ref, player);
-						if (res && TrinketSlot.canInsert(self, ref, player)) {
+						boolean canInsert = TrinketSlot.canInsert(self, ref, player);
+						if (res && canInsert) {
 							boolean sameTranslationExists = false;
 							for (SlotType t : slots) {
 								if (t.getTranslation().getString().equals(slotType.getTranslation().getString())) {
@@ -96,14 +101,18 @@ public abstract class ItemStackMixin {
 							if (!duplicate) {
 								modifiers.put(slotType, map);
 							}
+							continue outer;
+						} else if (canInsert) {
+							anywhereButHidden = true;
 						}
 					}
-
-					slotCount++;
+					if (!anywhereButHidden) {
+						canEquipAnywhere = false;
+					}
 				}
 			}
 
-			if (slots.size() == slotCount && slotCount > 1) {
+			if (canEquipAnywhere && slotCount > 1) {
 				list.add(Text.translatable("trinkets.tooltip.slots.any").formatted(Formatting.GRAY));
 			} else if (slots.size() > 1) {
 				list.add(Text.translatable("trinkets.tooltip.slots.list").formatted(Formatting.GRAY));
