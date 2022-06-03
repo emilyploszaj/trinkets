@@ -1,9 +1,9 @@
 {
-  "trinkets.tooltip.slots.any": "Можно надеть в §9любой§r аксессуарный слот",
-  "trinkets.tooltip.slots.list": "Можно надеть в аксессуарные слоты:",
-  "trinkets.tooltip.slots.single": "Можно надеть в аксессуарный слот %d",
+  "trinkets.tooltip.slots.any": "Можно надеть в §9любой§r слот для аксессуаров",
+  "trinkets.tooltip.slots.list": "Можно надеть в слоты для аксессуаров:",
+  "trinkets.tooltip.slots.single": "Можно надеть в слот для аксессуаров %d",
   "trinkets.tooltip.attributes.all": "Когда надето:",
-  "trinkets.tooltip.attributes.single": "Когда надето в аксессуарный слот %d:",
+  "trinkets.tooltip.attributes.single": "Когда надето в слот для аксессуаров %d:",
   "trinkets.tooltip.attributes.slots": "%d Слотов",
   "trinkets.slot.head.face": "Лица",
   "trinkets.slot.head.hat": "Шляпы",
