@@ -3,10 +3,11 @@ package dev.emi.trinkets.api;
 import dev.emi.trinkets.api.TrinketEnums.DropRule;
 import net.fabricmc.fabric.api.util.NbtType;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
 import java.util.HashSet;
@@ -74,8 +75,8 @@ public class SlotType {
 		return dropRule;
 	}
 
-	public TranslatableText getTranslation() {
-		return new TranslatableText("trinkets.slot." + this.group + "." + this.name);
+	public MutableText getTranslation() {
+		return Text.translatable("trinkets.slot." + this.group + "." + this.name);
 	}
 
 	public void write(NbtCompound data) {
