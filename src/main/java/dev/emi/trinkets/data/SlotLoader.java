@@ -44,7 +44,7 @@ public class SlotLoader extends SinglePreparationResourceReloader<Map<String, Gr
 	protected Map<String, GroupData> prepare(ResourceManager resourceManager, Profiler profiler) {
 		Map<String, GroupData> map = new HashMap<>();
 		String dataType = "slots";
-		for (Identifier identifier : resourceManager.findResources(dataType, (stringx) -> stringx.endsWith(".json"))) {
+		for (Identifier identifier : resourceManager.findResources(dataType, (stringx) -> stringx.getPath().endsWith(".json")).keySet()) {
 
 			if (identifier.getNamespace().equals(TrinketsMain.MOD_ID)) {
 
