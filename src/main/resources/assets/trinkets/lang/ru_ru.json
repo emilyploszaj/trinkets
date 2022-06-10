@@ -4,7 +4,7 @@
   "trinkets.tooltip.slots.single": "Используется как %d",
   "trinkets.tooltip.attributes.all": "Когда надето:",
   "trinkets.tooltip.attributes.single": "Когда надето как %d:",
-  "trinkets.tooltip.attributes.slots": "%d слотов",
+  "trinkets.tooltip.attributes.slots": "%d (доп. слоты)",
   "trinkets.slot.head.face": "маска",
   "trinkets.slot.head.hat": "шапка",
   "trinkets.slot.chest.necklace": "подвеска",
