@@ -54,12 +54,13 @@ public class EntitySlotLoader extends SinglePreparationResourceReloader<Map<Stri
 		Map<String, Map<String, Set<String>>> map = new HashMap<>();
 		String dataType = "entities";
 
-		for (Identifier identifier : resourceManager.findResources(dataType, (stringx) -> stringx.endsWith(".json"))) {
+		for (Map.Entry<Identifier, List<Resource>> entry : resourceManager.findAllResources(dataType, id -> id.getPath().endsWith(".json")).entrySet()) {
+			Identifier identifier = entry.getKey();
 
 			if (identifier.getNamespace().equals(TrinketsMain.MOD_ID)) {
 
 				try {
-					for (Resource resource : resourceManager.getAllResources(identifier)) {
+					for (Resource resource : entry.getValue()) {
 						InputStreamReader reader = new InputStreamReader(resource.getInputStream());
 						JsonObject jsonObject = JsonHelper.deserialize(GSON, reader, JsonObject.class);
 
