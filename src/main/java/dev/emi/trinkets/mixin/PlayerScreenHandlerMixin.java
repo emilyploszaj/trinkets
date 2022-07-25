@@ -79,7 +79,7 @@ public abstract class PlayerScreenHandlerMixin extends ScreenHandler implements 
 
 				//Will Cause a client to redraw the screen(if opened during a reload) now that the data is available
 				if(owner.getWorld().isClient){
-					this.setReRenderScreen(true);
+					this.trinkets$setReRenderScreen(true);
 				}
 			}
 			Map<String, SlotGroup> groups = trinkets.getGroups();
@@ -217,12 +217,12 @@ public abstract class PlayerScreenHandlerMixin extends ScreenHandler implements 
 	}
 
 	@Override
-	public void setReRenderScreen(boolean reRenderScreen) {
+	public void trinkets$setReRenderScreen(boolean reRenderScreen) {
 		this.reRenderScreen = reRenderScreen;
 	}
 
 	@Override
-	public boolean shouldReRenderScreen() {
+	public boolean trinkets$shouldReRenderScreen() {
 		return this.reRenderScreen;
 	}
 

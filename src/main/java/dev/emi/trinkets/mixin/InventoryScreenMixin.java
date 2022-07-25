@@ -1,7 +1,6 @@
 package dev.emi.trinkets.mixin;
 
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -49,11 +48,11 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreen<Playe
 	private void render(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo info) {
 		TrinketScreenManager.update(mouseX, mouseY);
 
-		if(trinkets$getHandler().shouldReRenderScreen()){
+		if(trinkets$getHandler().trinkets$shouldReRenderScreen()){
 			// Force the screen to re-render until the group exists within the map
 			this.clearAndInit();
 
-			trinkets$getHandler().setReRenderScreen(false);
+			trinkets$getHandler().trinkets$setReRenderScreen(false);
 		}
 	}
 

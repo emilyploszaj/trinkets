@@ -33,8 +33,8 @@ public interface TrinketPlayerScreenHandler {
 
 	int trinkets$getTrinketSlotEnd();
 
-	boolean shouldReRenderScreen();
+	boolean trinkets$shouldReRenderScreen();
 
-	void setReRenderScreen(boolean reRender);
+	void trinkets$setReRenderScreen(boolean reRender);
 
 }
