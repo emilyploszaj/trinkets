@@ -70,6 +70,29 @@ public final class SlotGroup {
 		return builder.build();
 	}
 
+	@Override
+	public int hashCode() {
+		int hash = name.hashCode();
+
+		hash = 31 * hash + slots.hashCode();
+
+		return hash;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof SlotGroup slotGroup){
+			return slotGroup.name.equals(name) && slotGroup.slots.equals(slots);
+		}
+
+		return super.equals(obj);
+	}
+
+	@Override
+	public String toString() {
+		return this.name + " / " + this.slots;
+	}
+
 	public static class Builder {
 
 		private final String name;
