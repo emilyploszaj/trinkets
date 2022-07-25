@@ -5,6 +5,7 @@ import net.minecraft.nbt.NbtCompound;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public final class SlotGroup {
 
@@ -71,21 +72,16 @@ public final class SlotGroup {
 	}
 
 	@Override
-	public int hashCode() {
-		int hash = name.hashCode();
-
-		hash = 31 * hash + slots.hashCode();
-
-		return hash;
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		SlotGroup slotGroup = (SlotGroup) o;
+		return slotId == slotGroup.slotId && order == slotGroup.order && name.equals(slotGroup.name) && slots.equals(slotGroup.slots);
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if(obj instanceof SlotGroup slotGroup){
-			return slotGroup.name.equals(name) && slotGroup.slots.equals(slots);
-		}
-
-		return super.equals(obj);
+	public int hashCode() {
+		return Objects.hash(name, slotId, order, slots);
 	}
 
 	@Override
