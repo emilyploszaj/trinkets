@@ -1,6 +1,7 @@
 package dev.emi.trinkets.mixin;
 
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -47,6 +48,13 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreen<Playe
 	@Inject(at = @At("HEAD"), method = "render")
 	private void render(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo info) {
 		TrinketScreenManager.update(mouseX, mouseY);
+
+		if(trinkets$getHandler().shouldReRenderScreen()){
+			// Force the screen to re-render until the group exists within the map
+			this.clearAndInit();
+
+			trinkets$getHandler().setReRenderScreen(false);
+		}
 	}
 
 	@Inject(at = @At(value = "INVOKE", target = "net/minecraft/client/gui/screen/ingame/InventoryScreen.drawEntity(IIIFFLnet/minecraft/entity/LivingEntity;)V"), method = "drawBackground")

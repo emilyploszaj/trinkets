@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import dev.emi.trinkets.*;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -15,10 +16,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import dev.emi.trinkets.Point;
-import dev.emi.trinkets.SurvivalTrinketSlot;
-import dev.emi.trinkets.TrinketPlayerScreenHandler;
-import dev.emi.trinkets.TrinketsClient;
 import dev.emi.trinkets.api.SlotGroup;
 import dev.emi.trinkets.api.SlotReference;
 import dev.emi.trinkets.api.SlotType;
@@ -43,6 +40,8 @@ public abstract class PlayerScreenHandlerMixin extends ScreenHandler implements 
 	@Shadow @Final
 	private PlayerEntity owner;
 
+	@Unique
+	private boolean reRenderScreen = false;
 	@Unique
 	private final Map<SlotGroup, Integer> groupNums = new HashMap<>();
 	@Unique
@@ -75,7 +74,14 @@ public abstract class PlayerScreenHandlerMixin extends ScreenHandler implements 
 	@Override
 	public void trinkets$updateTrinketSlots(boolean slotsChanged) {
 		TrinketsApi.getTrinketComponent(owner).ifPresent(trinkets -> {
-			if (slotsChanged) trinkets.update();
+			if (slotsChanged){
+				trinkets.update();
+
+				//Will Cause a client to redraw the screen(if opened during a reload) now that the data is available
+				if(owner.getWorld().isClient){
+					this.setReRenderScreen(true);
+				}
+			}
 			Map<String, SlotGroup> groups = trinkets.getGroups();
 			groupPos.clear();
 			while (trinketSlotStart < trinketSlotEnd) {
@@ -208,6 +214,16 @@ public abstract class PlayerScreenHandlerMixin extends ScreenHandler implements 
 	@Override
 	public int trinkets$getTrinketSlotEnd() {
 		return trinketSlotEnd;
+	}
+
+	@Override
+	public void setReRenderScreen(boolean reRenderScreen) {
+		this.reRenderScreen = reRenderScreen;
+	}
+
+	@Override
+	public boolean shouldReRenderScreen() {
+		return this.reRenderScreen;
 	}
 
 	@Inject(at = @At("HEAD"), method = "close")

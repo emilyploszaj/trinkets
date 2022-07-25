@@ -2,6 +2,7 @@ package dev.emi.trinkets.mixin;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -90,6 +91,12 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
 	private void render(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo info) {
 		if (selectedTab == ItemGroup.INVENTORY.getIndex()) {
 			TrinketScreenManager.update(mouseX, mouseY);
+		}
+
+		if(trinkets$getHandler().shouldReRenderScreen()){
+			this.clearAndInit();
+
+			trinkets$getHandler().setReRenderScreen(false);
 		}
 	}
 

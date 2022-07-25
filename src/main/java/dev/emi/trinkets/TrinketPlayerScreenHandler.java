@@ -1,9 +1,11 @@
 package dev.emi.trinkets;
 
 import java.util.List;
+import java.util.Map;
 
 import dev.emi.trinkets.api.SlotGroup;
 import dev.emi.trinkets.api.SlotType;
+import net.minecraft.screen.slot.Slot;
 
 /**
  * Interface for putting methods onto the player's screen handler
@@ -30,4 +32,9 @@ public interface TrinketPlayerScreenHandler {
 	int trinkets$getTrinketSlotStart();
 
 	int trinkets$getTrinketSlotEnd();
+
+	boolean shouldReRenderScreen();
+
+	void setReRenderScreen(boolean reRender);
+
 }
