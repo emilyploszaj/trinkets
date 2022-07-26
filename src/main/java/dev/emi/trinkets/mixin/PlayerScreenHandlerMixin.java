@@ -1,10 +1,6 @@
 package dev.emi.trinkets.mixin;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -44,15 +40,15 @@ public abstract class PlayerScreenHandlerMixin extends ScreenHandler implements 
 	private PlayerEntity owner;
 
 	@Unique
-	private final Map<SlotGroup, Integer> groupNums = new HashMap<>();
+	private final Map<SlotGroup, Integer> groupNums = new IdentityHashMap<>();
 	@Unique
-	private final Map<SlotGroup, Point> groupPos = new HashMap<>();
+	private final Map<SlotGroup, Point> groupPos = new IdentityHashMap<>();
 	@Unique
-	private final Map<SlotGroup, List<Point>> slotHeights = new HashMap<>();
+	private final Map<SlotGroup, List<Point>> slotHeights = new IdentityHashMap<>();
 	@Unique
-	private final Map<SlotGroup, List<SlotType>> slotTypes = new HashMap<>();
+	private final Map<SlotGroup, List<SlotType>> slotTypes = new IdentityHashMap<>();
 	@Unique
-	private final Map<SlotGroup, Integer> slotWidths = new HashMap<>();
+	private final Map<SlotGroup, Integer> slotWidths = new IdentityHashMap<>();
 	@Unique
 	private int trinketSlotStart = 0;
 	@Unique
@@ -193,6 +189,15 @@ public abstract class PlayerScreenHandlerMixin extends ScreenHandler implements 
 	@Override
 	public int trinkets$getSlotWidth(SlotGroup group) {
 		return slotWidths.get(group);
+	}
+
+	@Override
+	public boolean trinkets$isSane(SlotGroup group) {
+		return groupNums.containsKey(group)
+				&& groupPos.containsKey(group)
+				&& slotHeights.containsKey(group)
+				&& slotTypes.containsKey(group)
+				&& slotWidths.containsKey(group);
 	}
 
 	@Override

@@ -30,4 +30,6 @@ public interface TrinketPlayerScreenHandler {
 	int trinkets$getTrinketSlotStart();
 
 	int trinkets$getTrinketSlotEnd();
+
+	boolean trinkets$isSane(SlotGroup group);
 }
