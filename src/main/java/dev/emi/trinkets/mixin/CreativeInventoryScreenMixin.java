@@ -2,6 +2,7 @@ package dev.emi.trinkets.mixin;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -39,6 +40,9 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
 	@Shadow
 	protected abstract void setSelectedTab(ItemGroup group);
 
+	@Unique
+	private boolean dirty = false;
+
 	private CreativeInventoryScreenMixin() {
 		super(null, null, null);
 	}
@@ -62,11 +66,13 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
 			Slot slot = this.client.player.playerScreenHandler.slots.get(i);
 			if (slot instanceof SurvivalTrinketSlot ts) {
 				SlotGroup group = TrinketsApi.getPlayerSlots().get(ts.getType().getGroup());
-				Rect2i rect = trinkets$getGroupRect(group);
-				Point pos = trinkets$getHandler().trinkets$getGroupPos(group);
-				int xOff = rect.getX() + 1 - pos.x();
-				int yOff = rect.getY() + 1 - pos.y();
-				((CreativeScreenHandler) this.handler).slots.add(new CreativeTrinketSlot(ts, ts.getIndex(), ts.x + xOff, ts.y + yOff));
+				if(trinkets$getHandler().trinkets$isSane(group)) {
+					Rect2i rect = trinkets$getGroupRect(group);
+					Point pos = trinkets$getHandler().trinkets$getGroupPos(group);
+					int xOff = rect.getX() + 1 - pos.x();
+					int yOff = rect.getY() + 1 - pos.y();
+					((CreativeScreenHandler) this.handler).slots.add(new CreativeTrinketSlot(ts, ts.getIndex(), ts.x + xOff, ts.y + yOff));
+				}
 			}
 		}
 	}
@@ -88,6 +94,11 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
 
 	@Inject(at = @At("HEAD"), method = "render")
 	private void render(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo info) {
+		if(dirty){
+			this.clearAndInit();
+			dirty = false;
+		}
+
 		if (selectedTab == ItemGroup.INVENTORY.getIndex()) {
 			TrinketScreenManager.update(mouseX, mouseY);
 		}
@@ -129,30 +140,37 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
 	}
 
 	@Override
+	public void trinkets$markDirty() {
+		this.dirty = true;
+	}
+
+	@Override
 	public TrinketPlayerScreenHandler trinkets$getHandler() {
 		return (TrinketPlayerScreenHandler) this.client.player.playerScreenHandler;
 	}
 
 	@Override
 	public Rect2i trinkets$getGroupRect(SlotGroup group) {
-		int groupNum = trinkets$getHandler().trinkets$getGroupNum(group);
-		if (groupNum <= 3) {
-			// Look what else do you want me to do
-			return switch (groupNum) {
-				case 1 -> new Rect2i(15, 19, 17, 17);
-				case 2 -> new Rect2i(126, 19, 17, 17);
-				case 3 -> new Rect2i(145, 19, 17, 17);
-				case -5 -> new Rect2i(53, 5, 17, 17);
-				case -6 -> new Rect2i(53, 32, 17, 17);
-				case -7 -> new Rect2i(107, 5, 17, 17);
-				case -8 -> new Rect2i(107, 32, 17, 17);
-				case -45 -> new Rect2i(34, 19, 17, 17);
-				default -> new Rect2i(0, 0, 0, 0);
-			};
-		}
-		Point pos = trinkets$getHandler().trinkets$getGroupPos(group);
-		if (pos != null) {
-			return new Rect2i(pos.x() - 1, pos.y() - 1, 17, 17);
+		if(trinkets$getHandler().trinkets$isSane(group)) {
+			int groupNum = trinkets$getHandler().trinkets$getGroupNum(group);
+			if (groupNum <= 3) {
+				// Look what else do you want me to do
+				return switch (groupNum) {
+					case 1 -> new Rect2i(15, 19, 17, 17);
+					case 2 -> new Rect2i(126, 19, 17, 17);
+					case 3 -> new Rect2i(145, 19, 17, 17);
+					case -5 -> new Rect2i(53, 5, 17, 17);
+					case -6 -> new Rect2i(53, 32, 17, 17);
+					case -7 -> new Rect2i(107, 5, 17, 17);
+					case -8 -> new Rect2i(107, 32, 17, 17);
+					case -45 -> new Rect2i(34, 19, 17, 17);
+					default -> new Rect2i(0, 0, 0, 0);
+				};
+			}
+			Point pos = trinkets$getHandler().trinkets$getGroupPos(group);
+			if (pos != null) {
+				return new Rect2i(pos.x() - 1, pos.y() - 1, 17, 17);
+			}
 		}
 		return new Rect2i(0, 0, 0, 0);
 	}

@@ -22,4 +22,6 @@ public interface TrinketScreen {
 
 	public default void trinkets$updateTrinketSlots() {
 	}
+
+	void trinkets$markDirty();
 }

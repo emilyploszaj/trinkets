@@ -1,6 +1,7 @@
 package dev.emi.trinkets.mixin;
 
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -27,6 +28,9 @@ import net.minecraft.screen.slot.Slot;
 @Mixin(InventoryScreen.class)
 public abstract class InventoryScreenMixin extends AbstractInventoryScreen<PlayerScreenHandler> implements RecipeBookProvider, TrinketScreen {
 
+	@Unique
+	private boolean dirty = false;
+
 	private InventoryScreenMixin() { super(null, null, null); }
 
 	@Inject(at = @At("HEAD"), method = "init")
@@ -46,6 +50,12 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreen<Playe
 
 	@Inject(at = @At("HEAD"), method = "render")
 	private void render(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo info) {
+		if(this.dirty){
+			this.clearAndInit();
+
+			this.dirty = false;
+		}
+
 		TrinketScreenManager.update(mouseX, mouseY);
 	}
 
@@ -67,15 +77,22 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreen<Playe
 	}
 
 	@Override
+	public void trinkets$markDirty() {
+		this.dirty = true;
+	}
+
+	@Override
 	public TrinketPlayerScreenHandler trinkets$getHandler() {
 		return (TrinketPlayerScreenHandler) this.handler;
 	}
 	
 	@Override
 	public Rect2i trinkets$getGroupRect(SlotGroup group) {
-		Point pos = ((TrinketPlayerScreenHandler) handler).trinkets$getGroupPos(group);
-		if (pos != null) {
-			return new Rect2i(pos.x() - 1, pos.y() - 1, 17, 17);
+		if(trinkets$getHandler().trinkets$isSane(group)) {
+			Point pos = ((TrinketPlayerScreenHandler) handler).trinkets$getGroupPos(group);
+			if (pos != null) {
+				return new Rect2i(pos.x() - 1, pos.y() - 1, 17, 17);
+			}
 		}
 		return new Rect2i(0, 0, 0, 0);
 	}

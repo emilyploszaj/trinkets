@@ -135,6 +135,10 @@ public class TrinketsClient implements ClientModInitializer {
 						for (AbstractClientPlayerEntity clientWorldPlayer : player.clientWorld.getPlayers()) {
 							((TrinketPlayerScreenHandler) clientWorldPlayer.playerScreenHandler).trinkets$updateTrinketSlots(true);
 						}
+
+						if(client.currentScreen instanceof TrinketScreen trinketScreen){
+							trinketScreen.trinkets$markDirty();
+						}
 					}
 				});
 			}

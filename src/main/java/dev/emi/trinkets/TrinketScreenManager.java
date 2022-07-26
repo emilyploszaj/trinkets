@@ -36,6 +36,14 @@ public class TrinketScreenManager {
 
 	public static void update(float mouseX, float mouseY) {
 		TrinketPlayerScreenHandler handler = currentScreen.trinkets$getHandler();
+
+		if((group != null && !handler.trinkets$isSane(group))
+			|| (quickMoveGroup != null && !handler.trinkets$isSane(quickMoveGroup))
+			|| (TrinketsClient.activeGroup != null && !handler.trinkets$isSane(TrinketsClient.activeGroup))
+			|| (TrinketsClient.quickMoveGroup != null && !handler.trinkets$isSane(TrinketsClient.quickMoveGroup))){
+			return;
+		}
+
 		Slot focusedSlot = currentScreen.trinkets$getFocusedSlot();
 		int x = currentScreen.trinkets$getX();
 		int y = currentScreen.trinkets$getY();
@@ -108,6 +116,10 @@ public class TrinketScreenManager {
 			group = TrinketsClient.activeGroup;
 
 			if (group != null) {
+				if(!handler.trinkets$isSane(group)){
+					return;
+				}
+
 				int slotsWidth = handler.trinkets$getSlotWidth(group) + 1;
 				if (group.getSlotId() == -1) slotsWidth -= 1;
 				Rect2i r = currentScreen.trinkets$getGroupRect(group);
@@ -141,6 +153,10 @@ public class TrinketScreenManager {
 			quickMoveGroup = TrinketsClient.quickMoveGroup;
 
 			if (quickMoveGroup != null) {
+				if(!handler.trinkets$isSane(quickMoveGroup)){
+					return;
+				}
+
 				int slotsWidth = handler.trinkets$getSlotWidth(quickMoveGroup) + 1;
 
 				if (quickMoveGroup.getSlotId() == -1) slotsWidth -= 1;
@@ -175,6 +191,11 @@ public class TrinketScreenManager {
 
 	public static void drawGroup(DrawableHelper helper, MatrixStack matrices, SlotGroup group, SlotType type) {
 		TrinketPlayerScreenHandler handler = currentScreen.trinkets$getHandler();
+
+		if (!handler.trinkets$isSane(group)) {
+			return;
+		}
+
 		RenderSystem.enableDepthTest();
 		helper.setZOffset(305);
 
