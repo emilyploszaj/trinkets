@@ -7,6 +7,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import dev.emi.trinkets.api.SlotGroup;
 import dev.emi.trinkets.api.SlotType;
 import dev.emi.trinkets.api.TrinketsApi;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.util.math.Rect2i;
@@ -57,12 +58,14 @@ public class TrinketScreenManager {
 					if (focusedSlot instanceof TrinketSlot ts) {
 						int i = handler.trinkets$getSlotTypes(group).indexOf(ts.getType());
 						if (i >= 0) {
-							Point slotHeight = handler.trinkets$getSlotHeights(group).get(i);
-							Rect2i r = currentScreen.trinkets$getGroupRect(group);
-							int height = slotHeight.y();
-							if (height > 1) {
-								TrinketsClient.activeType = ts.getType();
-								typeBounds = new Rect2i(r.getX() + slotHeight.x() - 2, r.getY() - (height - 1) / 2 * 18 - 3, 23, height * 18 + 5);
+							Point slotHeight = handler.trinkets$getSlotHeight(group, i);
+							if (slotHeight != null) {
+								Rect2i r = currentScreen.trinkets$getGroupRect(group);
+								int height = slotHeight.y();
+								if (height > 1) {
+									TrinketsClient.activeType = ts.getType();
+									typeBounds = new Rect2i(r.getX() + slotHeight.x() - 2, r.getY() - (height - 1) / 2 * 18 - 3, 23, height * 18 + 5);
+								}
 							}
 						}
 					}
@@ -76,11 +79,13 @@ public class TrinketScreenManager {
 				TrinketsClient.activeType = TrinketsClient.quickMoveType;
 				int i = handler.trinkets$getSlotTypes(TrinketsClient.activeGroup).indexOf(TrinketsClient.activeType);
 				if (i >= 0) {
-					Point slotHeight = handler.trinkets$getSlotHeights(TrinketsClient.activeGroup).get(i);
-					Rect2i r = currentScreen.trinkets$getGroupRect(TrinketsClient.activeGroup);
-					int height = slotHeight.y();
-					if (height > 1) {
-						typeBounds = new Rect2i(r.getX() + slotHeight.x() - 2, r.getY() - (height - 1) / 2 * 18 - 3, 23, height * 18 + 5);
+					Point slotHeight = handler.trinkets$getSlotHeight(TrinketsClient.activeGroup, i);
+					if (slotHeight != null) {
+						Rect2i r = currentScreen.trinkets$getGroupRect(TrinketsClient.activeGroup);
+						int height = slotHeight.y();
+						if (height > 1) {
+							typeBounds = new Rect2i(r.getX() + slotHeight.x() - 2, r.getY() - (height - 1) / 2 * 18 - 3, 23, height * 18 + 5);
+						}
 					}
 				}
 				TrinketsClient.quickMoveGroup = null;
@@ -91,7 +96,7 @@ public class TrinketScreenManager {
 		}
 
 		if (group == null) {
-			for (SlotGroup g : TrinketsApi.getPlayerSlots().values()) {
+			for (SlotGroup g : TrinketsApi.getPlayerSlots(MinecraftClient.getInstance().player).values()) {
 				Rect2i r = currentScreen.trinkets$getGroupRect(g);
 				if (r.getX() < 0 && currentScreen.trinkets$isRecipeBookOpen()) {
 					continue;
@@ -125,11 +130,13 @@ public class TrinketScreenManager {
 					if (focusedSlot instanceof TrinketSlot ts) {
 						int i = handler.trinkets$getSlotTypes(group).indexOf(ts.getType());
 						if (i >= 0) {
-							Point slotHeight = handler.trinkets$getSlotHeights(group).get(i);
-							int height = slotHeight.y();
-							if (height > 1) {
-								TrinketsClient.activeType = ts.getType();
-								typeBounds = new Rect2i(r.getX() + slotHeight.x() - 2, r.getY() - (height - 1) / 2 * 18 - 3, 23, height * 18 + 5);
+							Point slotHeight = handler.trinkets$getSlotHeight(group, i);
+							if (slotHeight != null) {
+								int height = slotHeight.y();
+								if (height > 1) {
+									TrinketsClient.activeType = ts.getType();
+									typeBounds = new Rect2i(r.getX() + slotHeight.x() - 2, r.getY() - (height - 1) / 2 * 18 - 3, 23, height * 18 + 5);
+								}
 							}
 						}
 					}
@@ -153,9 +160,11 @@ public class TrinketScreenManager {
 					if (TrinketsClient.quickMoveType != null) {
 						int i = handler.trinkets$getSlotTypes(quickMoveGroup).indexOf(TrinketsClient.quickMoveType);
 						if (i >= 0) {
-							Point slotHeight = handler.trinkets$getSlotHeights(quickMoveGroup).get(i);
-							int height = slotHeight.y();
-							quickMoveTypeBounds = new Rect2i(r.getX() + slotHeight.x() - 2, r.getY() - (height - 1) / 2 * 18 - 3, 23, height * 18 + 5);
+							Point slotHeight = handler.trinkets$getSlotHeight(quickMoveGroup, i);
+							if (slotHeight != null) {
+								int height = slotHeight.y();
+								quickMoveTypeBounds = new Rect2i(r.getX() + slotHeight.x() - 2, r.getY() - (height - 1) / 2 * 18 - 3, 23, height * 18 + 5);
+							}
 						}
 					}
 				}
@@ -195,54 +204,52 @@ public class TrinketScreenManager {
 			}
 
 			helper.drawTexture(matrices, x + slotsWidth * 18 + 4, y, 22, 0, 4, 26);
-			if (slotHeights != null) {
-				for (int s = 0; s < slotHeights.size(); s++) {
-					if (slotTypes.get(s) != type) {
-						continue;
-					}
-					Point slotHeight = slotHeights.get(s);
-					int height = slotHeight.y();
-					if (height > 1) {
-						int top = (height - 1) / 2;
-						int bottom = height / 2;
-						int slotX = slotHeight.x() - 4 + r.getX();
-						if (height > 2) {
-							helper.drawTexture(matrices, slotX, y - top * 18, 0, 0, 26, 4);
-						}
-
-						for (int i = 1; i < top + 1; i++) {
-							helper.drawTexture(matrices, slotX, y - i * 18 + 4, 0, 4, 26, 18);
-						}
-
-						for (int i = 1; i < bottom + 1; i++) {
-							helper.drawTexture(matrices, slotX, y + i * 18 + 4, 0, 4, 26, 18);
-						}
-
-						helper.drawTexture(matrices, slotX, y + 18 + bottom * 18 + 4, 0, 22, 26, 4);
-					}
+			for (int s = 0; s < slotHeights.size() && s < slotTypes.size(); s++) {
+				if (slotTypes.get(s) != type) {
+					continue;
 				}
-
-
-				// The rest of this is just to re-render a portion of the top and bottom slot borders so that corners
-				// between slot types on the GUI look nicer
-				for (int s = 0; s < slotHeights.size(); s++) {
-					Point slotHeight = slotHeights.get(s);
-					int height = slotHeight.y();
-					if (slotTypes.get(s) != type) {
-						height = 1;
-					}
-					int slotX = slotHeight.x() + r.getX() + 1;
+				Point slotHeight = slotHeights.get(s);
+				int height = slotHeight.y();
+				if (height > 1) {
 					int top = (height - 1) / 2;
 					int bottom = height / 2;
-					helper.drawTexture(matrices, slotX, y - top * 18 + 1, 4, 1, 16, 3);
-					helper.drawTexture(matrices, slotX, y + (bottom + 1) * 18 + 4, 4, 22, 16, 3);
-				}
+					int slotX = slotHeight.x() - 4 + r.getX();
+					if (height > 2) {
+						helper.drawTexture(matrices, slotX, y - top * 18, 0, 0, 26, 4);
+					}
 
-				// Because pre-existing slots are not part of the slotHeights list
-				if (group.getSlotId() != -1) {
-					helper.drawTexture(matrices, r.getX() + 1, y + 1, 4, 1, 16, 3);
-					helper.drawTexture(matrices, r.getX() + 1, y + 22, 4, 22, 16, 3);
+					for (int i = 1; i < top + 1; i++) {
+						helper.drawTexture(matrices, slotX, y - i * 18 + 4, 0, 4, 26, 18);
+					}
+
+					for (int i = 1; i < bottom + 1; i++) {
+						helper.drawTexture(matrices, slotX, y + i * 18 + 4, 0, 4, 26, 18);
+					}
+
+					helper.drawTexture(matrices, slotX, y + 18 + bottom * 18 + 4, 0, 22, 26, 4);
 				}
+			}
+
+
+			// The rest of this is just to re-render a portion of the top and bottom slot borders so that corners
+			// between slot types on the GUI look nicer
+			for (int s = 0; s < slotHeights.size(); s++) {
+				Point slotHeight = slotHeights.get(s);
+				int height = slotHeight.y();
+				if (slotTypes.get(s) != type) {
+					height = 1;
+				}
+				int slotX = slotHeight.x() + r.getX() + 1;
+				int top = (height - 1) / 2;
+				int bottom = height / 2;
+				helper.drawTexture(matrices, slotX, y - top * 18 + 1, 4, 1, 16, 3);
+				helper.drawTexture(matrices, slotX, y + (bottom + 1) * 18 + 4, 4, 22, 16, 3);
+			}
+
+			// Because pre-existing slots are not part of the slotHeights list
+			if (group.getSlotId() != -1) {
+				helper.drawTexture(matrices, r.getX() + 1, y + 1, 4, 1, 16, 3);
+				helper.drawTexture(matrices, r.getX() + 1, y + 22, 4, 22, 16, 3);
 			}
 		} else {
 			helper.drawTexture(matrices, x + 4, y + 4, 4, 4, 18, 18);

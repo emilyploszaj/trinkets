@@ -61,7 +61,7 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 
 	@Override
 	public void update() {
-		Map<String, SlotGroup> entitySlots = TrinketsApi.getEntitySlots(this.entity.getType());
+		Map<String, SlotGroup> entitySlots = TrinketsApi.getEntitySlots(this.entity);
 		int count = 0;
 		groups.clear();
 		Map<String, Map<String, TrinketInventory>> inventory = new HashMap<>();

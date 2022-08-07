@@ -1,11 +1,13 @@
 package dev.emi.trinkets;
 
+import dev.emi.trinkets.data.EntitySlotLoader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Pair;
@@ -18,7 +20,6 @@ import dev.emi.trinkets.api.SlotType;
 import dev.emi.trinkets.api.Trinket;
 import dev.emi.trinkets.api.TrinketInventory;
 import dev.emi.trinkets.api.TrinketsApi;
-import dev.emi.trinkets.data.EntitySlotLoader;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -126,11 +127,15 @@ public class TrinketsClient implements ClientModInitializer {
 					});
 				}
 				client.execute(() -> {
-					EntitySlotLoader.INSTANCE.setSlots(slots);
+					EntitySlotLoader.CLIENT.setSlots(slots);
 					ClientPlayerEntity player = client.player;
 
 					if (player != null) {
 						((TrinketPlayerScreenHandler) player.playerScreenHandler).trinkets$updateTrinketSlots(true);
+
+						if (client.currentScreen instanceof TrinketScreen trinketScreen) {
+							trinketScreen.trinkets$updateTrinketSlots();
+						}
 
 						for (AbstractClientPlayerEntity clientWorldPlayer : player.clientWorld.getPlayers()) {
 							((TrinketPlayerScreenHandler) clientWorldPlayer.playerScreenHandler).trinkets$updateTrinketSlots(true);
