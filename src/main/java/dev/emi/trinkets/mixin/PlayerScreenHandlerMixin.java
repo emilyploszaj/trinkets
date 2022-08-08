@@ -1,11 +1,14 @@
 package dev.emi.trinkets.mixin;
 
+import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -114,10 +117,7 @@ public abstract class PlayerScreenHandlerMixin extends ScreenHandler implements 
 					groupNum++;
 				}
 			}
-			if (groupNum > 4) {
-				groupCount = groupNum - 4;
-			}
-
+			groupCount = Math.max(0, groupNum - 4);
 			trinketSlotStart = slots.size();
 			slotWidths.clear();
 			slotHeights.clear();
@@ -172,27 +172,37 @@ public abstract class PlayerScreenHandlerMixin extends ScreenHandler implements 
 
 	@Override
 	public int trinkets$getGroupNum(SlotGroup group) {
-		return groupNums.get(group);
+		return groupNums.getOrDefault(group, 0);
 	}
-	
+
+	@Nullable
 	@Override
 	public Point trinkets$getGroupPos(SlotGroup group) {
 		return groupPos.get(group);
 	}
 
+	@Nonnull
 	@Override
 	public List<Point> trinkets$getSlotHeights(SlotGroup group) {
-		return slotHeights.get(group);
+		return slotHeights.getOrDefault(group, ImmutableList.of());
 	}
 
+	@Nullable
+	@Override
+	public Point trinkets$getSlotHeight(SlotGroup group, int i) {
+		List<Point> points = this.trinkets$getSlotHeights(group);
+		return i < points.size() ? points.get(i) : null;
+	}
+
+	@Nonnull
 	@Override
 	public List<SlotType> trinkets$getSlotTypes(SlotGroup group) {
-		return slotTypes.get(group);
+		return slotTypes.getOrDefault(group, ImmutableList.of());
 	}
 
 	@Override
 	public int trinkets$getSlotWidth(SlotGroup group) {
-		return slotWidths.get(group);
+		return slotWidths.getOrDefault(group, 0);
 	}
 
 	@Override
@@ -249,7 +259,7 @@ public abstract class PlayerScreenHandlerMixin extends ScreenHandler implements 
 								if (this.insertItem(stack, i, i + 1, false)) {
 									if (player.world.isClient) {
 										TrinketsClient.quickMoveTimer = 20;
-										TrinketsClient.quickMoveGroup = TrinketsApi.getPlayerSlots().get(type.getGroup());
+										TrinketsClient.quickMoveGroup = TrinketsApi.getPlayerSlots(this.owner).get(type.getGroup());
 										if (ref.index() > 0) {
 											TrinketsClient.quickMoveType = type;
 										} else {

@@ -1,5 +1,6 @@
 package dev.emi.trinkets.api;
 
+import com.google.common.collect.ImmutableMap;
 import com.mojang.datafixers.util.Function3;
 import dev.emi.trinkets.TrinketsMain;
 import dev.emi.trinkets.TrinketsNetwork;
@@ -7,11 +8,15 @@ import dev.emi.trinkets.data.EntitySlotLoader;
 import dev.onyxstudios.cca.api.v3.component.ComponentKey;
 import dev.onyxstudios.cca.api.v3.component.ComponentRegistryV3;
 import io.netty.buffer.Unpooled;
+import net.fabricmc.api.EnvType;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.util.TriState;
+import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketByteBuf;
@@ -25,6 +30,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
+import net.minecraft.world.World;
 
 public class TrinketsApi {
 	public static final ComponentKey<TrinketComponent> TRINKET_COMPONENT = ComponentRegistryV3.INSTANCE
@@ -77,18 +83,57 @@ public class TrinketsApi {
 	}
 
 	/**
+	 * @deprecated Use world-sensitive alternative {@link TrinketsApi#getPlayerSlots(World)}
 	 * @return A map of slot group names to slot groups available for players
 	 */
+	@Deprecated
 	public static Map<String, SlotGroup> getPlayerSlots() {
 		return getEntitySlots(EntityType.PLAYER);
 	}
 
 	/**
+	 * @return A sided map of slot group names to slot groups available for players
+	 */
+	public static Map<String, SlotGroup> getPlayerSlots(World world) {
+		return getEntitySlots(world, EntityType.PLAYER);
+	}
+
+	/**
+	 * @return A sided map of slot group names to slot groups available for players
+	 */
+	public static Map<String, SlotGroup> getPlayerSlots(PlayerEntity player) {
+		return getEntitySlots(player);
+	}
+
+	/**
+	 * @deprecated Use world-sensitive alternative {@link TrinketsApi#getEntitySlots(World, EntityType)}
 	 * @return A map of slot group names to slot groups available for the provided
 	 * entity type
 	 */
+	@Deprecated
 	public static Map<String, SlotGroup> getEntitySlots(EntityType<?> type) {
-		return EntitySlotLoader.INSTANCE.getEntitySlots(type);
+		EntitySlotLoader loader = FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT ? EntitySlotLoader.CLIENT : EntitySlotLoader.SERVER;
+		return loader.getEntitySlots(type);
+	}
+
+	/**
+	 * @return A sided map of slot group names to slot groups available for the provided
+	 * entity type
+	 */
+	public static Map<String, SlotGroup> getEntitySlots(World world, EntityType<?> type) {
+		EntitySlotLoader loader = world.isClient() ? EntitySlotLoader.CLIENT : EntitySlotLoader.SERVER;
+		return loader.getEntitySlots(type);
+	}
+
+	/**
+	 * @return A sided map of slot group names to slot groups available for the provided
+	 * entity
+	 */
+	public static Map<String, SlotGroup> getEntitySlots(Entity entity) {
+		if (entity != null) {
+			return getEntitySlots(entity.getWorld(), entity.getType());
+		}
+		return ImmutableMap.of();
 	}
 
 	/**

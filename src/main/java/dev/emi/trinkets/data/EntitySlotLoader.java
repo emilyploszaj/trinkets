@@ -42,7 +42,8 @@ import net.minecraft.util.registry.Registry;
 
 public class EntitySlotLoader extends SinglePreparationResourceReloader<Map<String, Map<String, Set<String>>>> implements IdentifiableResourceReloadListener {
 
-	public static final EntitySlotLoader INSTANCE = new EntitySlotLoader();
+	public static final EntitySlotLoader CLIENT = new EntitySlotLoader();
+	public static final EntitySlotLoader SERVER = new EntitySlotLoader();
 
 	private static final Gson GSON = (new GsonBuilder()).setPrettyPrinting().disableHtmlEscaping().create();
 	private static final Identifier ID = new Identifier(TrinketsMain.MOD_ID, "entities");

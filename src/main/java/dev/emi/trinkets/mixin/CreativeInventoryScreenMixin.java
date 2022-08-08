@@ -61,9 +61,12 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
 		for (int i = handler.trinkets$getTrinketSlotStart(); i < handler.trinkets$getTrinketSlotEnd(); i++) {
 			Slot slot = this.client.player.playerScreenHandler.slots.get(i);
 			if (slot instanceof SurvivalTrinketSlot ts) {
-				SlotGroup group = TrinketsApi.getPlayerSlots().get(ts.getType().getGroup());
+				SlotGroup group = TrinketsApi.getPlayerSlots(this.client.player).get(ts.getType().getGroup());
 				Rect2i rect = trinkets$getGroupRect(group);
 				Point pos = trinkets$getHandler().trinkets$getGroupPos(group);
+				if (pos == null) {
+					return;
+				}
 				int xOff = rect.getX() + 1 - pos.x();
 				int yOff = rect.getY() + 1 - pos.y();
 				((CreativeScreenHandler) this.handler).slots.add(new CreativeTrinketSlot(ts, ts.getIndex(), ts.x + xOff, ts.y + yOff));
