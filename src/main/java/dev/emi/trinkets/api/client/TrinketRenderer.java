@@ -15,7 +15,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.Vec3f;
 
 public interface TrinketRenderer {
-	float MAGIC_ROTATION = 180f / (float) Math.PI;
 
 	/**
 	 * Renders the Trinket
@@ -85,9 +84,9 @@ public interface TrinketRenderer {
 
 		if (player.isInSneakingPose() && !model.riding && !player.isSwimming()) {
 			matrices.translate(0.0F, 0.2F, 0.0F);
-			matrices.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(model.body.pitch * MAGIC_ROTATION));
+			matrices.multiply(Vec3f.POSITIVE_X.getRadialQuaternion(model.body.pitch));
 		}
-		matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(model.body.yaw * MAGIC_ROTATION));
+		matrices.multiply(Vec3f.POSITIVE_Y.getRadialQuaternion(model.body.yaw));
 		matrices.translate(0.0F, 0.4F, -0.16F);
 	}
 
@@ -100,11 +99,11 @@ public interface TrinketRenderer {
 		if (player.isInSneakingPose() && !model.riding && !player.isSwimming()) {
 			matrices.translate(0.0F, 0.2F, 0.0F);
 		}
-		matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(model.body.yaw * MAGIC_ROTATION));
+		matrices.multiply(Vec3f.POSITIVE_Y.getRadialQuaternion(model.body.yaw));
 		matrices.translate(-0.3125F, 0.15625F, 0.0F);
-		matrices.multiply(Vec3f.POSITIVE_Z.getDegreesQuaternion(model.rightArm.roll * MAGIC_ROTATION));
-		matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(model.rightArm.yaw * MAGIC_ROTATION));
-		matrices.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(model.rightArm.pitch * MAGIC_ROTATION));
+		matrices.multiply(Vec3f.POSITIVE_Z.getRadialQuaternion(model.rightArm.roll));
+		matrices.multiply(Vec3f.POSITIVE_Y.getRadialQuaternion(model.rightArm.yaw));
+		matrices.multiply(Vec3f.POSITIVE_X.getRadialQuaternion(model.rightArm.pitch));
 		matrices.translate(-0.0625F, 0.625F, 0.0F);
 	}
 
@@ -117,11 +116,11 @@ public interface TrinketRenderer {
 		if (player.isInSneakingPose() && !model.riding && !player.isSwimming()) {
 			matrices.translate(0.0F, 0.2F, 0.0F);
 		}
-		matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(model.body.yaw * MAGIC_ROTATION));
+		matrices.multiply(Vec3f.POSITIVE_Y.getRadialQuaternion(model.body.yaw));
 		matrices.translate(0.3125F, 0.15625F, 0.0F);
-		matrices.multiply(Vec3f.POSITIVE_Z.getDegreesQuaternion(model.leftArm.roll * MAGIC_ROTATION));
-		matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(model.leftArm.yaw * MAGIC_ROTATION));
-		matrices.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(model.leftArm.pitch * MAGIC_ROTATION));
+		matrices.multiply(Vec3f.POSITIVE_Z.getRadialQuaternion(model.leftArm.roll));
+		matrices.multiply(Vec3f.POSITIVE_Y.getRadialQuaternion(model.leftArm.yaw));
+		matrices.multiply(Vec3f.POSITIVE_X.getRadialQuaternion(model.leftArm.pitch));
 		matrices.translate(0.0625F, 0.625F, 0.0F);
 	}
 
@@ -135,9 +134,9 @@ public interface TrinketRenderer {
 			matrices.translate(0.0F, 0.0F, 0.25F);
 		}
 		matrices.translate(-0.125F, 0.75F, 0.0F);
-		matrices.multiply(Vec3f.POSITIVE_Z.getDegreesQuaternion(model.rightLeg.roll * MAGIC_ROTATION));
-		matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(model.rightLeg.yaw * MAGIC_ROTATION));
-		matrices.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(model.rightLeg.pitch * MAGIC_ROTATION));
+		matrices.multiply(Vec3f.POSITIVE_Z.getRadialQuaternion(model.rightLeg.roll));
+		matrices.multiply(Vec3f.POSITIVE_Y.getRadialQuaternion(model.rightLeg.yaw));
+		matrices.multiply(Vec3f.POSITIVE_X.getRadialQuaternion(model.rightLeg.pitch));
 		matrices.translate(0.0F, 0.75F, 0.0F);
 	}
 
@@ -151,9 +150,9 @@ public interface TrinketRenderer {
 			matrices.translate(0.0F, 0.0F, 0.25F);
 		}
 		matrices.translate(0.125F, 0.75F, 0.0F);
-		matrices.multiply(Vec3f.POSITIVE_Z.getDegreesQuaternion(model.leftLeg.roll * MAGIC_ROTATION));
-		matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(model.leftLeg.yaw * MAGIC_ROTATION));
-		matrices.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(model.leftLeg.pitch * MAGIC_ROTATION));
+		matrices.multiply(Vec3f.POSITIVE_Z.getRadialQuaternion(model.leftLeg.roll));
+		matrices.multiply(Vec3f.POSITIVE_Y.getRadialQuaternion(model.leftLeg.yaw));
+		matrices.multiply(Vec3f.POSITIVE_X.getRadialQuaternion(model.leftLeg.pitch));
 		matrices.translate(0.0F, 0.75F, 0.0F);
 	}
 }
