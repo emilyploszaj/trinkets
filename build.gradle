@@ -44,9 +44,7 @@ dependencies {
 
 	// Dev Runtime
 	testmodImplementation sourceSets.main.output
-	modImplementation("com.terraformersmc:modmenu:${project.mod_menu_version}") {
-		transitive = false
-	}
+	modLocalRuntime "com.terraformersmc:modmenu:${project.mod_menu_version}"
 }
 
 processResources {
