@@ -1,0 +1,20 @@
+{
+	"trinkets.tooltip.slots.any" : "Equipable en la ranura §9any§r de trinkets.",
+	"trinkets.tooltip.slots.list" : "Equipable en la ranuras de trinkets:",
+	"trinkets.tooltip.slots.single" : "Equipable en la ranura %d de trinkets.",
+	"trinkets.tooltip.attributes.all" : "Cuando está equipado:",
+	"trinkets.tooltip.attributes.single" : "Cuando está equipado en la ranura %d:",
+	"trinkets.tooltip.attributes.slots" : "Ranuras %d",
+	"trinkets.slot.head.face": "Cara",
+	"trinkets.slot.head.hat": "Sombrero",
+	"trinkets.slot.chest.necklace": "Cuello",
+	"trinkets.slot.chest.back": "Espalda",
+	"trinkets.slot.chest.cape": "Capa",
+	"trinkets.slot.legs.belt": "Cinturón",
+	"trinkets.slot.feet.aglet": "Cordones",
+	"trinkets.slot.feet.shoes": "Zapatos",
+	"trinkets.slot.hand.glove": "Guantes",
+	"trinkets.slot.offhand.glove": "Guantes",
+	"trinkets.slot.hand.ring": "Anillos",
+	"trinkets.slot.offhand.ring": "Anillos"
+}
