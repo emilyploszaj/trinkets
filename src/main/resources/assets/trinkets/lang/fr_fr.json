@@ -1,9 +1,9 @@
 {
-    "trinkets.tooltip.slots.any" : "Équipable dans §9tout§r les trinket slots",
-    "trinkets.tooltip.slots.list" : "Équipable dans les trinket slots:",
-    "trinkets.tooltip.slots.single" : "Équipable dans le trinket slot %d",
+    "trinkets.tooltip.slots.any" : "Équipable dans §9tout§r les emplacements",
+    "trinkets.tooltip.slots.list" : "Équipable dans les emplacements:",
+    "trinkets.tooltip.slots.single" : "Équipable dans l'emplacement %d",
     "trinkets.tooltip.attributes.all" : "Quand équipé:",
-    "trinkets.tooltip.attributes.single" : "Quand équipé dans le trinket slot %d:",
+    "trinkets.tooltip.attributes.single" : "Quand équipé dans l'emplacement %d:",
     "trinkets.tooltip.attributes.slots" : "%d Slots",
     "trinkets.slot.head.face": "Visage",
     "trinkets.slot.head.hat": "Chapeau",
