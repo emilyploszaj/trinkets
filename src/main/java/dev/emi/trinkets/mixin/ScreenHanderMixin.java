@@ -20,7 +20,6 @@ import net.minecraft.util.collection.DefaultedList;
  *
  * @author Sollace
  */
-// fixed shift-clicking (handles other 10%)
 @Mixin(
     value = ScreenHandler.class,
     priority = 2000 // run after other mods
