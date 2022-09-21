@@ -42,7 +42,7 @@ public class TestTrinket extends TrinketItem implements TrinketRenderer {
 
 	@Override
 	public int getMaxCount(ItemStack stack, SlotReference slot) {
-	    return 1;
+	    return 2;
 	}
 
 	@Override

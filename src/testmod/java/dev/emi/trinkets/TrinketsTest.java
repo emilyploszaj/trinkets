@@ -18,7 +18,7 @@ public class TrinketsTest implements ModInitializer {
 	public void onInitialize() {
 		LOGGER.info("[Trinkets Testmod] test mod was initialized!");
 		TEST_TRINKET = Registry.register(Registry.ITEM, identifier("test"), new TestTrinket(new Item.Settings().maxCount(1).maxDamage(100)));
-		STACKABLE_TEST = Registry.register(Registry.ITEM, identifier("stackable_test"), new TestTrinket(new Item.Settings().maxCount(2)));
+		STACKABLE_TEST = Registry.register(Registry.ITEM, identifier("stackable_test"), new TestTrinket(new Item.Settings().maxCount(64)));
 	}
 
 	private static Identifier identifier(String id) {
