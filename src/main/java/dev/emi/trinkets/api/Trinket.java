@@ -77,6 +77,19 @@ public interface Trinket {
 	}
 
 	/**
+	 * Determines the maximum number of this item that can be inserted into a particular trinket slot.
+	 *
+	 * @param stack The stack being equipped
+	 * @param slot The slot the stack is being equipped into
+	 * @return The maximum stack size for the given slot
+	 *
+	 * @since 3.4.1
+	 */
+	default int getMaxCount(ItemStack stack, SlotReference slot) {
+		return stack.getMaxCount();
+	}
+
+	/**
 	 * Returns the Entity Attribute Modifiers for a stack in a slot. Child implementations should
 	 * remain pure
 	 * <p>
@@ -121,7 +134,7 @@ public interface Trinket {
 	 * <p>
 	 * The default implementation works the same as breaking vanilla equipment, a sound is played and
 	 * particles are spawned based on the item
-	 * 
+	 *
 	 * @param stack The stack being broken
 	 * @param slot The slot the stack is being broken in
 	 * @param entity The entity that is breaking the stack

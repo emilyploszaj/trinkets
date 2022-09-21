@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
-    "trinkets-testmod:test"
+    "trinkets-testmod:test",
+    "trinkets-testmod:stackable_test"
   ]
 }

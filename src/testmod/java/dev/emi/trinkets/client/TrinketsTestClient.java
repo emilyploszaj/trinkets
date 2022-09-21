@@ -10,5 +10,6 @@ public class TrinketsTestClient implements ClientModInitializer {
 	@Override
 	public void onInitializeClient() {
 		TrinketRendererRegistry.registerRenderer(TrinketsTest.TEST_TRINKET, (TrinketRenderer) TrinketsTest.TEST_TRINKET);
+		TrinketRendererRegistry.registerRenderer(TrinketsTest.STACKABLE_TEST, (TrinketRenderer) TrinketsTest.STACKABLE_TEST);
 	}
 }

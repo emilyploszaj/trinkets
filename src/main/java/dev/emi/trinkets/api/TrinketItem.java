@@ -14,7 +14,7 @@ import net.minecraft.world.event.GameEvent;
  * A convenient base class for trinket items that automatically registers itself and
  */
 public class TrinketItem extends Item implements Trinket {
-	
+
 	public TrinketItem(Item.Settings settings) {
 		super(settings);
 		TrinketsApi.registerTrinket(this, this);
@@ -39,14 +39,14 @@ public class TrinketItem extends Item implements Trinket {
 						if (inv.getStack(i).isEmpty()) {
 							SlotReference ref = new SlotReference(inv, i);
 							if (TrinketSlot.canInsert(stack, ref, user)) {
-								ItemStack newStack = stack.copy();
-								inv.setStack(i, newStack);
-								SoundEvent soundEvent = stack.getEquipSound();
-								if (!stack.isEmpty() && soundEvent != null) {
+								Trinket trinket = TrinketsApi.getTrinket(stack.getItem());
+								ItemStack inserted = stack.split(trinket.getMaxCount(stack, ref));
+								inv.setStack(i, inserted);
+								SoundEvent soundEvent = inserted.getEquipSound();
+								if (!inserted.isEmpty() && soundEvent != null) {
 								   user.emitGameEvent(GameEvent.EQUIP);
 								   user.playSound(soundEvent, 1.0F, 1.0F);
 								}
-								stack.setCount(0);
 								return true;
 							}
 						}

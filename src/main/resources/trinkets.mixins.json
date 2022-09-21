@@ -9,7 +9,8 @@
     "PlayerManagerMixin",
     "PlayerScreenHandlerMixin",
     "ServerPlayNetworkHandlerMixin",
-    "ExperienceOrbEntityMixin"
+    "ExperienceOrbEntityMixin",
+    "ScreenHandlerMixin"
   ],
   "client": [
     "accessor.CreativeSlotAccessor",

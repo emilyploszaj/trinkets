@@ -1,7 +1,8 @@
 package dev.emi.trinkets;
 
-import dev.emi.trinkets.api.SlotType;
+import dev.emi.trinkets.api.*;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen.CreativeSlot;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 
 /**
@@ -23,6 +24,11 @@ public class CreativeTrinketSlot extends CreativeSlot implements TrinketSlot {
 	@Override
 	public Identifier getBackgroundIdentifier() {
 		return original.getBackgroundIdentifier();
+	}
+
+	@Override
+	public int getMaxItemCount(ItemStack stack) {
+		return original.getMaxItemCount(stack);
 	}
 
 	@Override

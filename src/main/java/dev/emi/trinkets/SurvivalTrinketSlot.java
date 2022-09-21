@@ -1,10 +1,6 @@
 package dev.emi.trinkets;
 
-import dev.emi.trinkets.api.SlotGroup;
-import dev.emi.trinkets.api.SlotReference;
-import dev.emi.trinkets.api.SlotType;
-import dev.emi.trinkets.api.TrinketInventory;
-import dev.emi.trinkets.api.TrinketsApi;
+import dev.emi.trinkets.api.*;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
@@ -43,6 +39,17 @@ public class SurvivalTrinketSlot extends Slot implements TrinketSlot {
 		ItemStack stack = this.getStack();
 		return TrinketsApi.getTrinket(stack.getItem())
 			.canUnequip(stack, new SlotReference(trinketInventory, slotOffset), player);
+	}
+
+	@Override
+	public int getMaxItemCount(ItemStack stack) {
+		Trinket trinket = TrinketsApi.getTrinket(stack.getItem());
+		return Math.min(
+			getMaxItemCount(),
+			Math.min(
+				stack.getMaxCount(),
+				trinket.getMaxCount(stack, new SlotReference(trinketInventory, slotOffset)))
+		);
 	}
 
 	@Override

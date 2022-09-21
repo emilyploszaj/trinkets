@@ -41,6 +41,11 @@ public class TestTrinket extends TrinketItem implements TrinketRenderer {
 	}
 
 	@Override
+	public int getMaxCount(ItemStack stack, SlotReference slot) {
+	    return 1;
+	}
+
+	@Override
 	public Multimap<EntityAttribute, EntityAttributeModifier> getModifiers(ItemStack stack, SlotReference slot, LivingEntity entity, UUID uuid) {
 		Multimap<EntityAttribute, EntityAttributeModifier> modifiers = super.getModifiers(stack, slot, entity, uuid);
 		EntityAttributeModifier speedModifier = new EntityAttributeModifier(uuid, "trinkets-testmod:movement_speed",
