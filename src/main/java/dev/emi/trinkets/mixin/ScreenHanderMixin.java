@@ -23,7 +23,7 @@ import net.minecraft.util.collection.DefaultedList;
 // fixed shift-clicking (handles other 10%)
 @Mixin(
     value = ScreenHandler.class,
-    priority = 1002 // run after other mods
+    priority = 2000 // run after other mods
 )
 abstract class ScreenHandlerMixin {
 	@Nullable
