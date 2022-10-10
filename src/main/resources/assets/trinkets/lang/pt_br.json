@@ -1,0 +1,20 @@
+{
+	"trinkets.tooltip.slots.any" : "Equipável no espaço de §9any§r",
+	"trinkets.tooltip.slots.list" : "Equipável nos seguintes espaços:",
+	"trinkets.tooltip.slots.single" : "Equipável no espaço de %d",
+	"trinkets.tooltip.attributes.all" : "Quando equipado:",
+	"trinkets.tooltip.attributes.single" : "Quando equipado no espaço de %d:",
+	"trinkets.tooltip.attributes.slots" : "%d espaços",
+	"trinkets.slot.head.face": "Rosto",
+	"trinkets.slot.head.hat": "Chapéu",
+	"trinkets.slot.chest.necklace": "Colar",
+	"trinkets.slot.chest.back": "Costas",
+	"trinkets.slot.chest.cape": "Capa",
+	"trinkets.slot.legs.belt": "Cinto",
+	"trinkets.slot.feet.aglet": "Agulheta",
+	"trinkets.slot.feet.shoes": "Pés",
+	"trinkets.slot.hand.glove": "Mão principal",
+	"trinkets.slot.offhand.glove": "Mão secundária",
+	"trinkets.slot.hand.ring": "Anel da mão principal",
+	"trinkets.slot.offhand.ring": "Anel da mão secundária"
+}
