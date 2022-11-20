@@ -1,5 +1,6 @@
 package dev.emi.trinkets.mixin;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -8,6 +9,7 @@ import com.google.common.collect.Maps;
 
 import java.util.Optional;
 
+import java.util.function.Predicate;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -44,13 +46,25 @@ public class ExperienceOrbEntityMixin {
 	@ModifyVariable(at = @At(value = "INVOKE_ASSIGN", target = "net/minecraft/enchantment/EnchantmentHelper.chooseEquipmentWith(Lnet/minecraft/enchantment/Enchantment;Lnet/minecraft/entity/LivingEntity;Ljava/util/function/Predicate;)Ljava/util/Map$Entry;"),
 		method = "repairPlayerGears")
 	private Entry<EquipmentSlot, ItemStack> modifyEntry(Entry<EquipmentSlot, ItemStack> entry) {
-		int size = Enchantments.MENDING.getEquipment(mendingPlayer).size();
 		Optional<TrinketComponent> optional = TrinketsApi.getTrinketComponent(mendingPlayer);
 		if (optional.isPresent()) {
 			TrinketComponent comp = optional.get();
-			List<Pair<SlotReference, ItemStack>> list = 
-				comp.getEquipped(stack -> stack.isDamaged() && EnchantmentHelper.getLevel(Enchantments.MENDING, stack) > 0);
-			int totalSize = size + list.size();
+			Predicate<ItemStack> predicate = stack -> !stack.isEmpty() && stack.isDamaged() && EnchantmentHelper.getLevel(Enchantments.MENDING, stack) > 0;
+			List<Pair<SlotReference, ItemStack>> list = comp.getEquipped(predicate);
+			int totalSize = list.size();
+
+			if (entry != null) {
+				Map<EquipmentSlot, ItemStack> map = Enchantments.MENDING.getEquipment(mendingPlayer);
+				// The map contains ALL equipped items, so we need to filter for Mending candidates specifically
+				ArrayList<Entry<EquipmentSlot, ItemStack>> originalList = new ArrayList<>();
+				for (Map.Entry<EquipmentSlot, ItemStack> ent : map.entrySet()) {
+					if (predicate.test(ent.getValue())) {
+						originalList.add(ent);
+					}
+				}
+				totalSize += originalList.size();
+			}
+
 			if (totalSize == 0) {
 				return entry;
 			}
