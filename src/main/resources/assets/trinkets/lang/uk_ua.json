@@ -1,0 +1,20 @@
+{
+	"trinkets.tooltip.slots.any" : "Можна оснастити в §9будь-який§r дод. слот",
+	"trinkets.tooltip.slots.list" : "Можна оснастити в слоти:",
+	"trinkets.tooltip.slots.single" : "Можна оснастити в слот %d",
+	"trinkets.tooltip.attributes.all" : "Коли оснащено:",
+	"trinkets.tooltip.attributes.single" : "Коли оснащено в слот %d:",
+	"trinkets.tooltip.attributes.slots" : "Слоти: %d",
+	"trinkets.slot.head.face": "Обличчя",
+	"trinkets.slot.head.hat": "Капелюх",
+	"trinkets.slot.chest.necklace": "Намисто",
+	"trinkets.slot.chest.back": "Спина",
+	"trinkets.slot.chest.cape": "Плащ",
+	"trinkets.slot.legs.belt": "Пояс",
+	"trinkets.slot.feet.aglet": "Пістончик",
+	"trinkets.slot.feet.shoes": "Взуття",
+	"trinkets.slot.hand.glove": "Рукавичка",
+	"trinkets.slot.offhand.glove": "Рукавичка",
+	"trinkets.slot.hand.ring": "Кільце",
+	"trinkets.slot.offhand.ring": "Кільце"
+}
