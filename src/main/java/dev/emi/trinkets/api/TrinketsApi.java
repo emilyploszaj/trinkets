@@ -20,10 +20,10 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.tag.TagKey;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.tag.TagKey;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -164,11 +164,11 @@ public class TrinketsApi {
 	static {
 		TrinketsApi.registerTrinketPredicate(new Identifier("trinkets", "all"), (stack, ref, entity) -> TriState.TRUE);
 		TrinketsApi.registerTrinketPredicate(new Identifier("trinkets", "none"), (stack, ref, entity) -> TriState.FALSE);
-		TagKey<Item> trinketsAll = TagKey.of(Registry.ITEM_KEY, new Identifier("trinkets", "all"));
+		TagKey<Item> trinketsAll = TagKey.of(RegistryKeys.ITEM, new Identifier("trinkets", "all"));
 
 		TrinketsApi.registerTrinketPredicate(new Identifier("trinkets", "tag"), (stack, ref, entity) -> {
 			SlotType slot = ref.inventory().getSlotType();
-			TagKey<Item> tag = TagKey.of(Registry.ITEM_KEY, new Identifier("trinkets", slot.getGroup() + "/" + slot.getName()));
+			TagKey<Item> tag = TagKey.of(RegistryKeys.ITEM, new Identifier("trinkets", slot.getGroup() + "/" + slot.getName()));
 
 			if (stack.isIn(tag) || stack.isIn(trinketsAll)) {
 				return TriState.TRUE;

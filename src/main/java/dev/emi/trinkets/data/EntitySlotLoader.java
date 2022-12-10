@@ -31,6 +31,7 @@ import net.fabricmc.fabric.api.resource.ResourceReloadListenerKeys;
 import net.minecraft.entity.EntityType;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.registry.Registries;
 import net.minecraft.resource.Resource;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.resource.SinglePreparationResourceReloader;
@@ -38,7 +39,6 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.JsonHelper;
 import net.minecraft.util.profiler.Profiler;
-import net.minecraft.util.registry.Registry;
 
 public class EntitySlotLoader extends SinglePreparationResourceReloader<Map<String, Map<String, Set<String>>>> implements IdentifiableResourceReloadListener {
 
@@ -148,7 +148,7 @@ public class EntitySlotLoader extends SinglePreparationResourceReloader<Map<Stri
 
 					types.addAll(entityTypes);*/
 				} else {
-					types.add(Registry.ENTITY_TYPE.getOrEmpty(new Identifier(entityName))
+					types.add(Registries.ENTITY_TYPE.getOrEmpty(new Identifier(entityName))
 							.orElseThrow(() -> new IllegalArgumentException("Unknown entity '" + entityName + "'")));
 				}
 			} catch (IllegalArgumentException e) {
@@ -221,7 +221,7 @@ public class EntitySlotLoader extends SinglePreparationResourceReloader<Map<Stri
 				slotsTag.put(id, groupTag);
 			});
 
-			tag.put(Registry.ENTITY_TYPE.getId(entity).toString(), slotsTag);
+			tag.put(Registries.ENTITY_TYPE.getId(entity).toString(), slotsTag);
 		});
 
 		PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());

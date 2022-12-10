@@ -17,8 +17,8 @@ import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
+import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
 
 public interface Trinket {
 
@@ -97,7 +97,7 @@ public interface Trinket {
 
 				if (!tag.contains("Slot", NbtType.STRING) || tag.getString("Slot")
 						.equals(slot.inventory().getSlotType().getGroup() + "/" + slot.inventory().getSlotType().getName())) {
-					Optional<EntityAttribute> optional = Registry.ATTRIBUTE
+					Optional<EntityAttribute> optional = Registries.ATTRIBUTE
 							.getOrEmpty(Identifier.tryParse(tag.getString("AttributeName")));
 
 					if (optional.isPresent()) {
