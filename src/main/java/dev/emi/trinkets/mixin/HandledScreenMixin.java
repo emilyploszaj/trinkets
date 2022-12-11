@@ -2,6 +2,8 @@ package dev.emi.trinkets.mixin;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 
+import dev.emi.trinkets.TrinketScreenManager;
+import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -35,6 +37,13 @@ public abstract class HandledScreenMixin extends Screen {
 
 	private HandledScreenMixin() {
 		super(null);
+	}
+
+	@Inject(at = @At("HEAD"), method = "removed")
+	private void removed(CallbackInfo info) {
+		if ((Object)this instanceof InventoryScreen) {
+			TrinketScreenManager.removeSelections();
+		}
 	}
 
 	@Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/render/item/ItemRenderer;zOffset:F",

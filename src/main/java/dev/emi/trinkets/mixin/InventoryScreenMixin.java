@@ -34,11 +34,6 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreen<Playe
 		TrinketScreenManager.init(this);
 	}
 
-	@Inject(at = @At("HEAD"), method = "removed")
-	private void removed(CallbackInfo info) {
-		TrinketScreenManager.removeSelections();
-	}
-
 	@Inject(at = @At("TAIL"), method = "handledScreenTick")
 	private void tick(CallbackInfo info) {
 		TrinketScreenManager.tick();
