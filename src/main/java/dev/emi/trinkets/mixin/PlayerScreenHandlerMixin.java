@@ -229,8 +229,8 @@ public abstract class PlayerScreenHandlerMixin extends ScreenHandler implements 
 		}
 	}
 
-	@Inject(at = @At("HEAD"), method = "transferSlot", cancellable = true)
-	private void transferSlot(PlayerEntity player, int index, CallbackInfoReturnable<ItemStack> info) {
+	@Inject(at = @At("HEAD"), method = "quickMove", cancellable = true)
+	private void quickMove(PlayerEntity player, int index, CallbackInfoReturnable<ItemStack> info) {
 		Slot slot = slots.get(index);
 
 		if (slot.hasStack()) {

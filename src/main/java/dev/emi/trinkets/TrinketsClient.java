@@ -10,6 +10,7 @@ import java.util.Optional;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.registry.Registries;
 import net.minecraft.util.Pair;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.commons.lang3.tuple.Triple;
@@ -29,7 +30,6 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
 
 public class TrinketsClient implements ClientModInitializer {
 	public static SlotGroup activeGroup;
@@ -109,7 +109,7 @@ public class TrinketsClient implements ClientModInitializer {
 				Map<EntityType<?>, Map<String, SlotGroup>> slots = new HashMap<>();
 
 				for (String id : data.getKeys()) {
-					Optional<EntityType<?>> maybeType = Registry.ENTITY_TYPE.getOrEmpty(Identifier.tryParse(id));
+					Optional<EntityType<?>> maybeType = Registries.ENTITY_TYPE.getOrEmpty(Identifier.tryParse(id));
 					maybeType.ifPresent(type -> {
 						NbtCompound groups = data.getCompound(id);
 

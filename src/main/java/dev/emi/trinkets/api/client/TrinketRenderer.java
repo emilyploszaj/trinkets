@@ -12,7 +12,7 @@ import net.minecraft.client.render.entity.model.PlayerEntityModel;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.Vec3f;
+import net.minecraft.util.math.RotationAxis;
 
 public interface TrinketRenderer {
 
@@ -50,7 +50,7 @@ public interface TrinketRenderer {
 
 			if (entityModel instanceof BipedEntityModel) {
 				BipedEntityModel<LivingEntity> bipedModel = (BipedEntityModel<LivingEntity>) entityModel;
-				bipedModel.setAttributes(model);
+				bipedModel.copyBipedStateTo(model);
 			}
 		}
 	}
@@ -62,16 +62,16 @@ public interface TrinketRenderer {
 			AbstractClientPlayerEntity player, float headYaw, float headPitch) {
 
 		if (player.isInSwimmingPose() || player.isFallFlying()) {
-			matrices.multiply(Vec3f.POSITIVE_Z.getDegreesQuaternion(model.head.roll));
-			matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(headYaw));
-			matrices.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(-45.0F));
+			matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(model.head.roll));
+			matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(headYaw));
+			matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(-45.0F));
 		} else {
 
 			if (player.isInSneakingPose() && !model.riding) {
 				matrices.translate(0.0F, 0.25F, 0.0F);
 			}
-			matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(headYaw));
-			matrices.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(headPitch));
+			matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(headYaw));
+			matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(headPitch));
 		}
 		matrices.translate(0.0F, -0.25F, -0.3F);
 	}
@@ -84,9 +84,9 @@ public interface TrinketRenderer {
 
 		if (player.isInSneakingPose() && !model.riding && !player.isSwimming()) {
 			matrices.translate(0.0F, 0.2F, 0.0F);
-			matrices.multiply(Vec3f.POSITIVE_X.getRadialQuaternion(model.body.pitch));
+			matrices.multiply(RotationAxis.POSITIVE_X.rotation(model.body.pitch));
 		}
-		matrices.multiply(Vec3f.POSITIVE_Y.getRadialQuaternion(model.body.yaw));
+		matrices.multiply(RotationAxis.POSITIVE_Y.rotation(model.body.yaw));
 		matrices.translate(0.0F, 0.4F, -0.16F);
 	}
 
@@ -99,11 +99,11 @@ public interface TrinketRenderer {
 		if (player.isInSneakingPose() && !model.riding && !player.isSwimming()) {
 			matrices.translate(0.0F, 0.2F, 0.0F);
 		}
-		matrices.multiply(Vec3f.POSITIVE_Y.getRadialQuaternion(model.body.yaw));
+		matrices.multiply(RotationAxis.POSITIVE_Y.rotation(model.body.yaw));
 		matrices.translate(-0.3125F, 0.15625F, 0.0F);
-		matrices.multiply(Vec3f.POSITIVE_Z.getRadialQuaternion(model.rightArm.roll));
-		matrices.multiply(Vec3f.POSITIVE_Y.getRadialQuaternion(model.rightArm.yaw));
-		matrices.multiply(Vec3f.POSITIVE_X.getRadialQuaternion(model.rightArm.pitch));
+		matrices.multiply(RotationAxis.POSITIVE_Z.rotation(model.rightArm.roll));
+		matrices.multiply(RotationAxis.POSITIVE_Y.rotation(model.rightArm.yaw));
+		matrices.multiply(RotationAxis.POSITIVE_X.rotation(model.rightArm.pitch));
 		matrices.translate(-0.0625F, 0.625F, 0.0F);
 	}
 
@@ -116,11 +116,11 @@ public interface TrinketRenderer {
 		if (player.isInSneakingPose() && !model.riding && !player.isSwimming()) {
 			matrices.translate(0.0F, 0.2F, 0.0F);
 		}
-		matrices.multiply(Vec3f.POSITIVE_Y.getRadialQuaternion(model.body.yaw));
+		matrices.multiply(RotationAxis.POSITIVE_Y.rotation(model.body.yaw));
 		matrices.translate(0.3125F, 0.15625F, 0.0F);
-		matrices.multiply(Vec3f.POSITIVE_Z.getRadialQuaternion(model.leftArm.roll));
-		matrices.multiply(Vec3f.POSITIVE_Y.getRadialQuaternion(model.leftArm.yaw));
-		matrices.multiply(Vec3f.POSITIVE_X.getRadialQuaternion(model.leftArm.pitch));
+		matrices.multiply(RotationAxis.POSITIVE_Z.rotation(model.leftArm.roll));
+		matrices.multiply(RotationAxis.POSITIVE_Y.rotation(model.leftArm.yaw));
+		matrices.multiply(RotationAxis.POSITIVE_X.rotation(model.leftArm.pitch));
 		matrices.translate(0.0625F, 0.625F, 0.0F);
 	}
 
@@ -134,9 +134,9 @@ public interface TrinketRenderer {
 			matrices.translate(0.0F, 0.0F, 0.25F);
 		}
 		matrices.translate(-0.125F, 0.75F, 0.0F);
-		matrices.multiply(Vec3f.POSITIVE_Z.getRadialQuaternion(model.rightLeg.roll));
-		matrices.multiply(Vec3f.POSITIVE_Y.getRadialQuaternion(model.rightLeg.yaw));
-		matrices.multiply(Vec3f.POSITIVE_X.getRadialQuaternion(model.rightLeg.pitch));
+		matrices.multiply(RotationAxis.POSITIVE_Z.rotation(model.rightLeg.roll));
+		matrices.multiply(RotationAxis.POSITIVE_Y.rotation(model.rightLeg.yaw));
+		matrices.multiply(RotationAxis.POSITIVE_X.rotation(model.rightLeg.pitch));
 		matrices.translate(0.0F, 0.75F, 0.0F);
 	}
 
@@ -150,9 +150,9 @@ public interface TrinketRenderer {
 			matrices.translate(0.0F, 0.0F, 0.25F);
 		}
 		matrices.translate(0.125F, 0.75F, 0.0F);
-		matrices.multiply(Vec3f.POSITIVE_Z.getRadialQuaternion(model.leftLeg.roll));
-		matrices.multiply(Vec3f.POSITIVE_Y.getRadialQuaternion(model.leftLeg.yaw));
-		matrices.multiply(Vec3f.POSITIVE_X.getRadialQuaternion(model.leftLeg.pitch));
+		matrices.multiply(RotationAxis.POSITIVE_Z.rotation(model.leftLeg.roll));
+		matrices.multiply(RotationAxis.POSITIVE_Y.rotation(model.leftLeg.yaw));
+		matrices.multiply(RotationAxis.POSITIVE_X.rotation(model.leftLeg.pitch));
 		matrices.translate(0.0F, 0.75F, 0.0F);
 	}
 }
