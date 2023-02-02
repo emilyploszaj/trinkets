@@ -1,0 +1,20 @@
+{
+	"trinkets.tooltip.slots.any" : "§9Herhangi§r  bir trinket slotuna takılabilir",
+	"trinkets.tooltip.slots.list" : "Şu trinket slotlarına takılabilir:",
+	"trinkets.tooltip.slots.single" : "%d trinket slotuna takılabilir",
+	"trinkets.tooltip.attributes.all" : "Takıldığında:",
+	"trinkets.tooltip.attributes.single" : "%d trinket slotuna takılı olduğunda:",
+	"trinkets.tooltip.attributes.slots" : "%d Slotları",
+	"trinkets.slot.head.face": "Yüz",
+	"trinkets.slot.head.hat": "Şapka",
+	"trinkets.slot.chest.necklace": "Kolye",
+	"trinkets.slot.chest.back": "Sırt",
+	"trinkets.slot.chest.cape": "Pelerin",
+	"trinkets.slot.legs.belt": "Kemer",
+	"trinkets.slot.feet.aglet": "Bağcık",
+	"trinkets.slot.feet.shoes": "Ayakkabı",
+	"trinkets.slot.hand.glove": "Eldiven",
+	"trinkets.slot.offhand.glove": "Eldiven",
+	"trinkets.slot.hand.ring": "Yüzük",
+	"trinkets.slot.offhand.ring": "Yüzük"
+}
