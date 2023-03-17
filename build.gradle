@@ -44,7 +44,7 @@ dependencies {
 
 	// Dev Runtime
 	testmodImplementation sourceSets.main.output
-	modLocalRuntime "com.terraformersmc:modmenu:${project.mod_menu_version}"
+	//modLocalRuntime "com.terraformersmc:modmenu:${project.mod_menu_version}"
 }
 
 processResources {

@@ -2,6 +2,7 @@ package dev.emi.trinkets.api;
 
 import dev.emi.trinkets.TrinketSlot;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Equipment;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.sound.SoundEvent;
@@ -41,7 +42,7 @@ public class TrinketItem extends Item implements Trinket {
 							if (TrinketSlot.canInsert(stack, ref, user)) {
 								ItemStack newStack = stack.copy();
 								inv.setStack(i, newStack);
-								SoundEvent soundEvent = stack.getEquipSound();
+								SoundEvent soundEvent = stack.getItem() instanceof Equipment eq ? eq.getEquipSound() : null;
 								if (!stack.isEmpty() && soundEvent != null) {
 								   user.emitGameEvent(GameEvent.EQUIP);
 								   user.playSound(soundEvent, 1.0F, 1.0F);

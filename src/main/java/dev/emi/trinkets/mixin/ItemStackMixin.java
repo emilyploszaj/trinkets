@@ -41,7 +41,7 @@ import java.util.Set;
 public abstract class ItemStackMixin {
 	
 	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;isSectionVisible(ILnet/minecraft/item/ItemStack$TooltipSection;)Z",
-		ordinal = 3, shift = Shift.BEFORE), method = "getTooltip", locals = LocalCapture.CAPTURE_FAILHARD)
+		ordinal = 4, shift = Shift.BEFORE), method = "getTooltip", locals = LocalCapture.CAPTURE_FAILHARD)
 	private void getTooltip(PlayerEntity player, TooltipContext context, CallbackInfoReturnable<List<Text>> info, List<Text> list) {
 		TrinketsApi.getTrinketComponent(player).ifPresent(comp -> {
 			ItemStack self = (ItemStack) (Object) this;

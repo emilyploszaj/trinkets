@@ -97,7 +97,7 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
 		}
 	}
 
-	@Inject(at = @At(value = "INVOKE", target = "net/minecraft/client/gui/screen/ingame/InventoryScreen.drawEntity(IIIFFLnet/minecraft/entity/LivingEntity;)V"), method = "drawBackground")
+	@Inject(at = @At("RETURN"), method = "drawBackground")
 	private void drawBackground(MatrixStack matrices, float delta, int mouseX, int mouseY, CallbackInfo info) {
 		if (selectedTab == ItemGroups.INVENTORY) {
 			TrinketScreenManager.drawExtraGroups(this, matrices);

@@ -44,7 +44,7 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreen<Playe
 		TrinketScreenManager.update(mouseX, mouseY);
 	}
 
-	@Inject(at = @At(value = "INVOKE", target = "net/minecraft/client/gui/screen/ingame/InventoryScreen.drawEntity(IIIFFLnet/minecraft/entity/LivingEntity;)V"), method = "drawBackground")
+	@Inject(at = @At("RETURN"), method = "drawBackground")
 	private void drawBackground(MatrixStack matrices, float delta, int mouseX, int mouseY, CallbackInfo info) {
 		TrinketScreenManager.drawExtraGroups(this, matrices);
 	}

@@ -220,8 +220,8 @@ public abstract class PlayerScreenHandlerMixin extends ScreenHandler implements 
 		return trinketSlotEnd;
 	}
 
-	@Inject(at = @At("HEAD"), method = "close")
-	private void close(PlayerEntity player, CallbackInfo info) {
+	@Inject(at = @At("HEAD"), method = "onClosed")
+	private void onClosed(PlayerEntity player, CallbackInfo info) {
 		if (player.world.isClient) {
 			TrinketsClient.activeGroup = null;
 			TrinketsClient.activeType = null;

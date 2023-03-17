@@ -185,7 +185,8 @@ public class TrinketScreenManager {
 	public static void drawGroup(DrawableHelper helper, MatrixStack matrices, SlotGroup group, SlotType type) {
 		TrinketPlayerScreenHandler handler = currentScreen.trinkets$getHandler();
 		RenderSystem.enableDepthTest();
-		helper.setZOffset(305);
+		matrices.push();
+		matrices.translate(0, 0, 305);
 
 		Rect2i r = currentScreen.trinkets$getGroupRect(group);
 		int slotsWidth = handler.trinkets$getSlotWidth(group) + 1;
@@ -255,7 +256,7 @@ public class TrinketScreenManager {
 			helper.drawTexture(matrices, x + 4, y + 4, 4, 4, 18, 18);
 		}
 
-		helper.setZOffset(0);
+		matrices.pop();
 		RenderSystem.disableDepthTest();
 	}
 

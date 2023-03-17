@@ -46,8 +46,8 @@ public abstract class HandledScreenMixin extends Screen {
 		}
 	}
 
-	@Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/render/item/ItemRenderer;zOffset:F",
-			opcode = Opcodes.PUTFIELD, ordinal = 0, shift = Shift.AFTER), method = "drawSlot")
+	@Inject(at = @At(value = "INVOKE", target = "net/minecraft/client/util/math/MatrixStack.translate(FFF)V"),
+		method = "drawSlot")
 	private void changeZ(MatrixStack matrices, Slot slot, CallbackInfo info) {
 		// Items are drawn at z + 150 (normal items are drawn at 250)
 		// Item tooltips (count, item bar) are drawn at z + 200 (normal itmes are drawn at 300)
@@ -68,7 +68,7 @@ public abstract class HandledScreenMixin extends Screen {
 				// Thus, I need to draw trinket slot backs over normal items at z 300 (310 was chosen)
 				drawTexture(matrices, slot.x, slot.y, 310, 0, 0, 16, 16, 16, 16);
 				// I also need to draw items in trinket slots *above* 310 but *below* 400, (320 for items and 370 for tooltips was chosen)
-				this.itemRenderer.zOffset = 170F;
+				matrices.translate(0, 0, 70);
 			} else {
 				drawTexture(matrices, slot.x, slot.y, 0, 0, 0, 16, 16, 16, 16);
 				RenderSystem.setShaderTexture(0, MORE_SLOTS);
@@ -76,7 +76,7 @@ public abstract class HandledScreenMixin extends Screen {
 			}
 		}
 		if (TrinketsClient.activeGroup != null && TrinketsClient.activeGroup.getSlotId() == slot.id) {
-			this.itemRenderer.zOffset = 170F;
+			matrices.translate(0, 0, 70);
 		}
 
 	}
