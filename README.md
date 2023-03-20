@@ -8,7 +8,7 @@ Trinkets adds a slot group and slot system to Minecraft. Slot groups are collect
 
 ## Developers
 To add Trinkets to your project you need to add jitpack and nerdhubmc to your repositories in your build.gradle
-```
+```gradle
 repositories {
 	maven {
 		name = "TerraformersMC"
@@ -21,7 +21,7 @@ repositories {
 }
 ```
 And then to add Trinkets you add it as a dependency in your build.gradle
-```
+```gradle
 dependencies {
 	modImplementation "dev.emi:trinkets:${trinkets_version}"
 }
