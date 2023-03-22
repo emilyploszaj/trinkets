@@ -1,6 +1,6 @@
 plugins {
-	id 'fabric-loom' version '0.11-SNAPSHOT'
-	id 'io.github.juuxel.loom-quiltflower' version '1.7.1'
+	id 'fabric-loom' version '1.1-SNAPSHOT'
+	id 'io.github.juuxel.loom-quiltflower' version '1.8.0'
 	id 'maven-publish'
 }
 
@@ -41,6 +41,8 @@ dependencies {
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 	modImplementation include("dev.onyxstudios.cardinal-components-api:cardinal-components-base:${project.cca_version}")
 	modImplementation include("dev.onyxstudios.cardinal-components-api:cardinal-components-entity:${project.cca_version}")
+
+	implementation 'com.google.code.findbugs:jsr305:3.0.2' // required for javax.annotations since they was eliminated in Java 11+
 
 	// Dev Runtime
 	testmodImplementation sourceSets.main.output
