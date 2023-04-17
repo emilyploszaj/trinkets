@@ -1,5 +1,5 @@
 {
-  "entities": ["player"],
+  "entities": ["player", "zombie"],
   "slots": [
     "hand/glove",
     "hand/ring",

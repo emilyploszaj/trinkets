@@ -20,7 +20,7 @@
     "HandledScreenMixin",
     "InventoryScreenMixin",
     "ItemStackMixin",
-    "PlayerEntityRendererMixin"
+    "LivingEntityRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1
