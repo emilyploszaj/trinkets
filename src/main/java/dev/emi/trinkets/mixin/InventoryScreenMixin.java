@@ -1,5 +1,6 @@
 package dev.emi.trinkets.mixin;
 
+import net.minecraft.client.gui.DrawContext;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -40,18 +41,18 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreen<Playe
 	}
 
 	@Inject(at = @At("HEAD"), method = "render")
-	private void render(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo info) {
+	private void render(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
 		TrinketScreenManager.update(mouseX, mouseY);
 	}
 
 	@Inject(at = @At("RETURN"), method = "drawBackground")
-	private void drawBackground(MatrixStack matrices, float delta, int mouseX, int mouseY, CallbackInfo info) {
-		TrinketScreenManager.drawExtraGroups(this, matrices);
+	private void drawBackground(DrawContext context, float delta, int mouseX, int mouseY, CallbackInfo ci) {
+		TrinketScreenManager.drawExtraGroups(context);
 	}
 
 	@Inject(at = @At("TAIL"), method = "drawForeground")
-	private void drawForeground(MatrixStack matrices, int mouseX, int mouseY, CallbackInfo info) {
-		TrinketScreenManager.drawActiveGroup(this, matrices);
+	private void drawForeground(DrawContext context, int mouseX, int mouseY, CallbackInfo ci) {
+		TrinketScreenManager.drawActiveGroup(context);
 	}
 	
 	@Inject(at = @At("HEAD"), method = "isClickOutsideBounds", cancellable = true)

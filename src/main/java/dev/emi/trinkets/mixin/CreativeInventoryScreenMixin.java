@@ -1,5 +1,6 @@
 package dev.emi.trinkets.mixin;
 
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.item.ItemGroups;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -51,7 +52,7 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
 
 	@Inject(at = @At("HEAD"), method = "setSelectedTab")
 	private void setSelectedTab(ItemGroup g, CallbackInfo info) {
-		if (g != ItemGroups.INVENTORY) {
+		if (g.getType() == ItemGroup.Type.INVENTORY) {
 			TrinketScreenManager.removeSelections();
 		}
 	}
@@ -91,29 +92,29 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
 	}
 
 	@Inject(at = @At("HEAD"), method = "render")
-	private void render(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo info) {
-		if (selectedTab == ItemGroups.INVENTORY) {
+	private void render(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
+		if (selectedTab.getType() == ItemGroup.Type.INVENTORY) {
 			TrinketScreenManager.update(mouseX, mouseY);
 		}
 	}
 
 	@Inject(at = @At("RETURN"), method = "drawBackground")
-	private void drawBackground(MatrixStack matrices, float delta, int mouseX, int mouseY, CallbackInfo info) {
-		if (selectedTab == ItemGroups.INVENTORY) {
-			TrinketScreenManager.drawExtraGroups(this, matrices);
+	private void drawBackground(DrawContext context, float delta, int mouseX, int mouseY, CallbackInfo ci) {
+		if (selectedTab.getType() == ItemGroup.Type.INVENTORY) {
+			TrinketScreenManager.drawExtraGroups(context);
 		}
 	}
 
 	@Inject(at = @At("TAIL"), method = "drawForeground")
-	private void drawForeground(MatrixStack matrices, int mouseX, int mouseY, CallbackInfo info) {
-		if (selectedTab == ItemGroups.INVENTORY) {
-			TrinketScreenManager.drawActiveGroup(this, matrices);
+	private void drawForeground(DrawContext context, int mouseX, int mouseY, CallbackInfo ci) {
+		if (selectedTab.getType() == ItemGroup.Type.INVENTORY) {
+			TrinketScreenManager.drawActiveGroup(context);
 		}
 	}
 	
 	@Inject(at = @At("HEAD"), method = "isClickOutsideBounds", cancellable = true)
 	private void isClickOutsideBounds(double mouseX, double mouseY, int left, int top, int button, CallbackInfoReturnable<Boolean> info) {
-		if (selectedTab == ItemGroups.INVENTORY && TrinketScreenManager.isClickInsideTrinketBounds(mouseX, mouseY)) {
+		if (selectedTab.getType() == ItemGroup.Type.INVENTORY && TrinketScreenManager.isClickInsideTrinketBounds(mouseX, mouseY)) {
 			info.setReturnValue(false);
 		}
 	}
@@ -126,7 +127,7 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
 	}
 	
 	@Inject(at = @At("HEAD"), method = "renderTabTooltipIfHovered", cancellable = true)
-	private void renderTabTooltipIfHovered(MatrixStack matrices, ItemGroup group, int mouseX, int mouseY, CallbackInfoReturnable<Boolean> info) {
+	private void renderTabTooltipIfHovered(DrawContext context, ItemGroup group, int mouseX, int mouseY, CallbackInfoReturnable<Boolean> info) {
 		if (TrinketsClient.activeGroup != null) {
 			info.setReturnValue(false);
 		}

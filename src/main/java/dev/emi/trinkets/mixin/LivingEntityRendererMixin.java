@@ -23,10 +23,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(LivingEntityRenderer.class)
 public abstract class LivingEntityRendererMixin {
     @Invoker("addFeature")
-    public abstract boolean invokeAddFeature(FeatureRenderer feature);
+    public abstract boolean invokeAddFeature(FeatureRenderer<?, ?> feature);
 
 	@Inject(at = @At("RETURN"), method = "<init>")
-	public void init(EntityRendererFactory.Context ctx, EntityModel model, float shadowRadius, CallbackInfo ci) {
-        this.invokeAddFeature(new TrinketFeatureRenderer<>((LivingEntityRenderer) (Object) this));
+	public void init(EntityRendererFactory.Context ctx, EntityModel<?> model, float shadowRadius, CallbackInfo ci) {
+        this.invokeAddFeature(new TrinketFeatureRenderer<>((LivingEntityRenderer<?, ?>) (Object) this));
 	}
 }

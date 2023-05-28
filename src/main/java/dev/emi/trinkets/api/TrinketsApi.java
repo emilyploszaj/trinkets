@@ -68,7 +68,7 @@ public class TrinketsApi {
 	 * called in the callback of {@link ItemStack#damage(int, LivingEntity, Consumer)}
 	 */
 	public static void onTrinketBroken(ItemStack stack, SlotReference ref, LivingEntity entity) {
-		if (!entity.world.isClient) {
+		if (!entity.getWorld().isClient) {
 			PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
 			buf.writeInt(entity.getId());
 			buf.writeString(ref.inventory().getSlotType().getGroup() + "/" + ref.inventory().getSlotType().getName());

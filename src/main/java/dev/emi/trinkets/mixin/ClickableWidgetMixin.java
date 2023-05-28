@@ -1,6 +1,7 @@
 package dev.emi.trinkets.mixin;
 
 import dev.emi.trinkets.TrinketsClient;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.util.math.MatrixStack;
 import org.objectweb.asm.Opcodes;
@@ -25,7 +26,7 @@ public abstract class ClickableWidgetMixin {
 	
 	@Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/gui/widget/ClickableWidget;hovered:Z",
 			opcode = Opcodes.PUTFIELD, ordinal = 0, shift = Shift.AFTER), method = "render")
-	private void render(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo info) {
+	private void render(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
 		if (TrinketsClient.activeGroup != null) {
 			hovered = false;
 		}

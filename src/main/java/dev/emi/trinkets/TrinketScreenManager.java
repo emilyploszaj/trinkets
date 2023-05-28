@@ -8,7 +8,7 @@ import dev.emi.trinkets.api.SlotGroup;
 import dev.emi.trinkets.api.SlotType;
 import dev.emi.trinkets.api.TrinketsApi;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawableHelper;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.util.math.Rect2i;
 import net.minecraft.screen.slot.Slot;
@@ -182,11 +182,11 @@ public class TrinketScreenManager {
 		}
 	}
 
-	public static void drawGroup(DrawableHelper helper, MatrixStack matrices, SlotGroup group, SlotType type) {
+	public static void drawGroup(DrawContext context, SlotGroup group, SlotType type) {
 		TrinketPlayerScreenHandler handler = currentScreen.trinkets$getHandler();
 		RenderSystem.enableDepthTest();
-		matrices.push();
-		matrices.translate(0, 0, 305);
+		context.getMatrices().push();
+		context.getMatrices().translate(0, 0, 305);
 
 		Rect2i r = currentScreen.trinkets$getGroupRect(group);
 		int slotsWidth = handler.trinkets$getSlotWidth(group) + 1;
@@ -195,16 +195,14 @@ public class TrinketScreenManager {
 		if (group.getSlotId() == -1) slotsWidth -= 1;
 		int x = r.getX() - 4 - (slotsWidth - 1) / 2 * 18;
 		int y = r.getY() - 4;
-		RenderSystem.setShaderTexture(0, MORE_SLOTS);
-
 		if (slotsWidth > 1 || type != null) {
-			helper.drawTexture(matrices, x, y, 0, 0, 4, 26);
+			context.drawTexture(MORE_SLOTS, x, y, 0, 0, 4, 26);
 
 			for (int i = 0; i < slotsWidth; i++) {
-				helper.drawTexture(matrices, x + i * 18 + 4, y, 4, 0, 18, 26);
+				context.drawTexture(MORE_SLOTS, x + i * 18 + 4, y, 4, 0, 18, 26);
 			}
 
-			helper.drawTexture(matrices, x + slotsWidth * 18 + 4, y, 22, 0, 4, 26);
+			context.drawTexture(MORE_SLOTS, x + slotsWidth * 18 + 4, y, 22, 0, 4, 26);
 			for (int s = 0; s < slotHeights.size() && s < slotTypes.size(); s++) {
 				if (slotTypes.get(s) != type) {
 					continue;
@@ -216,18 +214,18 @@ public class TrinketScreenManager {
 					int bottom = height / 2;
 					int slotX = slotHeight.x() - 4 + r.getX();
 					if (height > 2) {
-						helper.drawTexture(matrices, slotX, y - top * 18, 0, 0, 26, 4);
+						context.drawTexture(MORE_SLOTS, slotX, y - top * 18, 0, 0, 26, 4);
 					}
 
 					for (int i = 1; i < top + 1; i++) {
-						helper.drawTexture(matrices, slotX, y - i * 18 + 4, 0, 4, 26, 18);
+						context.drawTexture(MORE_SLOTS, slotX, y - i * 18 + 4, 0, 4, 26, 18);
 					}
 
 					for (int i = 1; i < bottom + 1; i++) {
-						helper.drawTexture(matrices, slotX, y + i * 18 + 4, 0, 4, 26, 18);
+						context.drawTexture(MORE_SLOTS, slotX, y + i * 18 + 4, 0, 4, 26, 18);
 					}
 
-					helper.drawTexture(matrices, slotX, y + 18 + bottom * 18 + 4, 0, 22, 26, 4);
+					context.drawTexture(MORE_SLOTS, slotX, y + 18 + bottom * 18 + 4, 0, 22, 26, 4);
 				}
 			}
 
@@ -243,32 +241,32 @@ public class TrinketScreenManager {
 				int slotX = slotHeight.x() + r.getX() + 1;
 				int top = (height - 1) / 2;
 				int bottom = height / 2;
-				helper.drawTexture(matrices, slotX, y - top * 18 + 1, 4, 1, 16, 3);
-				helper.drawTexture(matrices, slotX, y + (bottom + 1) * 18 + 4, 4, 22, 16, 3);
+				context.drawTexture(MORE_SLOTS, slotX, y - top * 18 + 1, 4, 1, 16, 3);
+				context.drawTexture(MORE_SLOTS, slotX, y + (bottom + 1) * 18 + 4, 4, 22, 16, 3);
 			}
 
 			// Because pre-existing slots are not part of the slotHeights list
 			if (group.getSlotId() != -1) {
-				helper.drawTexture(matrices, r.getX() + 1, y + 1, 4, 1, 16, 3);
-				helper.drawTexture(matrices, r.getX() + 1, y + 22, 4, 22, 16, 3);
+				context.drawTexture(MORE_SLOTS, r.getX() + 1, y + 1, 4, 1, 16, 3);
+				context.drawTexture(MORE_SLOTS, r.getX() + 1, y + 22, 4, 22, 16, 3);
 			}
 		} else {
-			helper.drawTexture(matrices, x + 4, y + 4, 4, 4, 18, 18);
+			context.drawTexture(MORE_SLOTS, x + 4, y + 4, 4, 4, 18, 18);
 		}
 
-		matrices.pop();
+		context.getMatrices().pop();
 		RenderSystem.disableDepthTest();
 	}
 
-	public static void drawActiveGroup(DrawableHelper helper, MatrixStack matrices) {
+	public static void drawActiveGroup(DrawContext context) {
 		if (TrinketsClient.activeGroup != null) {
-			TrinketScreenManager.drawGroup(helper, matrices, TrinketsClient.activeGroup, TrinketsClient.activeType);
+			TrinketScreenManager.drawGroup(context, TrinketsClient.activeGroup, TrinketsClient.activeType);
 		} else if (TrinketsClient.quickMoveGroup != null) {
-			TrinketScreenManager.drawGroup(helper, matrices, TrinketsClient.quickMoveGroup, TrinketsClient.quickMoveType);
+			TrinketScreenManager.drawGroup(context, TrinketsClient.quickMoveGroup, TrinketsClient.quickMoveType);
 		}
 	}
 
-	public static void drawExtraGroups(DrawableHelper helper, MatrixStack matrices) {
+	public static void drawExtraGroups(DrawContext context) {
 		TrinketPlayerScreenHandler handler = currentScreen.trinkets$getHandler();
 		int x = currentScreen.trinkets$getX();
 		int y = currentScreen.trinkets$getY();
@@ -282,38 +280,37 @@ public class TrinketScreenManager {
 			height = 4;
 			width--;
 		}
-		RenderSystem.setShaderTexture(0, MORE_SLOTS);
-		helper.drawTexture(matrices, x + 3, y,      7, 26, 1, 7);
+		context.drawTexture(MORE_SLOTS, x + 3, y,      7, 26, 1, 7);
 		// Repeated tops and bottoms
 		for (int i = 0; i < width; i++) {
-			helper.drawTexture(matrices, x - 15 - 18 * i, y,      7, 26, 18, 7);
-			helper.drawTexture(matrices, x - 15 - 18 * i, y + 79, 7, 51, 18, 7);
+			context.drawTexture(MORE_SLOTS, x - 15 - 18 * i, y,      7, 26, 18, 7);
+			context.drawTexture(MORE_SLOTS, x - 15 - 18 * i, y + 79, 7, 51, 18, 7);
 		}
 		// Top and bottom
-		helper.drawTexture(matrices, x - 15 - 18 * width, y,                   7, 26, 18, 7);
-		helper.drawTexture(matrices, x - 15 - 18 * width, y + 7 + 18 * height, 7, 51, 18, 7);
+		context.drawTexture(MORE_SLOTS, x - 15 - 18 * width, y,                   7, 26, 18, 7);
+		context.drawTexture(MORE_SLOTS, x - 15 - 18 * width, y + 7 + 18 * height, 7, 51, 18, 7);
 		// Corners
-		helper.drawTexture(matrices, x - 22 - 18 * width, y,                   0, 26, 7, 7);
-		helper.drawTexture(matrices, x - 22 - 18 * width, y + 7 + 18 * height, 0, 51, 7, 7);
+		context.drawTexture(MORE_SLOTS, x - 22 - 18 * width, y,                   0, 26, 7, 7);
+		context.drawTexture(MORE_SLOTS, x - 22 - 18 * width, y + 7 + 18 * height, 0, 51, 7, 7);
 		// Outer sides
 		for (int i = 0; i < height; i++) {
-			helper.drawTexture(matrices, x - 22 - 18 * width, y + 7 + 18 * i, 0, 34, 7, 18);
+			context.drawTexture(MORE_SLOTS, x - 22 - 18 * width, y + 7 + 18 * i, 0, 34, 7, 18);
 		}
 		// Inner sides
 		if (width > 0) {
 			for (int i = height; i < 4; i++) {
-				helper.drawTexture(matrices, x - 4 - 18 * width, y + 7 + 18 * i, 0, 34, 7, 18);
+				context.drawTexture(MORE_SLOTS, x - 4 - 18 * width, y + 7 + 18 * i, 0, 34, 7, 18);
 			}
 		}
 		if (width > 0 && height < 4) {
 			// Bottom corner
-			helper.drawTexture(matrices, x - 4 - 18 * width, y + 79, 0, 51, 7, 7);
+			context.drawTexture(MORE_SLOTS, x - 4 - 18 * width, y + 79, 0, 51, 7, 7);
 			// Inner corner
-			helper.drawTexture(matrices, x - 4 - 18 * width, y + 7 + 18 * height, 0, 58, 7, 7);
+			context.drawTexture(MORE_SLOTS, x - 4 - 18 * width, y + 7 + 18 * height, 0, 58, 7, 7);
 		}
 		if (width > 0 || height == 4) {
 			// Inner corner
-			helper.drawTexture(matrices, x, y + 79, 0, 58, 3, 7);
+			context.drawTexture(MORE_SLOTS, x, y + 79, 0, 58, 3, 7);
 		}
 	}
 

@@ -81,7 +81,7 @@ public abstract class LivingEntityMixin extends Entity {
 	private void dropInventory(CallbackInfo info) {
 		LivingEntity entity = (LivingEntity) (Object) this;
 
-		boolean keepInv = entity.world.getGameRules().getBoolean(GameRules.KEEP_INVENTORY);
+		boolean keepInv = entity.getWorld().getGameRules().getBoolean(GameRules.KEEP_INVENTORY);
 		TrinketsApi.getTrinketComponent(entity).ifPresent(trinkets -> trinkets.forEach((ref, stack) -> {
 			if (stack.isEmpty()) {
 				return;
@@ -152,7 +152,7 @@ public abstract class LivingEntityMixin extends Entity {
 
 				if (!ItemStack.areEqual(newStack, oldStack)) {
 
-					if (!this.world.isClient) {
+					if (!this.getWorld().isClient) {
 						contentUpdates.put(newRef, copy);
 						UUID uuid = SlotAttributes.getUuid(ref);
 
@@ -193,14 +193,14 @@ public abstract class LivingEntityMixin extends Entity {
 						}
 					}
 
-					if (!newStack.isItemEqual(oldStack)) {
+					if (!ItemStack.areItemsEqual(oldStack, newStack)) {
 						TrinketsApi.getTrinket(oldStack.getItem()).onUnequip(oldStack, ref, entity);
 						TrinketsApi.getTrinket(newStack.getItem()).onEquip(newStack, ref, entity);
 					}
 				}
 			});
 
-			if (!this.world.isClient) {
+			if (!this.getWorld().isClient) {
 				Set<TrinketInventory> inventoriesToSend = trinkets.getTrackingUpdates();
 
 				if (!contentUpdates.isEmpty() || !inventoriesToSend.isEmpty()) {
