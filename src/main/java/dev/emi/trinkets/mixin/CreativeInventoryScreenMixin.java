@@ -52,7 +52,7 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
 
 	@Inject(at = @At("HEAD"), method = "setSelectedTab")
 	private void setSelectedTab(ItemGroup g, CallbackInfo info) {
-		if (g.getType() == ItemGroup.Type.INVENTORY) {
+		if (g.getType() != ItemGroup.Type.INVENTORY) {
 			TrinketScreenManager.removeSelections();
 		}
 	}
