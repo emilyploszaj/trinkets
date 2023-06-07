@@ -55,23 +55,21 @@ public abstract class HandledScreenMixin extends Screen {
 		// Inventory tooltip is drawn at 400
 		if (slot instanceof TrinketSlot ts) {
 			assert this.client != null;
-			Identifier id = ts.getBackgroundIdentifier();
+			Identifier slotTextureId = ts.getBackgroundIdentifier();
 
-			if (slot.getStack().isEmpty() && id != null) {
-				RenderSystem.setShaderTexture(0, id);
-			} else {
-				RenderSystem.setShaderTexture(0, BLANK_BACK);
+			if (!slot.getStack().isEmpty() || slotTextureId == null) {
+				slotTextureId = BLANK_BACK;
 			}
 
 			RenderSystem.enableDepthTest();
 
 			if (ts.isTrinketFocused()) {
 				// Thus, I need to draw trinket slot backs over normal items at z 300 (310 was chosen)
-				context.drawTexture(BLANK_BACK, slot.x, slot.y, 310, 0, 0, 16, 16, 16, 16);
+				context.drawTexture(slotTextureId, slot.x, slot.y, 310, 0, 0, 16, 16, 16, 16);
 				// I also need to draw items in trinket slots *above* 310 but *below* 400, (320 for items and 370 for tooltips was chosen)
 				context.getMatrices().translate(0, 0, 70);
 			} else {
-				context.drawTexture(BLANK_BACK, slot.x, slot.y, 0, 0, 0, 16, 16, 16, 16);
+				context.drawTexture(slotTextureId, slot.x, slot.y, 0, 0, 0, 16, 16, 16, 16);
 				context.drawTexture(MORE_SLOTS, slot.x - 1, slot.y - 1, 0, 4, 4, 18, 18, 256, 256);
 			}
 		}
