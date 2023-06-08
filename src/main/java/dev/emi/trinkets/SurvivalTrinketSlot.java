@@ -49,7 +49,7 @@ public class SurvivalTrinketSlot extends Slot implements TrinketSlot {
 	public boolean isEnabled() {
 		if (alwaysVisible) {
 			if (x < 0) {
-				if (trinketInventory.getComponent().getEntity().world.isClient) {
+				if (trinketInventory.getComponent().getEntity().getWorld().isClient) {
 					MinecraftClient client = MinecraftClient.getInstance();
 					Screen s = client.currentScreen;
 					if (s instanceof InventoryScreen screen) {

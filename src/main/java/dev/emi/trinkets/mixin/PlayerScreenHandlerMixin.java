@@ -222,7 +222,7 @@ public abstract class PlayerScreenHandlerMixin extends ScreenHandler implements 
 
 	@Inject(at = @At("HEAD"), method = "onClosed")
 	private void onClosed(PlayerEntity player, CallbackInfo info) {
-		if (player.world.isClient) {
+		if (player.getWorld().isClient) {
 			TrinketsClient.activeGroup = null;
 			TrinketsClient.activeType = null;
 			TrinketsClient.quickMoveGroup = null;
@@ -257,7 +257,7 @@ public abstract class PlayerScreenHandlerMixin extends ScreenHandler implements 
 
 							if (res) {
 								if (this.insertItem(stack, i, i + 1, false)) {
-									if (player.world.isClient) {
+									if (player.getWorld().isClient) {
 										TrinketsClient.quickMoveTimer = 20;
 										TrinketsClient.quickMoveGroup = TrinketsApi.getPlayerSlots(this.owner).get(type.getGroup());
 										if (ref.index() > 0) {
