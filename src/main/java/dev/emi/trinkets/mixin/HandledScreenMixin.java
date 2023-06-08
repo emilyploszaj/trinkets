@@ -49,7 +49,7 @@ public abstract class HandledScreenMixin extends Screen {
 
 	@Inject(at = @At(value = "INVOKE", target = "net/minecraft/client/util/math/MatrixStack.translate(FFF)V"),
 		method = "drawSlot")
-	private void changeZ(DrawContext context, Slot slot, CallbackInfo ci) {
+	private void changeZ(DrawContext context, Slot slot, CallbackInfo info) {
 		// Items are drawn at z + 150 (normal items are drawn at 250)
 		// Item tooltips (count, item bar) are drawn at z + 200 (normal itmes are drawn at 300)
 		// Inventory tooltip is drawn at 400

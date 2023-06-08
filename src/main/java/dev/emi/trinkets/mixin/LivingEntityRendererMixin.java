@@ -26,7 +26,7 @@ public abstract class LivingEntityRendererMixin {
     public abstract boolean invokeAddFeature(FeatureRenderer<?, ?> feature);
 
 	@Inject(at = @At("RETURN"), method = "<init>")
-	public void init(EntityRendererFactory.Context ctx, EntityModel<?> model, float shadowRadius, CallbackInfo ci) {
+	public void init(EntityRendererFactory.Context ctx, EntityModel<?> model, float shadowRadius, CallbackInfo info) {
         this.invokeAddFeature(new TrinketFeatureRenderer<>((LivingEntityRenderer<?, ?>) (Object) this));
 	}
 }

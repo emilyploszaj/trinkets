@@ -22,7 +22,7 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 public class ClientPlayNetworkHandlerMixin {
 
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerEntity;setId(I)V"), method = "onPlayerRespawn", locals = LocalCapture.CAPTURE_FAILSOFT)
-    private void onPlayerRespawn(PlayerRespawnS2CPacket packet, CallbackInfo ci, RegistryKey<?> registryKey, RegistryEntry<?> registryEntry, ClientPlayerEntity clientPlayerEntity, int i, String string, ClientPlayerEntity clientPlayerEntity2) {
+    private void onPlayerRespawn(PlayerRespawnS2CPacket packet, CallbackInfo info, RegistryKey<?> registryKey, RegistryEntry<?> registryEntry, ClientPlayerEntity clientPlayerEntity, int i, String string, ClientPlayerEntity clientPlayerEntity2) {
         if (packet.hasFlag(PlayerRespawnS2CPacket.KEEP_ATTRIBUTES)) {
             TrinketInventory.copyFrom(clientPlayerEntity, clientPlayerEntity2);
             ((TrinketPlayerScreenHandler) clientPlayerEntity2.playerScreenHandler).trinkets$updateTrinketSlots(false);

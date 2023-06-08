@@ -26,7 +26,7 @@ public abstract class ClickableWidgetMixin {
 	
 	@Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/gui/widget/ClickableWidget;hovered:Z",
 			opcode = Opcodes.PUTFIELD, ordinal = 0, shift = Shift.AFTER), method = "render")
-	private void render(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
+	private void render(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo info) {
 		if (TrinketsClient.activeGroup != null) {
 			hovered = false;
 		}

@@ -92,21 +92,21 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
 	}
 
 	@Inject(at = @At("HEAD"), method = "render")
-	private void render(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
+	private void render(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo info) {
 		if (selectedTab.getType() == ItemGroup.Type.INVENTORY) {
 			TrinketScreenManager.update(mouseX, mouseY);
 		}
 	}
 
 	@Inject(at = @At("RETURN"), method = "drawBackground")
-	private void drawBackground(DrawContext context, float delta, int mouseX, int mouseY, CallbackInfo ci) {
+	private void drawBackground(DrawContext context, float delta, int mouseX, int mouseY, CallbackInfo info) {
 		if (selectedTab.getType() == ItemGroup.Type.INVENTORY) {
 			TrinketScreenManager.drawExtraGroups(context);
 		}
 	}
 
 	@Inject(at = @At("TAIL"), method = "drawForeground")
-	private void drawForeground(DrawContext context, int mouseX, int mouseY, CallbackInfo ci) {
+	private void drawForeground(DrawContext context, int mouseX, int mouseY, CallbackInfo info) {
 		if (selectedTab.getType() == ItemGroup.Type.INVENTORY) {
 			TrinketScreenManager.drawActiveGroup(context);
 		}
