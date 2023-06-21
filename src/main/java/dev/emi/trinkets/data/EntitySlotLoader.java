@@ -1,23 +1,8 @@
 package dev.emi.trinkets.data;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSyntaxException;
-
+import com.google.gson.*;
 import dev.emi.trinkets.TrinketPlayerScreenHandler;
 import dev.emi.trinkets.TrinketsMain;
 import dev.emi.trinkets.TrinketsNetwork;
@@ -32,6 +17,9 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.registry.tag.TagKey;
 import net.minecraft.resource.Resource;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.resource.SinglePreparationResourceReloader;
@@ -39,6 +27,10 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.JsonHelper;
 import net.minecraft.util.profiler.Profiler;
+
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.*;
 
 public class EntitySlotLoader extends SinglePreparationResourceReloader<Map<String, Map<String, Set<String>>>> implements IdentifiableResourceReloadListener {
 
@@ -72,25 +64,22 @@ public class EntitySlotLoader extends SinglePreparationResourceReloader<Map<Stri
 								JsonArray assignedSlots = JsonHelper.getArray(jsonObject, "slots", new JsonArray());
 								Map<String, Set<String>> groups = new HashMap<>();
 
-								if (assignedSlots != null) {
+								for (JsonElement assignedSlot : assignedSlots) {
+									String slot = assignedSlot.getAsString();
+									String[] parsedSlot = slot.split("/");
 
-									for (JsonElement assignedSlot : assignedSlots) {
-										String slot = assignedSlot.getAsString();
-										String[] parsedSlot = slot.split("/");
-
-										if (parsedSlot.length != 2) {
-											TrinketsMain.LOGGER.error("Detected malformed slot assignment " + slot
-													+ "! Slots should be in the format 'group/slot'.");
-											continue;
-										}
-										String group = parsedSlot[0];
-										String name = parsedSlot[1];
-										groups.computeIfAbsent(group, (k) -> new HashSet<>()).add(name);
+									if (parsedSlot.length != 2) {
+										TrinketsMain.LOGGER.error("Detected malformed slot assignment " + slot
+												+ "! Slots should be in the format 'group/slot'.");
+										continue;
 									}
+									String group = parsedSlot[0];
+									String name = parsedSlot[1];
+									groups.computeIfAbsent(group, (k) -> new HashSet<>()).add(name);
 								}
 								JsonArray entities = JsonHelper.getArray(jsonObject, "entities", new JsonArray());
 
-								if (!groups.isEmpty() && entities != null) {
+								if (!groups.isEmpty()) {
 
 									for (JsonElement entity : entities) {
 										String name = entity.getAsString();
@@ -136,17 +125,15 @@ public class EntitySlotLoader extends SinglePreparationResourceReloader<Map<Stri
 
 			try {
 				if (entityName.startsWith("#")) {
-					// TODO rewrite this to work with the new tag system
-					TrinketsMain.LOGGER.error("[trinkets] Attempted to assign entity entry to tag");
-					/*
-					TagKey<EntityType<?>> tag = TagKey.of(Registry.ENTITY_TYPE_KEY, new Identifier(entityName.substring(1)));
-					List<? extends EntityType<?>> entityTypes = Registry.ENTITY_TYPE.getEntryList(tag)
+					TagKey<EntityType<?>> tag = TagKey.of(RegistryKeys.ENTITY_TYPE, new Identifier(entityName.substring(1)));
+					List<? extends EntityType<?>> entityTypes = Registries.ENTITY_TYPE.getEntryList(tag)
 							.orElseThrow(() -> new IllegalArgumentException("Unknown entity tag '" + entityName + "'"))
 							.stream()
 							.map(RegistryEntry::value)
 							.toList();
 
-					types.addAll(entityTypes);*/
+
+					types.addAll(entityTypes);
 				} else {
 					types.add(Registries.ENTITY_TYPE.getOrEmpty(new Identifier(entityName))
 							.orElseThrow(() -> new IllegalArgumentException("Unknown entity '" + entityName + "'")));

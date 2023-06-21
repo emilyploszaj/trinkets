@@ -1,5 +1,5 @@
 {
-  "entities": ["player", "zombie"],
+  "entities": ["player", "zombie","#minecraft:skeletons"],
   "slots": [
     "hand/glove",
     "hand/ring",

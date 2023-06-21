@@ -33,6 +33,8 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 
+import java.util.Optional;
+
 public class TrinketsMain implements ModInitializer, EntityComponentInitializer {
 
 	public static final String MOD_ID = "trinkets";
@@ -90,22 +92,25 @@ public class TrinketsMain implements ModInitializer, EntityComponentInitializer 
 			ItemStackArgument stack = context.getArgument("stack", ItemStackArgument.class);
 			ServerPlayerEntity player = context.getSource().getPlayer();
 			if (player != null) {
-				TrinketComponent comp = TrinketsApi.getTrinketComponent(player).get();
-				SlotGroup slotGroup = comp.getGroups().getOrDefault(group, null);
-				if (slotGroup != null) {
-					SlotType slotType = slotGroup.getSlots().getOrDefault(slot, null);
-					if (slotType != null) {
-						if (offset >= 0 && offset < slotType.getAmount()) {
-							comp.getInventory().get(group).get(slot).setStack(offset, stack.createStack(amount, true));
-							return Command.SINGLE_SUCCESS;
+				Optional<TrinketComponent> optional = TrinketsApi.getTrinketComponent(player);
+				if(optional.isPresent()) {
+					TrinketComponent comp = optional.get();
+					SlotGroup slotGroup = comp.getGroups().getOrDefault(group, null);
+					if (slotGroup != null) {
+						SlotType slotType = slotGroup.getSlots().getOrDefault(slot, null);
+						if (slotType != null) {
+							if (offset >= 0 && offset < slotType.getAmount()) {
+								comp.getInventory().get(group).get(slot).setStack(offset, stack.createStack(amount, true));
+								return Command.SINGLE_SUCCESS;
+							} else {
+								context.getSource().sendError(Text.literal(offset + " offset does not exist for slot"));
+							}
 						} else {
-							context.getSource().sendError(Text.literal(offset + " offset does not exist for slot"));
+							context.getSource().sendError(Text.literal(slot + " does not exist"));
 						}
 					} else {
-						context.getSource().sendError(Text.literal(slot + " does not exist"));
+						context.getSource().sendError(Text.literal(group + " does not exist"));
 					}
-				} else {
-					context.getSource().sendError(Text.literal(group + " does not exist"));
 				}
 			}
 		} catch (Exception e) {

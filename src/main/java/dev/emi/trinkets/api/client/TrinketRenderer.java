@@ -48,8 +48,7 @@ public interface TrinketRenderer {
 					(LivingEntityRenderer<LivingEntity, EntityModel<LivingEntity>>) render;
 			EntityModel<LivingEntity> entityModel = livingRenderer.getModel();
 
-			if (entityModel instanceof BipedEntityModel) {
-				BipedEntityModel<LivingEntity> bipedModel = (BipedEntityModel<LivingEntity>) entityModel;
+			if (entityModel instanceof BipedEntityModel<LivingEntity> bipedModel) {
 				bipedModel.copyBipedStateTo(model);
 			}
 		}

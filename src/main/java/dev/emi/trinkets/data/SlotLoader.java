@@ -168,47 +168,31 @@ public class SlotLoader extends SinglePreparationResourceReloader<Map<String, Gr
 			icon = JsonHelper.getString(jsonObject, "icon", icon);
 
 			JsonArray jsonQuickMovePredicates = JsonHelper.getArray(jsonObject, "quick_move_predicates", new JsonArray());
-
-			if (jsonQuickMovePredicates != null) {
-
-				if (replace && jsonQuickMovePredicates.size() > 0) {
-					quickMovePredicates.clear();
-				}
-
-				for (JsonElement jsonQuickMovePredicate : jsonQuickMovePredicates) {
-					quickMovePredicates.add(jsonQuickMovePredicate.getAsString());
-				}
+			if (replace && jsonQuickMovePredicates.size() > 0) {
+				quickMovePredicates.clear();
+			}
+			for (JsonElement jsonQuickMovePredicate : jsonQuickMovePredicates) {
+				quickMovePredicates.add(jsonQuickMovePredicate.getAsString());
 			}
 
 			String jsonDropRule = JsonHelper.getString(jsonObject, "drop_rule", dropRule).toUpperCase();
-
 			if (DropRule.has(jsonDropRule)) {
 				dropRule = jsonDropRule;
 			}
 			JsonArray jsonValidatorPredicates = JsonHelper.getArray(jsonObject, "validator_predicates", new JsonArray());
-
-			if (jsonValidatorPredicates != null) {
-
-				if (replace && jsonValidatorPredicates.size() > 0) {
-					validatorPredicates.clear();
-				}
-
-				for (JsonElement jsonValidatorPredicate : jsonValidatorPredicates) {
-					validatorPredicates.add(jsonValidatorPredicate.getAsString());
-				}
+			if (replace && jsonValidatorPredicates.size() > 0) {
+				validatorPredicates.clear();
+			}
+			for (JsonElement jsonValidatorPredicate : jsonValidatorPredicates) {
+				validatorPredicates.add(jsonValidatorPredicate.getAsString());
 			}
 
 			JsonArray jsonTooltipPredicates = JsonHelper.getArray(jsonObject, "tooltip_predicates", new JsonArray());
-
-			if (jsonTooltipPredicates != null) {
-
-				if (replace && jsonTooltipPredicates.size() > 0) {
-					tooltipPredicates.clear();
-				}
-
-				for (JsonElement jsonTooltipPredicate : jsonTooltipPredicates) {
-					tooltipPredicates.add(jsonTooltipPredicate.getAsString());
-				}
+			if (replace && jsonTooltipPredicates.size() > 0) {
+				tooltipPredicates.clear();
+			}
+			for (JsonElement jsonTooltipPredicate : jsonTooltipPredicates) {
+				tooltipPredicates.add(jsonTooltipPredicate.getAsString());
 			}
 		}
 	}

@@ -9,7 +9,6 @@ import dev.emi.trinkets.api.SlotType;
 import dev.emi.trinkets.api.TrinketsApi;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.util.math.Rect2i;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.util.Identifier;
@@ -335,9 +334,7 @@ public class TrinketScreenManager {
 			}
 		}
 		if (height > 0) {
-			if (new Rect2i(-22 - 18 * width, 0, 25, 14 + 18 * height).contains(mx, my)) {
-				return true;
-			}
+			return new Rect2i(-22 - 18 * width, 0, 25, 14 + 18 * height).contains(mx, my);
 		}
 		return false;
 	}
