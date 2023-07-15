@@ -1,5 +1,5 @@
 {
-	"trinkets.tooltip.slots.any" : "可装备于 §9any§r 饰品槽",
+	"trinkets.tooltip.slots.any" : "可装备于 §9任意§r 饰品槽",
 	"trinkets.tooltip.slots.list" : "可装备于以下饰品槽:",
 	"trinkets.tooltip.slots.single" : "可装备于 %d 饰品槽",
 	"trinkets.tooltip.attributes.all" : "装备时:",
