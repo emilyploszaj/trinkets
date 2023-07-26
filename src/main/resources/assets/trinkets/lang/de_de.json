@@ -1,6 +1,6 @@
 {
 	"trinkets.tooltip.slots.any" : "Ausrüstbar in §9jedem§r Schmuckstückschlitz",
-	"trinkets.tooltip.slots.list" : "Ausrüstbar in den Schmuckstückschlitze:",
+	"trinkets.tooltip.slots.list" : "Ausrüstbar in den Schmuckstückschlitzen:",
 	"trinkets.tooltip.slots.single" : "Das Schmuckstück ist Ausrüstbar im %dschlitz",
 	"trinkets.tooltip.attributes.all" : "Wenn getragen:",
 	"trinkets.tooltip.attributes.single" : "Wenn Sie das Schmuckstück im %dschlitz tragen:",
