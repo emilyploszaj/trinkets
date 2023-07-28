@@ -93,7 +93,7 @@ public class TrinketsMain implements ModInitializer, EntityComponentInitializer 
 			ServerPlayerEntity player = context.getSource().getPlayer();
 			if (player != null) {
 				Optional<TrinketComponent> optional = TrinketsApi.getTrinketComponent(player);
-				if(optional.isPresent()) {
+				if (optional.isPresent()) {
 					TrinketComponent comp = optional.get();
 					SlotGroup slotGroup = comp.getGroups().getOrDefault(group, null);
 					if (slotGroup != null) {

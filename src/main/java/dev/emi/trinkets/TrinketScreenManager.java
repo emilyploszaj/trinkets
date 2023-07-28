@@ -334,7 +334,9 @@ public class TrinketScreenManager {
 			}
 		}
 		if (height > 0) {
-			return new Rect2i(-22 - 18 * width, 0, 25, 14 + 18 * height).contains(mx, my);
+			if (new Rect2i(-22 - 18 * width, 0, 25, 14 + 18 * height).contains(mx, my)) {
+				return true;
+			}
 		}
 		return false;
 	}
