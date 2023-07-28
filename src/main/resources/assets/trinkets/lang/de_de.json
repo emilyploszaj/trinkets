@@ -1,0 +1,20 @@
+{
+	"trinkets.tooltip.slots.any" : "Ausrüstbar in §9jedem§r Schmuckstückschlitz",
+	"trinkets.tooltip.slots.list" : "Ausrüstbar in den Schmuckstückschlitzen:",
+	"trinkets.tooltip.slots.single" : "Das Schmuckstück ist Ausrüstbar im %dschlitz",
+	"trinkets.tooltip.attributes.all" : "Wenn getragen:",
+	"trinkets.tooltip.attributes.single" : "Wenn Sie das Schmuckstück im %dschlitz tragen:",
+	"trinkets.tooltip.attributes.slots" : "%d Schlitze",
+	"trinkets.slot.head.face": "Gesicht",
+	"trinkets.slot.head.hat": "Hut",
+	"trinkets.slot.chest.necklace": "Halskette",
+	"trinkets.slot.chest.back": "Rückseite",
+	"trinkets.slot.chest.cape": "Umhang",
+	"trinkets.slot.legs.belt": "Gürtel",
+	"trinkets.slot.feet.aglet": "Aglet",
+	"trinkets.slot.feet.shoes": "Schuhe",
+	"trinkets.slot.hand.glove": "Handschuh",
+	"trinkets.slot.offhand.glove": "Handschuh",
+	"trinkets.slot.hand.ring": "Ring",
+	"trinkets.slot.offhand.ring": "Ring"
+}
