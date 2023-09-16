@@ -4,8 +4,8 @@ import java.util.List;
 
 import dev.emi.trinkets.api.SlotGroup;
 import dev.emi.trinkets.api.SlotType;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Interface for putting methods onto the player's screen handler
@@ -22,13 +22,13 @@ public interface TrinketPlayerScreenHandler {
 	@Nullable
 	Point trinkets$getGroupPos(SlotGroup group);
 
-	@Nonnull
+	@NotNull
 	List<Point> trinkets$getSlotHeights(SlotGroup group);
 
 	@Nullable
 	Point trinkets$getSlotHeight(SlotGroup group, int i);
 
-	@Nonnull
+	@NotNull
 	List<SlotType> trinkets$getSlotTypes(SlotGroup group);
 
 	int trinkets$getSlotWidth(SlotGroup group);
