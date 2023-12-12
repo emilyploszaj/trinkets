@@ -54,6 +54,6 @@
 		"fabricloader": ">=0.7.0",
 		"cardinal-components-base": ">=3.0.0-0",
 		"cardinal-components-entity": ">=3.0.0-0",
-		"fabric": ">=0.51.2"
+		"fabric-api": ">=0.51.2"
 	}
 }
