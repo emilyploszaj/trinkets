@@ -1,0 +1,20 @@
+{
+	"trinkets.tooltip.slots.any" : "Equipaggiabile nello slot §9any§r",
+	"trinkets.tooltip.slots.list" : "Equipaggiabile negli slots:",
+	"trinkets.tooltip.slots.single" : "Equipaggiabile nello slot %d",
+	"trinkets.tooltip.attributes.all" : "Quando equipaggiato:",
+	"trinkets.tooltip.attributes.single" : "Quando equipaggiato nello slot %d :",
+	"trinkets.tooltip.attributes.slots" : "%d Slots",
+	"trinkets.slot.head.face": "Faccia",
+	"trinkets.slot.head.hat": "Cappello",
+	"trinkets.slot.chest.necklace": "Collana",
+	"trinkets.slot.chest.back": "Schiena",
+	"trinkets.slot.chest.cape": "Mantello",
+	"trinkets.slot.legs.belt": "Cintura",
+	"trinkets.slot.feet.aglet": "Alettone",
+	"trinkets.slot.feet.shoes": "Scarpe",
+	"trinkets.slot.hand.glove": "Guanto",
+	"trinkets.slot.offhand.glove": "Guanto",
+	"trinkets.slot.hand.ring": "Anello",
+	"trinkets.slot.offhand.ring": "Anello"
+}
