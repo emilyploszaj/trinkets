@@ -1,0 +1,20 @@
+{
+	"trinkets.tooltip.slots.any" : "§9いずれの位置§rの装身具としても取り付けられる",
+	"trinkets.tooltip.slots.list" : "装身具として取り付けられる位置:",
+	"trinkets.tooltip.slots.single" : "%dの装身具として取り付けられる",
+	"trinkets.tooltip.attributes.all" : "取り付けた時:",
+	"trinkets.tooltip.attributes.single" : "%dに取り付けた時:",
+	"trinkets.tooltip.attributes.slots" : "%d",
+	"trinkets.slot.head.face": "顔",
+	"trinkets.slot.head.hat": "帽子",
+	"trinkets.slot.chest.necklace": "首飾り",
+	"trinkets.slot.chest.back": "背中",
+	"trinkets.slot.chest.cape": "肩",
+	"trinkets.slot.legs.belt": "腰",
+	"trinkets.slot.feet.aglet": "靴紐",
+	"trinkets.slot.feet.shoes": "靴",
+	"trinkets.slot.hand.glove": "手袋",
+	"trinkets.slot.offhand.glove": "手袋",
+	"trinkets.slot.hand.ring": "指輪",
+	"trinkets.slot.offhand.ring": "指輪"
+}
