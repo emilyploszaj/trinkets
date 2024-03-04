@@ -52,10 +52,12 @@ dependencies {
 	modCompileOnly "me.shedaniel:RoughlyEnoughItems-api-fabric:${project.rei_version}"
 	modCompileOnly "me.shedaniel:RoughlyEnoughItems-default-plugin-fabric:${project.rei_version}"
 	modCompileOnly "me.shedaniel.cloth:cloth-config-fabric:${project.cloth_config_version}"
+	modCompileOnly "dev.emi:emi-fabric:${emi_version}:api"
 
 	// Dev Runtime
 	testmodImplementation sourceSets.main.output
-	modRuntimeOnly "me.shedaniel:RoughlyEnoughItems-fabric:${project.rei_version}"
+	modLocalRuntime "dev.emi:emi-fabric:${emi_version}"
+	//modRuntimeOnly "me.shedaniel:RoughlyEnoughItems-fabric:${project.rei_version}"
 	//modLocalRuntime "com.terraformersmc:modmenu:${project.mod_menu_version}"
 }
 
