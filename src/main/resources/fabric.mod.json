@@ -37,6 +37,9 @@
 		],
 		"cardinal-components-entity": [
 			"dev.emi.trinkets.TrinketsMain"
+		],
+		"rei_client": [
+			"dev.emi.trinkets.compat.TrinketsREIPlugin"
 		]
 	},
   "accessWidener": "trinkets.accesswidener",
