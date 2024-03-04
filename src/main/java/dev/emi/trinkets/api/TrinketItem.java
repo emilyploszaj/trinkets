@@ -1,6 +1,7 @@
 package dev.emi.trinkets.api;
 
 import dev.emi.trinkets.TrinketSlot;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Equipment;
 import net.minecraft.item.Item;
@@ -31,6 +32,10 @@ public class TrinketItem extends Item implements Trinket {
 	}
 
 	public static boolean equipItem(PlayerEntity user, ItemStack stack) {
+		return equipItem((LivingEntity) user, stack);
+	}
+
+	public static boolean equipItem(LivingEntity user, ItemStack stack) {
 		var optional = TrinketsApi.getTrinketComponent(user);
 		if (optional.isPresent()) {
 			TrinketComponent comp = optional.get();
