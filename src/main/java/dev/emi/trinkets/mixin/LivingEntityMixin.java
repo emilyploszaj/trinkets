@@ -137,15 +137,10 @@ public abstract class LivingEntityMixin extends Entity {
 	@Inject(at = @At("TAIL"), method = "tick")
 	private void tick(CallbackInfo info) {
 		LivingEntity entity = (LivingEntity) (Object) this;
+		if (entity.isRemoved()) {
+			return;
+		}
 		TrinketsApi.getTrinketComponent(entity).ifPresent(trinkets -> {
-			// tick trinkets before updating client (is order important?)
-			// only perform if entity has not been removed
-			if (!entity.isRemoved()) {
-				trinkets.forEach((slotRef, itemStack) -> {
-					TrinketsApi.getTrinket(itemStack.getItem()).tick(itemStack, slotRef, entity);
-				});
-			}
-
 			Map<String, ItemStack> newlyEquippedTrinkets = new HashMap<>();
 			Map<String, ItemStack> contentUpdates = new HashMap<>();
 			trinkets.forEach((ref, stack) -> {
@@ -154,14 +149,16 @@ public abstract class LivingEntityMixin extends Entity {
 				int index = ref.index();
 				ItemStack oldStack = getOldStack(slotType, index);
 				ItemStack newStack = inventory.getStack(index);
-				ItemStack copy = newStack.copy();
+				ItemStack newStackCopy = newStack.copy();
 				String newRef = slotType.getGroup() + "/" + slotType.getName() + "/" + index;
-				newlyEquippedTrinkets.put(newRef, copy);
 
 				if (!ItemStack.areEqual(newStack, oldStack)) {
 
+					TrinketsApi.getTrinket(oldStack.getItem()).onUnequip(oldStack, ref, entity);
+					TrinketsApi.getTrinket(newStack.getItem()).onEquip(newStack, ref, entity);
+
 					if (!this.getWorld().isClient) {
-						contentUpdates.put(newRef, copy);
+						contentUpdates.put(newRef, newStackCopy);
 						UUID uuid = SlotAttributes.getUuid(ref);
 
 						if (!oldStack.isEmpty()) {
@@ -200,11 +197,14 @@ public abstract class LivingEntityMixin extends Entity {
 							trinkets.addTemporaryModifiers(slotMap);
 						}
 					}
-
-					if (!ItemStack.areItemsEqual(oldStack, newStack)) {
-						TrinketsApi.getTrinket(oldStack.getItem()).onUnequip(oldStack, ref, entity);
-						TrinketsApi.getTrinket(newStack.getItem()).onEquip(newStack, ref, entity);
-					}
+				}
+				TrinketsApi.getTrinket(newStack.getItem()).tick(newStack, ref, entity);
+				ItemStack tickedStack = inventory.getStack(index);
+				// Avoid calling equip/unequip on stacks that mutate themselves
+				if (tickedStack.getItem() == newStackCopy.getItem()) {
+					newlyEquippedTrinkets.put(newRef, tickedStack.copy());
+				} else {
+					newlyEquippedTrinkets.put(newRef, newStackCopy);
 				}
 			});
 
