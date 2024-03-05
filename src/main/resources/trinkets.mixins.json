@@ -5,7 +5,6 @@
   "mixins": [
     "accessor.ScreenHandlerAccessor",
     "LivingEntityMixin",
-    "PlayerInventoryMixin",
     "PlayerManagerMixin",
     "PlayerScreenHandlerMixin",
     "ServerPlayNetworkHandlerMixin",

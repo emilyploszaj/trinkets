@@ -138,6 +138,14 @@ public abstract class LivingEntityMixin extends Entity {
 	private void tick(CallbackInfo info) {
 		LivingEntity entity = (LivingEntity) (Object) this;
 		TrinketsApi.getTrinketComponent(entity).ifPresent(trinkets -> {
+			// tick trinkets before updating client (is order important?)
+			// only perform if entity has not been removed
+			if (!entity.isRemoved()) {
+				trinkets.forEach((slotRef, itemStack) -> {
+					TrinketsApi.getTrinket(itemStack.getItem()).tick(itemStack, slotRef, entity);
+				});
+			}
+
 			Map<String, ItemStack> newlyEquippedTrinkets = new HashMap<>();
 			Map<String, ItemStack> contentUpdates = new HashMap<>();
 			trinkets.forEach((ref, stack) -> {
