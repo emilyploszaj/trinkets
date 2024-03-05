@@ -100,7 +100,7 @@ jar {
 publishing {
 	publications {
 		mavenJava(MavenPublication) {
-            artifact(sourcesJar) {
+            artifact(remapSourcesJar) {
                 builtBy remapSourcesJar
             }
             afterEvaluate {
