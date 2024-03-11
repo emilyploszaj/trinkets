@@ -7,8 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -181,7 +181,7 @@ public abstract class PlayerScreenHandlerMixin extends ScreenHandler implements 
 		return groupPos.get(group);
 	}
 
-	@NotNull
+	@Nonnull
 	@Override
 	public List<Point> trinkets$getSlotHeights(SlotGroup group) {
 		return slotHeights.getOrDefault(group, ImmutableList.of());
@@ -194,7 +194,7 @@ public abstract class PlayerScreenHandlerMixin extends ScreenHandler implements 
 		return i < points.size() ? points.get(i) : null;
 	}
 
-	@NotNull
+	@Nonnull
 	@Override
 	public List<SlotType> trinkets$getSlotTypes(SlotGroup group) {
 		return slotTypes.getOrDefault(group, ImmutableList.of());
