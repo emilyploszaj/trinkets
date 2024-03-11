@@ -45,8 +45,8 @@ dependencies {
 
 	// Mod dependencies
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-	modImplementation include("dev.onyxstudios.cardinal-components-api:cardinal-components-base:${project.cca_version}")
-	modImplementation include("dev.onyxstudios.cardinal-components-api:cardinal-components-entity:${project.cca_version}")
+	modApi include("dev.onyxstudios.cardinal-components-api:cardinal-components-base:${project.cca_version}")
+	modApi include("dev.onyxstudios.cardinal-components-api:cardinal-components-entity:${project.cca_version}")
 
 	// Optional mod dependencies
 	modCompileOnly "me.shedaniel:RoughlyEnoughItems-api-fabric:${project.rei_version}"
