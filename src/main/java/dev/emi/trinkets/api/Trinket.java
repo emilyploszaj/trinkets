@@ -14,6 +14,7 @@ import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
@@ -73,7 +74,7 @@ public interface Trinket {
 	 * @return Whether the stack can be unequipped
 	 */
 	default boolean canUnequip(ItemStack stack, SlotReference slot, LivingEntity entity) {
-		return !EnchantmentHelper.hasBindingCurse(stack);
+		return !EnchantmentHelper.hasBindingCurse(stack) || (entity instanceof PlayerEntity player && player.isCreative());
 	}
 
 	/**
@@ -121,7 +122,7 @@ public interface Trinket {
 	 * <p>
 	 * The default implementation works the same as breaking vanilla equipment, a sound is played and
 	 * particles are spawned based on the item
-	 * 
+	 *
 	 * @param stack The stack being broken
 	 * @param slot The slot the stack is being broken in
 	 * @param entity The entity that is breaking the stack
