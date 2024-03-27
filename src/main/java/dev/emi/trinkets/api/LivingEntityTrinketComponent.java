@@ -26,6 +26,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Pair;
 import net.minecraft.util.collection.DefaultedList;
 
@@ -189,6 +190,10 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 
 	@Override
 	public void readFromNbt(NbtCompound tag) {
+		if (!inventory.isEmpty()) {
+			inventory.clear();
+			update();
+		}
 		DefaultedList<ItemStack> dropped = DefaultedList.of();
 		for (String groupKey : tag.getKeys()) {
 			NbtCompound groupTag = tag.getCompound(groupKey);
@@ -254,6 +259,9 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 				}
 				inventory.clearCachedModifiers();
 			}
+		}
+		if (entity != null && entity.getWorld() instanceof ServerWorld) {
+			TrinketsApi.TRINKET_COMPONENT.sync(entity);
 		}
 	}
 
