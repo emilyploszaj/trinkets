@@ -9,16 +9,19 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 
 import dev.emi.trinkets.mixin.accessor.LivingEntityAccessor;
+import java.util.function.Consumer;
 import net.fabricmc.fabric.api.util.NbtType;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
+import net.minecraft.item.Equipment;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.registry.Registries;
+import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.Identifier;
 
 public interface Trinket {
@@ -27,7 +30,7 @@ public interface Trinket {
 	 * Called every tick on the client and server side
 	 *
 	 * @param stack The stack being ticked
-	 * @param slot The slot the stack is equipped to
+	 * @param slot The slot the stack is ticking in
 	 * @param entity The entity wearing the stack
 	 */
 	default void tick(ItemStack stack, SlotReference slot, LivingEntity entity) {
@@ -75,6 +78,30 @@ public interface Trinket {
 	 */
 	default boolean canUnequip(ItemStack stack, SlotReference slot, LivingEntity entity) {
 		return !EnchantmentHelper.hasBindingCurse(stack) || (entity instanceof PlayerEntity player && player.isCreative());
+	}
+
+	/**
+	 * Determines whether a trinket can automatically attempt to equip into the first available
+	 * slot when used
+	 *
+	 * @param stack The stack being equipped
+	 * @param entity The entity that is using the stack
+	 * @return Whether the stack can be equipped from use
+	 */
+	default boolean canEquipFromUse(ItemStack stack, LivingEntity entity) {
+		return false;
+	}
+
+	/**
+	 * Determines the equip sound of a trinket
+	 *
+	 * @param stack The stack for the equip sound
+	 * @param slot The slot the stack is being equipped to
+	 * @param entity The entity that is equipping the stack
+	 * @return The {@link SoundEvent} to play for equipping
+	 */
+	default SoundEvent getEquipSound(ItemStack stack, SlotReference slot, LivingEntity entity) {
+		return stack.getItem() instanceof Equipment eq ? eq.getEquipSound() : null;
 	}
 
 	/**

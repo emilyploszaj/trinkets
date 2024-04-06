@@ -5,6 +5,11 @@ import static com.mojang.brigadier.arguments.StringArgumentType.string;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
+import dev.emi.trinkets.api.Trinket;
+import dev.emi.trinkets.api.TrinketItem;
+import net.fabricmc.fabric.api.event.player.UseItemCallback;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.TypedActionResult;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -45,6 +50,16 @@ public class TrinketsMain implements ModInitializer, EntityComponentInitializer 
 		resourceManagerHelper.registerReloadListener(EntitySlotLoader.SERVER);
 		ServerLifecycleEvents.END_DATA_PACK_RELOAD.register((server, serverResourceManager, success)
 				-> EntitySlotLoader.SERVER.sync(server.getPlayerManager().getPlayerList()));
+		UseItemCallback.EVENT.register((player, world, hand) -> {
+			ItemStack stack = player.getStackInHand(hand);
+			Trinket trinket = TrinketsApi.getTrinket(stack.getItem());
+			if (trinket.canEquipFromUse(stack, player)) {
+				if (TrinketItem.equipItem(player, stack)) {
+					return TypedActionResult.success(stack);
+				}
+			}
+			return TypedActionResult.pass(stack);
+		});
 		CommandRegistrationCallback.EVENT.register((dispatcher, registry, env) -> 
 			dispatcher.register(literal("trinkets")
 				.requires(source -> source.hasPermissionLevel(2))
