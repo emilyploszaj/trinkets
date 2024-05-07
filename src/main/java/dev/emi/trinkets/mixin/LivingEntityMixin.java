@@ -9,6 +9,8 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 
+import net.minecraft.entity.attribute.EntityAttributeInstance;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.tag.ItemTags;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -163,10 +165,10 @@ public abstract class LivingEntityMixin extends Entity {
 
 						if (!oldStack.isEmpty()) {
 							Trinket trinket = TrinketsApi.getTrinket(oldStack.getItem());
-							Multimap<EntityAttribute, EntityAttributeModifier> map = trinket.getModifiers(oldStack, ref, entity, uuid);
+							Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> map = trinket.getModifiers(oldStack, ref, entity, uuid);
 							Multimap<String, EntityAttributeModifier> slotMap = HashMultimap.create();
 							Set<SlotEntityAttribute> toRemove = Sets.newHashSet();
-							for (EntityAttribute attr : map.keySet()) {
+							for (var attr : map.keySet()) {
 								if (attr instanceof SlotEntityAttribute slotAttr) {
 									slotMap.putAll(slotAttr.slot, map.get(attr));
 									toRemove.add(slotAttr);
@@ -175,7 +177,14 @@ public abstract class LivingEntityMixin extends Entity {
 							for (SlotEntityAttribute attr : toRemove) {
 								map.removeAll(attr);
 							}
-							this.getAttributes().removeModifiers(map);
+							//this.getAttributes().removeModifiers(map);
+							map.forEach((attribute, modifiers) -> {
+								EntityAttributeInstance entityAttributeInstance = (EntityAttributeInstance)this.getAttributes().getCustomInstance(attribute);
+								if (entityAttributeInstance != null) {
+									modifiers.forEach(modifier -> entityAttributeInstance.removeModifier(modifier.getId()));
+								}
+							});
+
 							trinkets.removeModifiers(slotMap);
 						}
 

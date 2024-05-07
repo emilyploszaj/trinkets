@@ -10,11 +10,14 @@ import dev.emi.trinkets.api.SlotType;
 import dev.emi.trinkets.api.Trinket;
 import dev.emi.trinkets.api.TrinketInventory;
 import dev.emi.trinkets.api.TrinketsApi;
-import net.minecraft.client.item.TooltipContext;
+import net.minecraft.client.item.TooltipType;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.AttributeModifiersComponent;
 import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -39,10 +42,10 @@ import java.util.Set;
  */
 @Mixin(ItemStack.class)
 public abstract class ItemStackMixin {
-	
-	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;isSectionVisible(ILnet/minecraft/item/ItemStack$TooltipSection;)Z",
-		ordinal = 4, shift = Shift.BEFORE), method = "getTooltip", locals = LocalCapture.CAPTURE_FAILHARD)
-	private void getTooltip(PlayerEntity player, TooltipContext context, CallbackInfoReturnable<List<Text>> info, List<Text> list) {
+
+
+	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;appendAttributeModifiersTooltip(Ljava/util/function/Consumer;Lnet/minecraft/entity/player/PlayerEntity;)V", shift = Shift.BEFORE), method = "getTooltip", locals = LocalCapture.CAPTURE_FAILHARD)
+	private void getTooltip(Item.TooltipContext context, PlayerEntity player, TooltipType tooltipType, CallbackInfoReturnable<List<Text>> cir, List<Text> list) {
 		TrinketsApi.getTrinketComponent(player).ifPresent(comp -> {
 			ItemStack self = (ItemStack) (Object) this;
 			boolean canEquipAnywhere = true;
@@ -109,22 +112,24 @@ public abstract class ItemStackMixin {
 				}
 			}
 
-			if (canEquipAnywhere && slotCount > 1) {
-				list.add(Text.translatable("trinkets.tooltip.slots.any").formatted(Formatting.GRAY));
-			} else if (slots.size() > 1) {
-				list.add(Text.translatable("trinkets.tooltip.slots.list").formatted(Formatting.GRAY));
-				for (SlotType type : slots) {
-					list.add(type.getTranslation().formatted(Formatting.BLUE));
-				}
-			} else if (slots.size() == 1) {
-				// Should only run once
-				for (SlotType type : slots) {
-					list.add(Text.translatable("trinkets.tooltip.slots.single",
-							type.getTranslation().formatted(Formatting.BLUE)).formatted(Formatting.GRAY));
+			if (!self.contains(DataComponentTypes.HIDE_ADDITIONAL_TOOLTIP)) {
+				if (canEquipAnywhere && slotCount > 1) {
+					list.add(Text.translatable("trinkets.tooltip.slots.any").formatted(Formatting.GRAY));
+				} else if (slots.size() > 1) {
+					list.add(Text.translatable("trinkets.tooltip.slots.list").formatted(Formatting.GRAY));
+					for (SlotType type : slots) {
+						list.add(type.getTranslation().formatted(Formatting.BLUE));
+					}
+				} else if (slots.size() == 1) {
+					// Should only run once
+					for (SlotType type : slots) {
+						list.add(Text.translatable("trinkets.tooltip.slots.single",
+								type.getTranslation().formatted(Formatting.BLUE)).formatted(Formatting.GRAY));
+					}
 				}
 			}
 
-			if (modifiers.size() > 0) {
+			if (!modifiers.isEmpty() && self.getOrDefault(DataComponentTypes.ATTRIBUTE_MODIFIERS, AttributeModifiersComponent.DEFAULT).showInTooltip()) {
 				if (allModifiersSame) {
 					if (defaultModifier != null && !defaultModifier.isEmpty()) {
 						list.add(Text.translatable("trinkets.tooltip.attributes.all").formatted(Formatting.GRAY));
@@ -147,9 +152,9 @@ public abstract class ItemStackMixin {
 			for (Map.Entry<EntityAttribute, EntityAttributeModifier> entry : map.entries()) {
 				EntityAttribute attribute = entry.getKey();
 				EntityAttributeModifier modifier = entry.getValue();
-				double g = modifier.getValue();
+				double g = modifier.value();
 
-				if (modifier.getOperation() != EntityAttributeModifier.Operation.MULTIPLY_BASE && modifier.getOperation() != EntityAttributeModifier.Operation.MULTIPLY_TOTAL) {
+				if (modifier.operation() != EntityAttributeModifier.Operation.ADD_MULTIPLIED_BASE && modifier.operation() != EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL) {
 					if (entry.getKey().equals(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE)) {
 						g *= 10.0D;
 					}
@@ -162,12 +167,12 @@ public abstract class ItemStackMixin {
 					text = Text.translatable("trinkets.tooltip.attributes.slots", text);
 				}
 				if (g > 0.0D) {
-					list.add(Text.translatable("attribute.modifier.plus." + modifier.getOperation().getId(),
-						ItemStack.MODIFIER_FORMAT.format(g), text).formatted(Formatting.BLUE));
+					list.add(Text.translatable("attribute.modifier.plus." + modifier.operation().getId(),
+							AttributeModifiersComponent.DECIMAL_FORMAT.format(g), text).formatted(Formatting.BLUE));
 				} else if (g < 0.0D) {
 					g *= -1.0D;
-					list.add(Text.translatable("attribute.modifier.take." + modifier.getOperation().getId(),
-						ItemStack.MODIFIER_FORMAT.format(g), text).formatted(Formatting.RED));
+					list.add(Text.translatable("attribute.modifier.take." + modifier.operation().getId(),
+							AttributeModifiersComponent.DECIMAL_FORMAT.format(g), text).formatted(Formatting.RED));
 				}
 			}
 		}

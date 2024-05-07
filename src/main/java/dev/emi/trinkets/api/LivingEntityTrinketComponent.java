@@ -15,7 +15,7 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
 import dev.emi.trinkets.TrinketPlayerScreenHandler;
-import dev.onyxstudios.cca.api.v3.component.sync.AutoSyncedComponent;
+import org.ladysnake.cca.api.v3.component.sync.AutoSyncedComponent;
 import net.fabricmc.fabric.api.util.NbtType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.EntityAttribute;

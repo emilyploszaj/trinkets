@@ -21,6 +21,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.Identifier;
 
@@ -113,9 +114,9 @@ public interface Trinket {
 	 *
 	 * @param uuid The UUID to use for creating attributes
 	 */
-	default Multimap<EntityAttribute, EntityAttributeModifier> getModifiers(ItemStack stack,
-			SlotReference slot, LivingEntity entity, UUID uuid) {
-		Multimap<EntityAttribute, EntityAttributeModifier> map = Multimaps.newMultimap(Maps.newLinkedHashMap(), ArrayList::new);
+	default Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> getModifiers(ItemStack stack,
+																						   SlotReference slot, LivingEntity entity, UUID uuid) {
+		Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> map = Multimaps.newMultimap(Maps.newLinkedHashMap(), ArrayList::new);
 
 		if (stack.hasNbt() && stack.getNbt().contains("TrinketAttributeModifiers", 9)) {
 			NbtList list = stack.getNbt().getList("TrinketAttributeModifiers", 10);
