@@ -15,6 +15,9 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
 import dev.emi.trinkets.TrinketPlayerScreenHandler;
+import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.registry.entry.RegistryEntry;
 import org.ladysnake.cca.api.v3.component.sync.AutoSyncedComponent;
 import net.fabricmc.fabric.api.util.NbtType;
 import net.minecraft.entity.LivingEntity;
@@ -159,7 +162,7 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 				if (groupInv != null) {
 					TrinketInventory inv = groupInv.get(slot);
 					if (inv != null) {
-						inv.removeModifier(modifier.getId());
+						inv.removeModifier(modifier.uuid());
 					}
 				}
 			}
@@ -188,7 +191,7 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 	}
 
 	@Override
-	public void readFromNbt(NbtCompound tag) {
+	public void readFromNbt(NbtCompound tag, RegistryWrapper.WrapperLookup lookup) {
 		DefaultedList<ItemStack> dropped = DefaultedList.of();
 		for (String groupKey : tag.getKeys()) {
 			NbtCompound groupTag = tag.getCompound(groupKey);
@@ -206,7 +209,7 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 
 						for (int i = 0; i < list.size(); i++) {
 							NbtCompound c = list.getCompound(i);
-							ItemStack stack = ItemStack.fromNbt(c);
+							ItemStack stack = ItemStack.fromNbtOrEmpty(lookup, c);
 							if (inv != null && i < inv.size()) {
 								inv.setStack(i, stack);
 							} else {
@@ -220,7 +223,7 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 						NbtList list = slotTag.getList("Items", NbtType.COMPOUND);
 						for (int i = 0; i < list.size(); i++) {
 							NbtCompound c = list.getCompound(i);
-							dropped.add(ItemStack.fromNbt(c));
+							dropped.add(ItemStack.fromNbtOrEmpty(lookup, c));
 						}
 					}
 				}
@@ -234,9 +237,9 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 			if (!stack.isEmpty()) {
 				UUID uuid = SlotAttributes.getUuid(ref);
 				Trinket trinket = TrinketsApi.getTrinket(stack.getItem());
-				Multimap<EntityAttribute, EntityAttributeModifier> map = trinket.getModifiers(stack, ref, entity, uuid);
-				for (EntityAttribute entityAttribute : map.keySet()) {
-					if (entityAttribute instanceof SlotAttributes.SlotEntityAttribute slotEntityAttribute) {
+				Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> map = trinket.getModifiers(stack, ref, entity, uuid);
+				for (RegistryEntry<EntityAttribute> entityAttribute : map.keySet()) {
+					if (entityAttribute.hasKeyAndValue() && entityAttribute.value() instanceof SlotAttributes.SlotEntityAttribute slotEntityAttribute) {
 						slotMap.putAll(slotEntityAttribute.slot, map.get(entityAttribute));
 					}
 				}
@@ -258,7 +261,7 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 	}
 
 	@Override
-	public void applySyncPacket(PacketByteBuf buf) {
+	public void applySyncPacket(RegistryByteBuf buf) {
 		NbtCompound tag = buf.readNbt();
 
 		if (tag != null) {
@@ -282,7 +285,7 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 
 							for (int i = 0; i < list.size(); i++) {
 								NbtCompound c = list.getCompound(i);
-								ItemStack stack = ItemStack.fromNbt(c);
+								ItemStack stack = ItemStack.fromNbtOrEmpty(buf.getRegistryManager(), c);
 								if (inv != null && i < inv.size()) {
 									inv.setStack(i, stack);
 								}
@@ -299,7 +302,7 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 	}
 
 	@Override
-	public void writeToNbt(NbtCompound tag) {
+	public void writeToNbt(NbtCompound tag, RegistryWrapper.WrapperLookup lookup) {
 		for (Map.Entry<String, Map<String, TrinketInventory>> group : this.getInventory().entrySet()) {
 			NbtCompound groupTag = new NbtCompound();
 			for (Map.Entry<String, TrinketInventory> slot : group.getValue().entrySet()) {
@@ -307,7 +310,7 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 				NbtList list = new NbtList();
 				TrinketInventory inv = slot.getValue();
 				for (int i = 0; i < inv.size(); i++) {
-					NbtCompound c = inv.getStack(i).writeNbt(new NbtCompound());
+					NbtCompound c = (NbtCompound) inv.getStack(i).encodeAllowEmpty(lookup);
 					list.add(c);
 				}
 				slotTag.put("Metadata", this.syncing ? inv.getSyncTag() : inv.toTag());
@@ -319,10 +322,10 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 	}
 
 	@Override
-	public void writeSyncPacket(PacketByteBuf buf, ServerPlayerEntity recipient) {
+	public void writeSyncPacket(RegistryByteBuf buf, ServerPlayerEntity recipient) {
 		this.syncing = true;
 		NbtCompound tag = new NbtCompound();
-		this.writeToNbt(tag);
+		this.writeToNbt(tag, buf.getRegistryManager());
 		this.syncing = false;
 		buf.writeNbt(tag);
 	}

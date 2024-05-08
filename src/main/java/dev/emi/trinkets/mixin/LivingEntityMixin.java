@@ -1,17 +1,16 @@
 package dev.emi.trinkets.mixin;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 
+import dev.emi.trinkets.payload.SyncInventoryPayload;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.tag.ItemTags;
+import org.apache.commons.lang3.tuple.Triple;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -136,7 +135,8 @@ public abstract class LivingEntityMixin extends Entity {
 		}
 	}
 
-	@Inject(at = @At("TAIL"), method = "tick")
+	@SuppressWarnings("UnreachableCode")
+    @Inject(at = @At("TAIL"), method = "tick")
 	private void tick(CallbackInfo info) {
 		LivingEntity entity = (LivingEntity) (Object) this;
 		if (entity.isRemoved()) {
@@ -167,21 +167,21 @@ public abstract class LivingEntityMixin extends Entity {
 							Trinket trinket = TrinketsApi.getTrinket(oldStack.getItem());
 							Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> map = trinket.getModifiers(oldStack, ref, entity, uuid);
 							Multimap<String, EntityAttributeModifier> slotMap = HashMultimap.create();
-							Set<SlotEntityAttribute> toRemove = Sets.newHashSet();
+							Set<RegistryEntry<EntityAttribute>> toRemove = Sets.newHashSet();
 							for (var attr : map.keySet()) {
-								if (attr instanceof SlotEntityAttribute slotAttr) {
+								if (attr.hasKeyAndValue() && attr.value() instanceof SlotEntityAttribute slotAttr) {
 									slotMap.putAll(slotAttr.slot, map.get(attr));
-									toRemove.add(slotAttr);
+									toRemove.add(attr);
 								}
 							}
-							for (SlotEntityAttribute attr : toRemove) {
+							for (RegistryEntry<EntityAttribute> attr : toRemove) {
 								map.removeAll(attr);
 							}
 							//this.getAttributes().removeModifiers(map);
-							map.forEach((attribute, modifiers) -> {
-								EntityAttributeInstance entityAttributeInstance = (EntityAttributeInstance)this.getAttributes().getCustomInstance(attribute);
+							map.asMap().forEach((attribute, modifiers) -> {
+								EntityAttributeInstance entityAttributeInstance = this.getAttributes().getCustomInstance(attribute);
 								if (entityAttributeInstance != null) {
-									modifiers.forEach(modifier -> entityAttributeInstance.removeModifier(modifier.getId()));
+									modifiers.forEach(modifier -> entityAttributeInstance.removeModifier(modifier.uuid()));
 								}
 							});
 
@@ -190,19 +190,27 @@ public abstract class LivingEntityMixin extends Entity {
 
 						if (!newStack.isEmpty()) {
 							Trinket trinket = TrinketsApi.getTrinket(newStack.getItem());
-							Multimap<EntityAttribute, EntityAttributeModifier> map = trinket.getModifiers(newStack, ref, entity, uuid);
+							Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> map = trinket.getModifiers(newStack, ref, entity, uuid);
 							Multimap<String, EntityAttributeModifier> slotMap = HashMultimap.create();
-							Set<SlotEntityAttribute> toRemove = Sets.newHashSet();
-							for (EntityAttribute attr : map.keySet()) {
-								if (attr instanceof SlotEntityAttribute slotAttr) {
+							Set<RegistryEntry<EntityAttribute>> toRemove = Sets.newHashSet();
+							for (RegistryEntry<EntityAttribute> attr : map.keySet()) {
+								if (attr.hasKeyAndValue() && attr.value() instanceof SlotEntityAttribute slotAttr) {
 									slotMap.putAll(slotAttr.slot, map.get(attr));
-									toRemove.add(slotAttr);
+									toRemove.add(attr);
 								}
 							}
-							for (SlotEntityAttribute attr : toRemove) {
+							for (RegistryEntry<EntityAttribute> attr : toRemove) {
 								map.removeAll(attr);
 							}
-							this.getAttributes().addTemporaryModifiers(map);
+							//this.getAttributes().addTemporaryModifiers(map);
+							map.forEach((attribute, attributeModifier) -> {
+								EntityAttributeInstance entityAttributeInstance = this.getAttributes().getCustomInstance(attribute);
+								if (entityAttributeInstance != null) {
+									entityAttributeInstance.removeModifier(attributeModifier.uuid());
+									entityAttributeInstance.addTemporaryModifier(attributeModifier);
+								}
+
+							});
 							trinkets.addTemporaryModifiers(slotMap);
 						}
 					}
@@ -221,29 +229,19 @@ public abstract class LivingEntityMixin extends Entity {
 				Set<TrinketInventory> inventoriesToSend = trinkets.getTrackingUpdates();
 
 				if (!contentUpdates.isEmpty() || !inventoriesToSend.isEmpty()) {
-					PacketByteBuf buf = PacketByteBufs.create();
-					buf.writeInt(entity.getId());
-					NbtCompound tag = new NbtCompound();
+					var map = new HashMap<String, NbtCompound>();
 
 					for (TrinketInventory trinketInventory : inventoriesToSend) {
-						tag.put(trinketInventory.getSlotType().getGroup() + "/" + trinketInventory.getSlotType().getName(), trinketInventory.getSyncTag());
+						map.put(trinketInventory.getSlotType().getGroup() + '/' + trinketInventory.getSlotType().getName(), trinketInventory.getSyncTag());
 					}
-
-					buf.writeNbt(tag);
-					tag = new NbtCompound();
-
-					for (Map.Entry<String, ItemStack> entry : contentUpdates.entrySet()) {
-						tag.put(entry.getKey(), entry.getValue().writeNbt(new NbtCompound()));
-					}
-
-					buf.writeNbt(tag);
+					var packet = new SyncInventoryPayload(this.getId(), contentUpdates, map);
 
 					for (ServerPlayerEntity player : PlayerLookup.tracking(entity)) {
-						ServerPlayNetworking.send(player, TrinketsNetwork.SYNC_INVENTORY, buf);
+						ServerPlayNetworking.send(player, packet);
 					}
 
 					if (entity instanceof ServerPlayerEntity serverPlayer) {
-						ServerPlayNetworking.send(serverPlayer, TrinketsNetwork.SYNC_INVENTORY, buf);
+						ServerPlayNetworking.send(serverPlayer, packet);
 
 						if (!inventoriesToSend.isEmpty()) {
 							((TrinketPlayerScreenHandler) serverPlayer.playerScreenHandler).trinkets$updateTrinketSlots(false);

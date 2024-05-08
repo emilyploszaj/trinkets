@@ -5,6 +5,8 @@ import com.mojang.datafixers.util.Function3;
 import dev.emi.trinkets.TrinketsMain;
 import dev.emi.trinkets.TrinketsNetwork;
 import dev.emi.trinkets.data.EntitySlotLoader;
+import dev.emi.trinkets.payload.BreakPayload;
+import net.minecraft.entity.EquipmentSlot;
 import org.ladysnake.cca.api.v3.component.ComponentKey;
 import org.ladysnake.cca.api.v3.component.ComponentRegistryV3;
 import io.netty.buffer.Unpooled;
@@ -65,19 +67,16 @@ public class TrinketsApi {
 
 	/**
 	 * Called to sync a trinket breaking event with clients. Should generally be
-	 * called in the callback of {@link ItemStack#damage(int, LivingEntity, Consumer)}
+	 * called in the callback of {@link ItemStack#damage(int, LivingEntity, EquipmentSlot)}
 	 */
 	public static void onTrinketBroken(ItemStack stack, SlotReference ref, LivingEntity entity) {
 		if (!entity.getWorld().isClient) {
-			PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
-			buf.writeInt(entity.getId());
-			buf.writeString(ref.inventory().getSlotType().getGroup() + "/" + ref.inventory().getSlotType().getName());
-			buf.writeInt(ref.index());
+			var packet = new BreakPayload(entity.getId(), ref.inventory().getSlotType().getGroup(), ref.inventory().getSlotType().getName(), ref.index());
 			if (entity instanceof ServerPlayerEntity player) {
-				ServerPlayNetworking.send(player, TrinketsNetwork.BREAK, buf);
+				ServerPlayNetworking.send(player, packet);
 			}
 			PlayerLookup.tracking(entity).forEach(watcher -> {
-				ServerPlayNetworking.send(watcher, TrinketsNetwork.BREAK, buf);
+				ServerPlayNetworking.send(watcher, packet);
 			});
 		}
 	}

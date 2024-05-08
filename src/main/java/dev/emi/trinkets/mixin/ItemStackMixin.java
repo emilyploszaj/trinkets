@@ -19,6 +19,7 @@ import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.spongepowered.asm.mixin.Mixin;
@@ -44,14 +45,15 @@ import java.util.Set;
 public abstract class ItemStackMixin {
 
 
-	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;appendAttributeModifiersTooltip(Ljava/util/function/Consumer;Lnet/minecraft/entity/player/PlayerEntity;)V", shift = Shift.BEFORE), method = "getTooltip", locals = LocalCapture.CAPTURE_FAILHARD)
+	@SuppressWarnings("UnreachableCode")
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;appendAttributeModifiersTooltip(Ljava/util/function/Consumer;Lnet/minecraft/entity/player/PlayerEntity;)V", shift = Shift.BEFORE), method = "getTooltip", locals = LocalCapture.CAPTURE_FAILHARD)
 	private void getTooltip(Item.TooltipContext context, PlayerEntity player, TooltipType tooltipType, CallbackInfoReturnable<List<Text>> cir, List<Text> list) {
 		TrinketsApi.getTrinketComponent(player).ifPresent(comp -> {
 			ItemStack self = (ItemStack) (Object) this;
-			boolean canEquipAnywhere = true;
+            boolean canEquipAnywhere = true;
 			Set<SlotType> slots = Sets.newHashSet();
-			Map<SlotType, Multimap<EntityAttribute, EntityAttributeModifier>> modifiers = Maps.newHashMap();
-			Multimap<EntityAttribute, EntityAttributeModifier> defaultModifier = null;
+            Map<SlotType, Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier>> modifiers = Maps.newHashMap();
+			Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> defaultModifier = null;
 			boolean allModifiersSame = true;
 			int slotCount = 0;
 
@@ -79,7 +81,7 @@ public abstract class ItemStackMixin {
 							}
 							Trinket trinket = TrinketsApi.getTrinket((self).getItem());
 
-							Multimap<EntityAttribute, EntityAttributeModifier> map =
+							Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> map =
 									trinket.getModifiers(self, ref, player, SlotAttributes.getUuid(ref));
 							
 							if (defaultModifier == null) {
@@ -147,10 +149,10 @@ public abstract class ItemStackMixin {
 	}
 
 	@Unique
-	private void addAttributes(List<Text> list, Multimap<EntityAttribute, EntityAttributeModifier> map) {
+	private void addAttributes(List<Text> list, Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> map) {
 		if (!map.isEmpty()) {
-			for (Map.Entry<EntityAttribute, EntityAttributeModifier> entry : map.entries()) {
-				EntityAttribute attribute = entry.getKey();
+			for (var entry : map.entries()) {
+				RegistryEntry<EntityAttribute> attribute = entry.getKey();
 				EntityAttributeModifier modifier = entry.getValue();
 				double g = modifier.value();
 
@@ -162,8 +164,8 @@ public abstract class ItemStackMixin {
 					g *= 100.0D;
 				}
 
-				Text text = Text.translatable(attribute.getTranslationKey());
-				if (attribute instanceof SlotAttributes.SlotEntityAttribute) {
+				Text text = Text.translatable(attribute.value().getTranslationKey());
+				if (attribute.hasKeyAndValue() && attribute.value() instanceof SlotAttributes.SlotEntityAttribute) {
 					text = Text.translatable("trinkets.tooltip.attributes.slots", text);
 				}
 				if (g > 0.0D) {
@@ -180,11 +182,11 @@ public abstract class ItemStackMixin {
 
 	// `equals` doesn't test thoroughly
 	@Unique
-	private boolean areMapsEqual(Multimap<EntityAttribute, EntityAttributeModifier> map1, Multimap<EntityAttribute, EntityAttributeModifier> map2) {
+	private boolean areMapsEqual(Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> map1, Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> map2) {
 		if (map1.size() != map2.size()) {
 			return false;
 		} else {
-			for (EntityAttribute attribute : map1.keySet()) {
+			for (var attribute : map1.keySet()) {
 				if (!map2.containsKey(attribute)) {
 					return false;
 				}
