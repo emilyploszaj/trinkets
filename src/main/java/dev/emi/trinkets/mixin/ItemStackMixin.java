@@ -46,13 +46,13 @@ public abstract class ItemStackMixin {
 
 
 	@SuppressWarnings("UnreachableCode")
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;appendAttributeModifiersTooltip(Ljava/util/function/Consumer;Lnet/minecraft/entity/player/PlayerEntity;)V", shift = Shift.BEFORE), method = "getTooltip", locals = LocalCapture.CAPTURE_FAILHARD)
+	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;appendAttributeModifiersTooltip(Ljava/util/function/Consumer;Lnet/minecraft/entity/player/PlayerEntity;)V", shift = Shift.BEFORE), method = "getTooltip", locals = LocalCapture.CAPTURE_FAILHARD)
 	private void getTooltip(Item.TooltipContext context, PlayerEntity player, TooltipType tooltipType, CallbackInfoReturnable<List<Text>> cir, List<Text> list) {
 		TrinketsApi.getTrinketComponent(player).ifPresent(comp -> {
 			ItemStack self = (ItemStack) (Object) this;
-            boolean canEquipAnywhere = true;
+			boolean canEquipAnywhere = true;
 			Set<SlotType> slots = Sets.newHashSet();
-            Map<SlotType, Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier>> modifiers = Maps.newHashMap();
+			Map<SlotType, Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier>> modifiers = Maps.newHashMap();
 			Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> defaultModifier = null;
 			boolean allModifiersSame = true;
 			int slotCount = 0;

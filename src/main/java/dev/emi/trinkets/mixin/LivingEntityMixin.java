@@ -136,7 +136,7 @@ public abstract class LivingEntityMixin extends Entity {
 	}
 
 	@SuppressWarnings("UnreachableCode")
-    @Inject(at = @At("TAIL"), method = "tick")
+	@Inject(at = @At("TAIL"), method = "tick")
 	private void tick(CallbackInfo info) {
 		LivingEntity entity = (LivingEntity) (Object) this;
 		if (entity.isRemoved()) {

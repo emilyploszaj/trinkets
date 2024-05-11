@@ -16,7 +16,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 @Mixin(ServerPlayNetworkHandler.class)
 public class ServerPlayNetworkHandlerMixin {
 	@Shadow
-    public ServerPlayerEntity player;
+	public ServerPlayerEntity player;
 	
 	@ModifyConstant(method = "onCreativeInventoryAction", constant = @Constant(intValue = 45))
 	public int modifyCreativeSlotMax(int value) {
