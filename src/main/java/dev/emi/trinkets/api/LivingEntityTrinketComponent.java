@@ -27,19 +27,18 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
-import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Pair;
 import net.minecraft.util.collection.DefaultedList;
+import org.ladysnake.cca.api.v3.entity.RespawnableComponent;
 
-public class LivingEntityTrinketComponent implements TrinketComponent, AutoSyncedComponent {
+public class LivingEntityTrinketComponent implements TrinketComponent, AutoSyncedComponent, RespawnableComponent {
 
 	public Map<String, Map<String, TrinketInventory>> inventory = new HashMap<>();
 	public Set<TrinketInventory> trackingUpdates = new HashSet<>();
 	public Map<String, SlotGroup> groups = new HashMap<>();
 	public int size;
 	public LivingEntity entity;
-
 	private boolean syncing;
 
 	public LivingEntityTrinketComponent(LivingEntity entity) {
@@ -328,6 +327,11 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 		this.writeToNbt(tag, buf.getRegistryManager());
 		this.syncing = false;
 		buf.writeNbt(tag);
+	}
+
+	@Override
+	public boolean shouldCopyForRespawn(boolean lossless, boolean keepInventory, boolean sameCharacter) {
+		return lossless || keepInventory;
 	}
 
 	@Override

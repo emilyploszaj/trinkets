@@ -53,6 +53,7 @@ import net.minecraft.world.GameRules;
  *
  * @author Emi
  */
+@SuppressWarnings("UnreachableCode")
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin extends Entity {
 	@Unique
@@ -135,7 +136,6 @@ public abstract class LivingEntityMixin extends Entity {
 		}
 	}
 
-	@SuppressWarnings("UnreachableCode")
 	@Inject(at = @At("TAIL"), method = "tick")
 	private void tick(CallbackInfo info) {
 		LivingEntity entity = (LivingEntity) (Object) this;
