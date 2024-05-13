@@ -12,15 +12,15 @@
     "datafixer.Schema1460Mixin"
   ],
   "client": [
+    "accessor.CreativeSlotAccessor",
+    "accessor.LivingEntityAccessor",
     "ClickableWidgetMixin",
     "ClientPlayNetworkHandlerMixin",
     "CreativeInventoryScreenMixin",
     "HandledScreenMixin",
     "InventoryScreenMixin",
     "ItemStackMixin",
-    "LivingEntityRendererMixin",
-    "accessor.CreativeSlotAccessor",
-    "accessor.LivingEntityAccessor"
+    "LivingEntityRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -6,11 +6,12 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 
+import dev.emi.trinkets.api.*;
 import dev.emi.trinkets.payload.SyncInventoryPayload;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.tag.ItemTags;
-import org.apache.commons.lang3.tuple.Triple;
+import net.minecraft.util.Pair;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -20,16 +21,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import dev.emi.trinkets.TrinketPlayerScreenHandler;
-import dev.emi.trinkets.TrinketsNetwork;
-import dev.emi.trinkets.api.SlotAttributes;
 import dev.emi.trinkets.api.SlotAttributes.SlotEntityAttribute;
-import dev.emi.trinkets.api.SlotType;
-import dev.emi.trinkets.api.Trinket;
 import dev.emi.trinkets.api.TrinketEnums.DropRule;
-import dev.emi.trinkets.api.TrinketInventory;
-import dev.emi.trinkets.api.TrinketsApi;
 import dev.emi.trinkets.api.event.TrinketDropCallback;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -43,7 +37,6 @@ import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.GameRules;
@@ -53,7 +46,6 @@ import net.minecraft.world.GameRules;
  *
  * @author Emi
  */
-@SuppressWarnings("UnreachableCode")
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin extends Entity {
 	@Unique
@@ -68,9 +60,9 @@ public abstract class LivingEntityMixin extends Entity {
 
 	@Inject(at = @At("HEAD"), method = "canFreeze", cancellable = true)
 	private void canFreeze(CallbackInfoReturnable<Boolean> cir) {
-		var component = TrinketsApi.getTrinketComponent((LivingEntity) (Object) this);
+        Optional<TrinketComponent> component = TrinketsApi.getTrinketComponent((LivingEntity) (Object) this);
 		if (component.isPresent()) {
-			for (var equipped : component.get().getAllEquipped()) {
+			for (Pair<SlotReference, ItemStack> equipped : component.get().getAllEquipped()) {
 				if (equipped.getRight().isIn(ItemTags.FREEZE_IMMUNE_WEARABLES)) {
 					cir.setReturnValue(false);
 					break;
@@ -168,7 +160,7 @@ public abstract class LivingEntityMixin extends Entity {
 							Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> map = trinket.getModifiers(oldStack, ref, entity, uuid);
 							Multimap<String, EntityAttributeModifier> slotMap = HashMultimap.create();
 							Set<RegistryEntry<EntityAttribute>> toRemove = Sets.newHashSet();
-							for (var attr : map.keySet()) {
+							for (RegistryEntry<EntityAttribute> attr : map.keySet()) {
 								if (attr.hasKeyAndValue() && attr.value() instanceof SlotEntityAttribute slotAttr) {
 									slotMap.putAll(slotAttr.slot, map.get(attr));
 									toRemove.add(attr);
@@ -229,12 +221,12 @@ public abstract class LivingEntityMixin extends Entity {
 				Set<TrinketInventory> inventoriesToSend = trinkets.getTrackingUpdates();
 
 				if (!contentUpdates.isEmpty() || !inventoriesToSend.isEmpty()) {
-					var map = new HashMap<String, NbtCompound>();
+                    Map<String, NbtCompound> map = new HashMap<>();
 
 					for (TrinketInventory trinketInventory : inventoriesToSend) {
-						map.put(trinketInventory.getSlotType().getGroup() + '/' + trinketInventory.getSlotType().getName(), trinketInventory.getSyncTag());
+						map.put(trinketInventory.getSlotType().getGroup() + "/" + trinketInventory.getSlotType().getName(), trinketInventory.getSyncTag());
 					}
-					var packet = new SyncInventoryPayload(this.getId(), contentUpdates, map);
+                    SyncInventoryPayload packet = new SyncInventoryPayload(this.getId(), contentUpdates, map);
 
 					for (ServerPlayerEntity player : PlayerLookup.tracking(entity)) {
 						ServerPlayNetworking.send(player, packet);

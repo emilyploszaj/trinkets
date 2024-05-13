@@ -18,7 +18,7 @@ public class SlotAttributes {
 	 * Adds an Entity Attribute Nodifier for slot count to the provided multimap
 	 */
 	public static void addSlotModifier(Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> map, String slot, UUID uuid, double amount,
-									   EntityAttributeModifier.Operation operation) {
+			EntityAttributeModifier.Operation operation) {
 		CACHED_ATTRIBUTES.putIfAbsent(slot, RegistryEntry.of(new SlotEntityAttribute(slot)));
 		map.put(CACHED_ATTRIBUTES.get(slot), new EntityAttributeModifier(uuid, slot, amount, operation));
 	}

@@ -3,6 +3,7 @@ package dev.emi.trinkets.mixin;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
+import com.llamalad7.mixinextras.sugar.Local;
 import dev.emi.trinkets.TrinketSlot;
 import dev.emi.trinkets.api.SlotAttributes;
 import dev.emi.trinkets.api.SlotReference;
@@ -45,9 +46,8 @@ import java.util.Set;
 public abstract class ItemStackMixin {
 
 
-	@SuppressWarnings("UnreachableCode")
-	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;appendAttributeModifiersTooltip(Ljava/util/function/Consumer;Lnet/minecraft/entity/player/PlayerEntity;)V", shift = Shift.BEFORE), method = "getTooltip", locals = LocalCapture.CAPTURE_FAILHARD)
-	private void getTooltip(Item.TooltipContext context, PlayerEntity player, TooltipType tooltipType, CallbackInfoReturnable<List<Text>> cir, List<Text> list) {
+	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;appendAttributeModifiersTooltip(Ljava/util/function/Consumer;Lnet/minecraft/entity/player/PlayerEntity;)V", shift = Shift.BEFORE), method = "getTooltip")
+	private void getTooltip(Item.TooltipContext context, PlayerEntity player, TooltipType tooltipType, CallbackInfoReturnable<List<Text>> cir, @Local(ordinal = 0) List<Text> list) {
 		TrinketsApi.getTrinketComponent(player).ifPresent(comp -> {
 			ItemStack self = (ItemStack) (Object) this;
 			boolean canEquipAnywhere = true;
@@ -91,7 +91,7 @@ public abstract class ItemStackMixin {
 							}
 
 							boolean duplicate = false;
-							for (var entry : modifiers.entrySet()) {
+							for (Map.Entry<SlotType, Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier>> entry : modifiers.entrySet()) {
 								if (entry.getKey().getTranslation().getString().equals(slotType.getTranslation().getString())) {
 									if (areMapsEqual(entry.getValue(), map)) {
 										duplicate = true;
@@ -151,7 +151,7 @@ public abstract class ItemStackMixin {
 	@Unique
 	private void addAttributes(List<Text> list, Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> map) {
 		if (!map.isEmpty()) {
-			for (var entry : map.entries()) {
+			for (Map.Entry<RegistryEntry<EntityAttribute>, EntityAttributeModifier> entry : map.entries()) {
 				RegistryEntry<EntityAttribute> attribute = entry.getKey();
 				EntityAttributeModifier modifier = entry.getValue();
 				double g = modifier.value();
@@ -186,7 +186,7 @@ public abstract class ItemStackMixin {
 		if (map1.size() != map2.size()) {
 			return false;
 		} else {
-			for (var attribute : map1.keySet()) {
+			for (RegistryEntry<EntityAttribute> attribute : map1.keySet()) {
 				if (!map2.containsKey(attribute)) {
 					return false;
 				}

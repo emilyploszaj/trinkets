@@ -23,8 +23,10 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.random.Random;
 
 public interface Trinket {
 
@@ -115,8 +117,7 @@ public interface Trinket {
 	 *
 	 * @param uuid The UUID to use for creating attributes
 	 */
-	default Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> getModifiers(ItemStack stack,
-																						   SlotReference slot, LivingEntity entity, UUID uuid) {
+	default Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> getModifiers(ItemStack stack, SlotReference slot, LivingEntity entity, UUID uuid) {
 		Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> map = Multimaps.newMultimap(Maps.newLinkedHashMap(), ArrayList::new);
 
 		if (stack.contains(TrinketsAttributeModifiersComponent.TYPE)) {
@@ -131,7 +132,7 @@ public interface Trinket {
 
 	/**
 	 * Called by Trinkets when a trinket is broken on the client if {@link TrinketsApi#onTrinketBroken}
-	 * is called by the consumer in {@link ItemStack#damage(int, LivingEntity, EquipmentSlot)} server side
+	 * is called by the consumer in {@link ItemStack#damage(int, Random, ServerPlayerEntity, Runnable)}  server side
 	 * <p>
 	 * The default implementation works the same as breaking vanilla equipment, a sound is played and
 	 * particles are spawned based on the item

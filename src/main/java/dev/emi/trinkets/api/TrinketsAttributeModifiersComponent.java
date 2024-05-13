@@ -20,10 +20,12 @@ import net.minecraft.registry.entry.RegistryEntry;
 public record TrinketsAttributeModifiersComponent(List<Entry> modifiers, boolean showInTooltip) {
 	public static final TrinketsAttributeModifiersComponent DEFAULT = new TrinketsAttributeModifiersComponent(List.of(), true);
 	private static final Codec<TrinketsAttributeModifiersComponent> BASE_CODEC = RecordCodecBuilder.create((instance) -> {
-		return instance.group(Entry.CODEC.listOf().fieldOf("modifiers").forGetter(TrinketsAttributeModifiersComponent::modifiers), Codec.BOOL.optionalFieldOf("show_in_tooltip", true).forGetter(TrinketsAttributeModifiersComponent::showInTooltip)).apply(instance, TrinketsAttributeModifiersComponent::new);
+		return instance.group(
+						Entry.CODEC.listOf().fieldOf("modifiers").forGetter(TrinketsAttributeModifiersComponent::modifiers),
+						Codec.BOOL.optionalFieldOf("show_in_tooltip", true).forGetter(TrinketsAttributeModifiersComponent::showInTooltip)
+				).apply(instance, TrinketsAttributeModifiersComponent::new);
 	});
-	public static final Codec<TrinketsAttributeModifiersComponent> CODEC = Codec.withAlternative(BASE_CODEC,
-			Entry.CODEC.listOf(), (attributeModifiers) -> {
+	public static final Codec<TrinketsAttributeModifiersComponent> CODEC = Codec.withAlternative(BASE_CODEC, Entry.CODEC.listOf(), (attributeModifiers) -> {
 		return new TrinketsAttributeModifiersComponent(attributeModifiers, true);
 	});
 

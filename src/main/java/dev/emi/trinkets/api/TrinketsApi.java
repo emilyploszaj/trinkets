@@ -7,6 +7,7 @@ import dev.emi.trinkets.TrinketsNetwork;
 import dev.emi.trinkets.data.EntitySlotLoader;
 import dev.emi.trinkets.payload.BreakPayload;
 import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.util.math.random.Random;
 import org.ladysnake.cca.api.v3.component.ComponentKey;
 import org.ladysnake.cca.api.v3.component.ComponentRegistryV3;
 import io.netty.buffer.Unpooled;
@@ -67,7 +68,7 @@ public class TrinketsApi {
 
 	/**
 	 * Called to sync a trinket breaking event with clients. Should generally be
-	 * called in the callback of {@link ItemStack#damage(int, LivingEntity, EquipmentSlot)}
+	 * called in the callback of {@link ItemStack#damage(int, Random, ServerPlayerEntity, Runnable)}
 	 */
 	public static void onTrinketBroken(ItemStack stack, SlotReference ref, LivingEntity entity) {
 		if (!entity.getWorld().isClient) {
