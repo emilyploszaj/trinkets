@@ -1,12 +1,22 @@
 package dev.emi.trinkets.mixin;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 
-import dev.emi.trinkets.api.*;
+import dev.emi.trinkets.api.SlotAttributes;
+import dev.emi.trinkets.api.SlotReference;
+import dev.emi.trinkets.api.SlotType;
+import dev.emi.trinkets.api.Trinket;
+import dev.emi.trinkets.api.TrinketComponent;
+import dev.emi.trinkets.api.TrinketInventory;
+import dev.emi.trinkets.api.TrinketsApi;
 import dev.emi.trinkets.payload.SyncInventoryPayload;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.registry.entry.RegistryEntry;

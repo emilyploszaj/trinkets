@@ -132,7 +132,7 @@ public interface Trinket {
 
 	/**
 	 * Called by Trinkets when a trinket is broken on the client if {@link TrinketsApi#onTrinketBroken}
-	 * is called by the consumer in {@link ItemStack#damage(int, Random, ServerPlayerEntity, Runnable)}  server side
+	 * is called by the consumer in {@link ItemStack#damage(int, Random, ServerPlayerEntity, Runnable)} server side
 	 * <p>
 	 * The default implementation works the same as breaking vanilla equipment, a sound is played and
 	 * particles are spawned based on the item

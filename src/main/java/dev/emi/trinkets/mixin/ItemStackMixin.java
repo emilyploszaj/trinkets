@@ -47,7 +47,7 @@ public abstract class ItemStackMixin {
 
 
 	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;appendAttributeModifiersTooltip(Ljava/util/function/Consumer;Lnet/minecraft/entity/player/PlayerEntity;)V", shift = Shift.BEFORE), method = "getTooltip")
-	private void getTooltip(Item.TooltipContext context, PlayerEntity player, TooltipType tooltipType, CallbackInfoReturnable<List<Text>> cir, @Local(ordinal = 0) List<Text> list) {
+	private void getTooltip(Item.TooltipContext context, PlayerEntity player, TooltipType tooltipType, CallbackInfoReturnable<List<Text>> info, @Local(ordinal = 0) List<Text> list) {
 		TrinketsApi.getTrinketComponent(player).ifPresent(comp -> {
 			ItemStack self = (ItemStack) (Object) this;
 			boolean canEquipAnywhere = true;
