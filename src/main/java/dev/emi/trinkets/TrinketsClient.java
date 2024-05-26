@@ -9,6 +9,7 @@ import dev.emi.trinkets.api.Trinket;
 import dev.emi.trinkets.data.EntitySlotLoader;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.Entity;
@@ -29,7 +30,8 @@ public class TrinketsClient implements ClientModInitializer {
 	@Override
 	public void onInitializeClient() {
 		ClientPlayNetworking.registerGlobalReceiver(TrinketsNetwork.SYNC_INVENTORY, (payload, context) -> {
-			Entity entity = context.client().world.getEntityById(payload.entityId());
+			MinecraftClient client = context.client();
+			Entity entity = client.world.getEntityById(payload.entityId());
 			if (entity instanceof LivingEntity) {
 				TrinketsApi.getTrinketComponent((LivingEntity) entity).ifPresent(trinkets -> {
 					for (Map.Entry<String, NbtCompound> entry : payload.inventoryUpdates().entrySet()) {
@@ -76,7 +78,8 @@ public class TrinketsClient implements ClientModInitializer {
 			if (player != null) {
 				((TrinketPlayerScreenHandler) player.playerScreenHandler).trinkets$updateTrinketSlots(true);
 
-				if (context.client().currentScreen instanceof TrinketScreen trinketScreen) {
+				MinecraftClient client = context.client();
+				if (client.currentScreen instanceof TrinketScreen trinketScreen) {
 					trinketScreen.trinkets$updateTrinketSlots();
 				}
 
@@ -88,7 +91,8 @@ public class TrinketsClient implements ClientModInitializer {
 		});
 		ClientPlayNetworking.registerGlobalReceiver(TrinketsNetwork.BREAK, (payload, context) -> {
 
-			Entity e = context.client().world.getEntityById(payload.entityId());
+			MinecraftClient client = context.client();
+			Entity e = client.world.getEntityById(payload.entityId());
 			if (e instanceof LivingEntity entity) {
 				TrinketsApi.getTrinketComponent(entity).ifPresent(comp -> {
 					var groupMap = comp.getInventory().get(payload.group());
