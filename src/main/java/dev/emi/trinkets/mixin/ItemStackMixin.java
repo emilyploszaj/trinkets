@@ -3,6 +3,7 @@ package dev.emi.trinkets.mixin;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
+import com.llamalad7.mixinextras.sugar.Local;
 import dev.emi.trinkets.TrinketSlot;
 import dev.emi.trinkets.api.SlotAttributes;
 import dev.emi.trinkets.api.SlotReference;
@@ -10,12 +11,16 @@ import dev.emi.trinkets.api.SlotType;
 import dev.emi.trinkets.api.Trinket;
 import dev.emi.trinkets.api.TrinketInventory;
 import dev.emi.trinkets.api.TrinketsApi;
-import net.minecraft.client.item.TooltipContext;
+import net.minecraft.client.item.TooltipType;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.AttributeModifiersComponent;
 import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.spongepowered.asm.mixin.Mixin;
@@ -39,16 +44,16 @@ import java.util.Set;
  */
 @Mixin(ItemStack.class)
 public abstract class ItemStackMixin {
-	
-	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;isSectionVisible(ILnet/minecraft/item/ItemStack$TooltipSection;)Z",
-		ordinal = 4, shift = Shift.BEFORE), method = "getTooltip", locals = LocalCapture.CAPTURE_FAILHARD)
-	private void getTooltip(PlayerEntity player, TooltipContext context, CallbackInfoReturnable<List<Text>> info, List<Text> list) {
+
+
+	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;appendAttributeModifiersTooltip(Ljava/util/function/Consumer;Lnet/minecraft/entity/player/PlayerEntity;)V", shift = Shift.BEFORE), method = "getTooltip")
+	private void getTooltip(Item.TooltipContext context, PlayerEntity player, TooltipType tooltipType, CallbackInfoReturnable<List<Text>> info, @Local(ordinal = 0) List<Text> list) {
 		TrinketsApi.getTrinketComponent(player).ifPresent(comp -> {
 			ItemStack self = (ItemStack) (Object) this;
 			boolean canEquipAnywhere = true;
 			Set<SlotType> slots = Sets.newHashSet();
-			Map<SlotType, Multimap<EntityAttribute, EntityAttributeModifier>> modifiers = Maps.newHashMap();
-			Multimap<EntityAttribute, EntityAttributeModifier> defaultModifier = null;
+			Map<SlotType, Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier>> modifiers = Maps.newHashMap();
+			Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> defaultModifier = null;
 			boolean allModifiersSame = true;
 			int slotCount = 0;
 
@@ -76,7 +81,7 @@ public abstract class ItemStackMixin {
 							}
 							Trinket trinket = TrinketsApi.getTrinket((self).getItem());
 
-							Multimap<EntityAttribute, EntityAttributeModifier> map =
+							Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> map =
 									trinket.getModifiers(self, ref, player, SlotAttributes.getUuid(ref));
 							
 							if (defaultModifier == null) {
@@ -86,7 +91,7 @@ public abstract class ItemStackMixin {
 							}
 
 							boolean duplicate = false;
-							for (var entry : modifiers.entrySet()) {
+							for (Map.Entry<SlotType, Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier>> entry : modifiers.entrySet()) {
 								if (entry.getKey().getTranslation().getString().equals(slotType.getTranslation().getString())) {
 									if (areMapsEqual(entry.getValue(), map)) {
 										duplicate = true;
@@ -109,22 +114,24 @@ public abstract class ItemStackMixin {
 				}
 			}
 
-			if (canEquipAnywhere && slotCount > 1) {
-				list.add(Text.translatable("trinkets.tooltip.slots.any").formatted(Formatting.GRAY));
-			} else if (slots.size() > 1) {
-				list.add(Text.translatable("trinkets.tooltip.slots.list").formatted(Formatting.GRAY));
-				for (SlotType type : slots) {
-					list.add(type.getTranslation().formatted(Formatting.BLUE));
-				}
-			} else if (slots.size() == 1) {
-				// Should only run once
-				for (SlotType type : slots) {
-					list.add(Text.translatable("trinkets.tooltip.slots.single",
-							type.getTranslation().formatted(Formatting.BLUE)).formatted(Formatting.GRAY));
+			if (!self.contains(DataComponentTypes.HIDE_ADDITIONAL_TOOLTIP)) {
+				if (canEquipAnywhere && slotCount > 1) {
+					list.add(Text.translatable("trinkets.tooltip.slots.any").formatted(Formatting.GRAY));
+				} else if (slots.size() > 1) {
+					list.add(Text.translatable("trinkets.tooltip.slots.list").formatted(Formatting.GRAY));
+					for (SlotType type : slots) {
+						list.add(type.getTranslation().formatted(Formatting.BLUE));
+					}
+				} else if (slots.size() == 1) {
+					// Should only run once
+					for (SlotType type : slots) {
+						list.add(Text.translatable("trinkets.tooltip.slots.single",
+								type.getTranslation().formatted(Formatting.BLUE)).formatted(Formatting.GRAY));
+					}
 				}
 			}
 
-			if (modifiers.size() > 0) {
+			if (!modifiers.isEmpty() && self.getOrDefault(DataComponentTypes.ATTRIBUTE_MODIFIERS, AttributeModifiersComponent.DEFAULT).showInTooltip()) {
 				if (allModifiersSame) {
 					if (defaultModifier != null && !defaultModifier.isEmpty()) {
 						list.add(Text.translatable("trinkets.tooltip.attributes.all").formatted(Formatting.GRAY));
@@ -142,14 +149,14 @@ public abstract class ItemStackMixin {
 	}
 
 	@Unique
-	private void addAttributes(List<Text> list, Multimap<EntityAttribute, EntityAttributeModifier> map) {
+	private void addAttributes(List<Text> list, Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> map) {
 		if (!map.isEmpty()) {
-			for (Map.Entry<EntityAttribute, EntityAttributeModifier> entry : map.entries()) {
-				EntityAttribute attribute = entry.getKey();
+			for (Map.Entry<RegistryEntry<EntityAttribute>, EntityAttributeModifier> entry : map.entries()) {
+				RegistryEntry<EntityAttribute> attribute = entry.getKey();
 				EntityAttributeModifier modifier = entry.getValue();
-				double g = modifier.getValue();
+				double g = modifier.value();
 
-				if (modifier.getOperation() != EntityAttributeModifier.Operation.MULTIPLY_BASE && modifier.getOperation() != EntityAttributeModifier.Operation.MULTIPLY_TOTAL) {
+				if (modifier.operation() != EntityAttributeModifier.Operation.ADD_MULTIPLIED_BASE && modifier.operation() != EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL) {
 					if (entry.getKey().equals(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE)) {
 						g *= 10.0D;
 					}
@@ -157,17 +164,17 @@ public abstract class ItemStackMixin {
 					g *= 100.0D;
 				}
 
-				Text text = Text.translatable(attribute.getTranslationKey());
-				if (attribute instanceof SlotAttributes.SlotEntityAttribute) {
+				Text text = Text.translatable(attribute.value().getTranslationKey());
+				if (attribute.hasKeyAndValue() && attribute.value() instanceof SlotAttributes.SlotEntityAttribute) {
 					text = Text.translatable("trinkets.tooltip.attributes.slots", text);
 				}
 				if (g > 0.0D) {
-					list.add(Text.translatable("attribute.modifier.plus." + modifier.getOperation().getId(),
-						ItemStack.MODIFIER_FORMAT.format(g), text).formatted(Formatting.BLUE));
+					list.add(Text.translatable("attribute.modifier.plus." + modifier.operation().getId(),
+							AttributeModifiersComponent.DECIMAL_FORMAT.format(g), text).formatted(Formatting.BLUE));
 				} else if (g < 0.0D) {
 					g *= -1.0D;
-					list.add(Text.translatable("attribute.modifier.take." + modifier.getOperation().getId(),
-						ItemStack.MODIFIER_FORMAT.format(g), text).formatted(Formatting.RED));
+					list.add(Text.translatable("attribute.modifier.take." + modifier.operation().getId(),
+							AttributeModifiersComponent.DECIMAL_FORMAT.format(g), text).formatted(Formatting.RED));
 				}
 			}
 		}
@@ -175,11 +182,11 @@ public abstract class ItemStackMixin {
 
 	// `equals` doesn't test thoroughly
 	@Unique
-	private boolean areMapsEqual(Multimap<EntityAttribute, EntityAttributeModifier> map1, Multimap<EntityAttribute, EntityAttributeModifier> map2) {
+	private boolean areMapsEqual(Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> map1, Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> map2) {
 		if (map1.size() != map2.size()) {
 			return false;
 		} else {
-			for (EntityAttribute attribute : map1.keySet()) {
+			for (RegistryEntry<EntityAttribute> attribute : map1.keySet()) {
 				if (!map2.containsKey(attribute)) {
 					return false;
 				}

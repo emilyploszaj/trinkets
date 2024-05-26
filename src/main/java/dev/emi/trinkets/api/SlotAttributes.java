@@ -8,17 +8,18 @@ import com.google.common.collect.Multimap;
 
 import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
+import net.minecraft.registry.entry.RegistryEntry;
 
 public class SlotAttributes {
 	private static Map<String, UUID> CACHED_UUIDS= Maps.newHashMap();
-	private static Map<String, SlotEntityAttribute> CACHED_ATTRIBUTES = Maps.newHashMap();
+	private static Map<String, RegistryEntry<EntityAttribute>> CACHED_ATTRIBUTES = Maps.newHashMap();
 	
 	/**
 	 * Adds an Entity Attribute Nodifier for slot count to the provided multimap
 	 */
-	public static void addSlotModifier(Multimap<EntityAttribute, EntityAttributeModifier> map, String slot, UUID uuid, double amount,
+	public static void addSlotModifier(Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> map, String slot, UUID uuid, double amount,
 			EntityAttributeModifier.Operation operation) {
-		CACHED_ATTRIBUTES.putIfAbsent(slot, new SlotEntityAttribute(slot));
+		CACHED_ATTRIBUTES.putIfAbsent(slot, RegistryEntry.of(new SlotEntityAttribute(slot)));
 		map.put(CACHED_ATTRIBUTES.get(slot), new EntityAttributeModifier(uuid, slot, amount, operation));
 	}
 

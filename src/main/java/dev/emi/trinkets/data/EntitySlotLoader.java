@@ -24,6 +24,7 @@ import dev.emi.trinkets.TrinketsNetwork;
 import dev.emi.trinkets.api.SlotGroup;
 import dev.emi.trinkets.data.SlotLoader.GroupData;
 import dev.emi.trinkets.data.SlotLoader.SlotData;
+import dev.emi.trinkets.payload.SyncSlotsPayload;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
@@ -199,34 +200,13 @@ public class EntitySlotLoader extends SinglePreparationResourceReloader<Map<Stri
 	}
 
 	public void sync(ServerPlayerEntity playerEntity) {
-		PacketByteBuf buf = getSlotsPacket();
-		ServerPlayNetworking.send(playerEntity, TrinketsNetwork.SYNC_SLOTS, buf);
+		ServerPlayNetworking.send(playerEntity, new SyncSlotsPayload(Map.copyOf(this.slots)));
 	}
 
 	public void sync(List<? extends ServerPlayerEntity> players) {
-		PacketByteBuf buf = getSlotsPacket();
-		players.forEach(player -> ServerPlayNetworking.send(player, TrinketsNetwork.SYNC_SLOTS, buf));
+		var packet = new SyncSlotsPayload(Map.copyOf(this.slots));
+		players.forEach(player -> ServerPlayNetworking.send(player, packet));
 		players.forEach(player -> ((TrinketPlayerScreenHandler) player.playerScreenHandler).trinkets$updateTrinketSlots(true));
-	}
-
-	private PacketByteBuf getSlotsPacket() {
-		NbtCompound tag = new NbtCompound();
-
-		this.slots.forEach((entity, slotMap) -> {
-			NbtCompound slotsTag = new NbtCompound();
-
-			slotMap.forEach((id, slotGroup) -> {
-				NbtCompound groupTag = new NbtCompound();
-				slotGroup.write(groupTag);
-				slotsTag.put(id, groupTag);
-			});
-
-			tag.put(Registries.ENTITY_TYPE.getId(entity).toString(), slotsTag);
-		});
-
-		PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
-		buf.writeNbt(tag);
-		return buf;
 	}
 
 	@Override

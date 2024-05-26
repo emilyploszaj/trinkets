@@ -2,7 +2,7 @@ package dev.emi.trinkets.api;
 
 import com.google.common.collect.Multimap;
 
-import dev.onyxstudios.cca.api.v3.component.ComponentV3;
+import org.ladysnake.cca.api.v3.component.ComponentV3;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.item.Item;

@@ -3,11 +3,11 @@ package dev.emi.trinkets.api;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.datafixers.util.Function3;
 import dev.emi.trinkets.TrinketsMain;
-import dev.emi.trinkets.TrinketsNetwork;
 import dev.emi.trinkets.data.EntitySlotLoader;
-import dev.onyxstudios.cca.api.v3.component.ComponentKey;
-import dev.onyxstudios.cca.api.v3.component.ComponentRegistryV3;
-import io.netty.buffer.Unpooled;
+import dev.emi.trinkets.payload.BreakPayload;
+import net.minecraft.util.math.random.Random;
+import org.ladysnake.cca.api.v3.component.ComponentKey;
+import org.ladysnake.cca.api.v3.component.ComponentRegistryV3;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -19,7 +19,6 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketByteBuf;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -29,7 +28,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Consumer;
 import net.minecraft.world.World;
 
 public class TrinketsApi {
@@ -65,19 +63,16 @@ public class TrinketsApi {
 
 	/**
 	 * Called to sync a trinket breaking event with clients. Should generally be
-	 * called in the callback of {@link ItemStack#damage(int, LivingEntity, Consumer)}
+	 * called in the callback of {@link ItemStack#damage(int, Random, ServerPlayerEntity, Runnable)}
 	 */
 	public static void onTrinketBroken(ItemStack stack, SlotReference ref, LivingEntity entity) {
 		if (!entity.getWorld().isClient) {
-			PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
-			buf.writeInt(entity.getId());
-			buf.writeString(ref.inventory().getSlotType().getGroup() + "/" + ref.inventory().getSlotType().getName());
-			buf.writeInt(ref.index());
+			var packet = new BreakPayload(entity.getId(), ref.inventory().getSlotType().getGroup(), ref.inventory().getSlotType().getName(), ref.index());
 			if (entity instanceof ServerPlayerEntity player) {
-				ServerPlayNetworking.send(player, TrinketsNetwork.BREAK, buf);
+				ServerPlayNetworking.send(player, packet);
 			}
 			PlayerLookup.tracking(entity).forEach(watcher -> {
-				ServerPlayNetworking.send(watcher, TrinketsNetwork.BREAK, buf);
+				ServerPlayNetworking.send(watcher, packet);
 			});
 		}
 	}

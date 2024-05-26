@@ -7,8 +7,21 @@ import static net.minecraft.server.command.CommandManager.literal;
 
 import dev.emi.trinkets.api.Trinket;
 import dev.emi.trinkets.api.TrinketItem;
+import dev.emi.trinkets.api.TrinketComponent;
+import dev.emi.trinkets.api.LivingEntityTrinketComponent;
+import dev.emi.trinkets.api.TrinketsApi;
+import dev.emi.trinkets.api.TrinketsAttributeModifiersComponent;
+import dev.emi.trinkets.api.SlotGroup;
+import dev.emi.trinkets.api.SlotType;
+import dev.emi.trinkets.payload.BreakPayload;
+import dev.emi.trinkets.payload.SyncInventoryPayload;
+import dev.emi.trinkets.payload.SyncSlotsPayload;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.minecraft.item.ItemStack;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registry;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.TypedActionResult;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -16,16 +29,11 @@ import org.apache.logging.log4j.Logger;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.context.CommandContext;
 
-import dev.emi.trinkets.api.LivingEntityTrinketComponent;
-import dev.emi.trinkets.api.SlotGroup;
-import dev.emi.trinkets.api.SlotType;
-import dev.emi.trinkets.api.TrinketComponent;
-import dev.emi.trinkets.api.TrinketsApi;
 import dev.emi.trinkets.data.EntitySlotLoader;
 import dev.emi.trinkets.data.SlotLoader;
-import dev.onyxstudios.cca.api.v3.entity.EntityComponentFactoryRegistry;
-import dev.onyxstudios.cca.api.v3.entity.EntityComponentInitializer;
-import dev.onyxstudios.cca.api.v3.entity.RespawnCopyStrategy;
+import org.ladysnake.cca.api.v3.entity.EntityComponentFactoryRegistry;
+import org.ladysnake.cca.api.v3.entity.EntityComponentInitializer;
+import org.ladysnake.cca.api.v3.entity.RespawnCopyStrategy;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -60,7 +68,11 @@ public class TrinketsMain implements ModInitializer, EntityComponentInitializer 
 			}
 			return TypedActionResult.pass(stack);
 		});
-		CommandRegistrationCallback.EVENT.register((dispatcher, registry, env) -> 
+		Registry.register(Registries.DATA_COMPONENT_TYPE, new Identifier(MOD_ID, "attribute_modifiers"), TrinketsAttributeModifiersComponent.TYPE);
+		PayloadTypeRegistry.playS2C().register(TrinketsNetwork.BREAK, BreakPayload.CODEC);
+		PayloadTypeRegistry.playS2C().register(TrinketsNetwork.SYNC_INVENTORY, SyncInventoryPayload.CODEC);
+		PayloadTypeRegistry.playS2C().register(TrinketsNetwork.SYNC_SLOTS, SyncSlotsPayload.CODEC);
+		CommandRegistrationCallback.EVENT.register((dispatcher, registry, env) ->
 			dispatcher.register(literal("trinkets")
 				.requires(source -> source.hasPermissionLevel(2))
 				.then(

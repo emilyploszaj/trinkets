@@ -4,11 +4,12 @@
   "compatibilityLevel": "JAVA_17",
   "mixins": [
     "accessor.ScreenHandlerAccessor",
+    "datafixer.Schema1460Mixin",
+    "ExperienceOrbEntityMixin",
     "LivingEntityMixin",
     "PlayerManagerMixin",
     "PlayerScreenHandlerMixin",
-    "ServerPlayNetworkHandlerMixin",
-    "ExperienceOrbEntityMixin"
+    "ServerPlayNetworkHandlerMixin"
   ],
   "client": [
     "accessor.CreativeSlotAccessor",

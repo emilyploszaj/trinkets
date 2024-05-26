@@ -114,8 +114,8 @@ public class TrinketInventory implements Inventory {
 	}
 
 	public void addModifier(EntityAttributeModifier modifier) {
-		this.modifiers.put(modifier.getId(), modifier);
-		this.getModifiersByOperation(modifier.getOperation()).add(modifier);
+		this.modifiers.put(modifier.uuid(), modifier);
+		this.getModifiersByOperation(modifier.operation()).add(modifier);
 		this.markUpdate();
 	}
 
@@ -128,7 +128,7 @@ public class TrinketInventory implements Inventory {
 		EntityAttributeModifier modifier = this.modifiers.remove(uuid);
 		if (modifier != null) {
 			this.persistentModifiers.remove(modifier);
-			this.getModifiersByOperation(modifier.getOperation()).remove(modifier);
+			this.getModifiersByOperation(modifier.operation()).remove(modifier);
 			this.markUpdate();
 		}
 	}
@@ -147,7 +147,7 @@ public class TrinketInventory implements Inventory {
 
 	public void clearCachedModifiers() {
 		for (EntityAttributeModifier cachedModifier : this.cachedModifiers) {
-			this.removeModifier(cachedModifier.getId());
+			this.removeModifier(cachedModifier.uuid());
 		}
 		this.cachedModifiers.clear();
 	}
@@ -156,17 +156,17 @@ public class TrinketInventory implements Inventory {
 		if (this.update) {
 			this.update = false;
 			double baseSize = this.baseSize;
-			for (EntityAttributeModifier mod : this.getModifiersByOperation(EntityAttributeModifier.Operation.ADDITION)) {
-				baseSize += mod.getValue();
+			for (EntityAttributeModifier mod : this.getModifiersByOperation(EntityAttributeModifier.Operation.ADD_VALUE)) {
+				baseSize += mod.value();
 			}
 
 			double size = baseSize;
-			for (EntityAttributeModifier mod : this.getModifiersByOperation(EntityAttributeModifier.Operation.MULTIPLY_BASE)) {
-				size += this.baseSize * mod.getValue();
+			for (EntityAttributeModifier mod : this.getModifiersByOperation(EntityAttributeModifier.Operation.ADD_MULTIPLIED_BASE)) {
+				size += this.baseSize * mod.value();
 			}
 
-			for (EntityAttributeModifier mod : this.getModifiersByOperation(EntityAttributeModifier.Operation.MULTIPLY_TOTAL)) {
-				size *= mod.getValue();
+			for (EntityAttributeModifier mod : this.getModifiersByOperation(EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL)) {
+				size *= mod.value();
 			}
 			LivingEntity entity = this.component.getEntity();
 
