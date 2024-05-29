@@ -68,7 +68,7 @@ public class TrinketsMain implements ModInitializer, EntityComponentInitializer 
 			}
 			return TypedActionResult.pass(stack);
 		});
-		Registry.register(Registries.DATA_COMPONENT_TYPE, new Identifier(MOD_ID, "attribute_modifiers"), TrinketsAttributeModifiersComponent.TYPE);
+		Registry.register(Registries.DATA_COMPONENT_TYPE, Identifier.of(MOD_ID, "attribute_modifiers"), TrinketsAttributeModifiersComponent.TYPE);
 		PayloadTypeRegistry.playS2C().register(TrinketsNetwork.BREAK, BreakPayload.CODEC);
 		PayloadTypeRegistry.playS2C().register(TrinketsNetwork.SYNC_INVENTORY, SyncInventoryPayload.CODEC);
 		PayloadTypeRegistry.playS2C().register(TrinketsNetwork.SYNC_SLOTS, SyncSlotsPayload.CODEC);

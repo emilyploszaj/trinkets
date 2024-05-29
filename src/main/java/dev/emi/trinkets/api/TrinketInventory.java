@@ -10,6 +10,7 @@ import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.DefaultedList;
 
 import java.util.*;
@@ -20,7 +21,7 @@ public class TrinketInventory implements Inventory {
 	private final SlotType slotType;
 	private final int baseSize;
 	private final TrinketComponent component;
-	private final Map<UUID, EntityAttributeModifier> modifiers = new HashMap<>();
+	private final Map<Identifier, EntityAttributeModifier> modifiers = new HashMap<>();
 	private final Set<EntityAttributeModifier> persistentModifiers = new HashSet<>();
 	private final Set<EntityAttributeModifier> cachedModifiers = new HashSet<>();
 	private final Multimap<EntityAttributeModifier.Operation, EntityAttributeModifier> modifiersByOperation = HashMultimap.create();
@@ -105,7 +106,7 @@ public class TrinketInventory implements Inventory {
 		return true;
 	}
 
-	public Map<UUID, EntityAttributeModifier> getModifiers() {
+	public Map<Identifier, EntityAttributeModifier> getModifiers() {
 		return this.modifiers;
 	}
 
@@ -114,7 +115,7 @@ public class TrinketInventory implements Inventory {
 	}
 
 	public void addModifier(EntityAttributeModifier modifier) {
-		this.modifiers.put(modifier.uuid(), modifier);
+		this.modifiers.put(modifier.id(), modifier);
 		this.getModifiersByOperation(modifier.operation()).add(modifier);
 		this.markUpdate();
 	}
@@ -124,8 +125,8 @@ public class TrinketInventory implements Inventory {
 		this.persistentModifiers.add(modifier);
 	}
 
-	public void removeModifier(UUID uuid) {
-		EntityAttributeModifier modifier = this.modifiers.remove(uuid);
+	public void removeModifier(Identifier identifier) {
+		EntityAttributeModifier modifier = this.modifiers.remove(identifier);
 		if (modifier != null) {
 			this.persistentModifiers.remove(modifier);
 			this.getModifiersByOperation(modifier.operation()).remove(modifier);
@@ -134,7 +135,7 @@ public class TrinketInventory implements Inventory {
 	}
 
 	public void clearModifiers() {
-		Iterator<UUID> iter = this.getModifiers().keySet().iterator();
+		Iterator<Identifier> iter = this.getModifiers().keySet().iterator();
 
 		while(iter.hasNext()) {
 			this.removeModifier(iter.next());
@@ -147,7 +148,7 @@ public class TrinketInventory implements Inventory {
 
 	public void clearCachedModifiers() {
 		for (EntityAttributeModifier cachedModifier : this.cachedModifiers) {
-			this.removeModifier(cachedModifier.uuid());
+			this.removeModifier(cachedModifier.id());
 		}
 		this.cachedModifiers.clear();
 	}
@@ -271,7 +272,7 @@ public class TrinketInventory implements Inventory {
 		NbtCompound NbtCompound = new NbtCompound();
 		if (!this.modifiers.isEmpty()) {
 			NbtList NbtList = new NbtList();
-			for (Map.Entry<UUID, EntityAttributeModifier> modifier : this.modifiers.entrySet()) {
+			for (Map.Entry<Identifier, EntityAttributeModifier> modifier : this.modifiers.entrySet()) {
 				NbtList.add(modifier.getValue().toNbt());
 			}
 

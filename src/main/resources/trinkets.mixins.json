@@ -5,7 +5,7 @@
   "mixins": [
     "accessor.ScreenHandlerAccessor",
     "datafixer.Schema1460Mixin",
-    "ExperienceOrbEntityMixin",
+    "EnchantmentHelperMixin",
     "LivingEntityMixin",
     "PlayerManagerMixin",
     "PlayerScreenHandlerMixin",

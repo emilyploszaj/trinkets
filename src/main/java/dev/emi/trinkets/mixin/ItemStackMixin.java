@@ -11,7 +11,6 @@ import dev.emi.trinkets.api.SlotType;
 import dev.emi.trinkets.api.Trinket;
 import dev.emi.trinkets.api.TrinketInventory;
 import dev.emi.trinkets.api.TrinketsApi;
-import net.minecraft.client.item.TooltipType;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.AttributeModifiersComponent;
 import net.minecraft.entity.attribute.EntityAttribute;
@@ -20,6 +19,7 @@ import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -29,7 +29,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -82,7 +81,7 @@ public abstract class ItemStackMixin {
 							Trinket trinket = TrinketsApi.getTrinket((self).getItem());
 
 							Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> map =
-									trinket.getModifiers(self, ref, player, SlotAttributes.getUuid(ref));
+									trinket.getModifiers(self, ref, player, SlotAttributes.getIdentifier(ref));
 							
 							if (defaultModifier == null) {
 								defaultModifier = map;

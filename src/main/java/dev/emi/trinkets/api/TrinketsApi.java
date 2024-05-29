@@ -5,6 +5,7 @@ import com.mojang.datafixers.util.Function3;
 import dev.emi.trinkets.TrinketsMain;
 import dev.emi.trinkets.data.EntitySlotLoader;
 import dev.emi.trinkets.payload.BreakPayload;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.random.Random;
 import org.ladysnake.cca.api.v3.component.ComponentKey;
 import org.ladysnake.cca.api.v3.component.ComponentRegistryV3;
@@ -28,11 +29,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
+
 import net.minecraft.world.World;
 
 public class TrinketsApi {
 	public static final ComponentKey<TrinketComponent> TRINKET_COMPONENT = ComponentRegistryV3.INSTANCE
-			.getOrCreate(new Identifier(TrinketsMain.MOD_ID, "trinkets"), TrinketComponent.class);
+			.getOrCreate(Identifier.of(TrinketsMain.MOD_ID, "trinkets"), TrinketComponent.class);
 	private static final Map<Identifier, Function3<ItemStack, SlotReference, LivingEntity, TriState>> PREDICATES = new HashMap<>();
 	
 	private static final Map<Item, Trinket> TRINKETS = new HashMap<>();
@@ -63,7 +66,7 @@ public class TrinketsApi {
 
 	/**
 	 * Called to sync a trinket breaking event with clients. Should generally be
-	 * called in the callback of {@link ItemStack#damage(int, Random, ServerPlayerEntity, Runnable)}
+	 * called in the callback of {@link ItemStack#damage(int, ServerWorld, ServerPlayerEntity, Consumer)}
 	 */
 	public static void onTrinketBroken(ItemStack stack, SlotReference ref, LivingEntity entity) {
 		if (!entity.getWorld().isClient) {
@@ -157,21 +160,21 @@ public class TrinketsApi {
 	}
 
 	static {
-		TrinketsApi.registerTrinketPredicate(new Identifier("trinkets", "all"), (stack, ref, entity) -> TriState.TRUE);
-		TrinketsApi.registerTrinketPredicate(new Identifier("trinkets", "none"), (stack, ref, entity) -> TriState.FALSE);
-		TagKey<Item> trinketsAll = TagKey.of(RegistryKeys.ITEM, new Identifier("trinkets", "all"));
+		TrinketsApi.registerTrinketPredicate(Identifier.of("trinkets", "all"), (stack, ref, entity) -> TriState.TRUE);
+		TrinketsApi.registerTrinketPredicate(Identifier.of("trinkets", "none"), (stack, ref, entity) -> TriState.FALSE);
+		TagKey<Item> trinketsAll = TagKey.of(RegistryKeys.ITEM, Identifier.of("trinkets", "all"));
 
-		TrinketsApi.registerTrinketPredicate(new Identifier("trinkets", "tag"), (stack, ref, entity) -> {
+		TrinketsApi.registerTrinketPredicate(Identifier.of("trinkets", "tag"), (stack, ref, entity) -> {
 			SlotType slot = ref.inventory().getSlotType();
-			TagKey<Item> tag = TagKey.of(RegistryKeys.ITEM, new Identifier("trinkets", slot.getGroup() + "/" + slot.getName()));
+			TagKey<Item> tag = TagKey.of(RegistryKeys.ITEM, Identifier.of("trinkets", slot.getGroup() + "/" + slot.getName()));
 
 			if (stack.isIn(tag) || stack.isIn(trinketsAll)) {
 				return TriState.TRUE;
 			}
 			return TriState.DEFAULT;
 		});
-		TrinketsApi.registerTrinketPredicate(new Identifier("trinkets", "relevant"), (stack, ref, entity) -> {
-			var map = TrinketsApi.getTrinket(stack.getItem()).getModifiers(stack, ref, entity, SlotAttributes.getUuid(ref));
+		TrinketsApi.registerTrinketPredicate(Identifier.of("trinkets", "relevant"), (stack, ref, entity) -> {
+			var map = TrinketsApi.getTrinket(stack.getItem()).getModifiers(stack, ref, entity, SlotAttributes.getIdentifier(ref));
 			if (!map.isEmpty()) {
 				return TriState.TRUE;
 			}

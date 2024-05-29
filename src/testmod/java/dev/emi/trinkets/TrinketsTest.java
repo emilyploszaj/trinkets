@@ -21,6 +21,6 @@ public class TrinketsTest implements ModInitializer {
 	}
 
 	private static Identifier identifier(String id) {
-		return new Identifier(MOD_ID, id);
+		return Identifier.of(MOD_ID, id);
 	}
 }
