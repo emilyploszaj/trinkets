@@ -11,6 +11,7 @@ import dev.emi.trinkets.api.TrinketsApi;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.minecraft.component.ComponentType;
 import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.AttributeModifierSlot;
 import net.minecraft.component.type.ItemEnchantmentsComponent;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentEffectContext;
@@ -48,11 +49,12 @@ public abstract class EnchantmentHelperMixin {
 
 						for (Object2IntMap.Entry<RegistryEntry<Enchantment>> entry : enchantments.getEnchantmentsMap()) {
 							RegistryEntry<Enchantment> registryEntry = entry.getKey();
+                            List<AttributeModifierSlot> slots = registryEntry.value().definition().slots();
 
-							// Todo: Trinkets need an extension to enchantments to support this!
-							//if (registryEntry.value().slotMatches(slot)) {
-							contextAwareConsumer.accept(registryEntry, entry.getIntValue(),context);
-							//}
+							// Todo: Trinkets need an extension to enchantments to support this better!
+							if (slots.contains(AttributeModifierSlot.ANY) || slots.contains(AttributeModifierSlot.ARMOR)) {
+								contextAwareConsumer.accept(registryEntry, entry.getIntValue(),context);
+							}
 						}
 					}
 				}
@@ -70,8 +72,10 @@ public abstract class EnchantmentHelperMixin {
 					ItemEnchantmentsComponent enchantments = stack.getOrDefault(DataComponentTypes.ENCHANTMENTS, ItemEnchantmentsComponent.DEFAULT);
 					for(Object2IntMap.Entry<RegistryEntry<Enchantment>> entry : enchantments.getEnchantmentsMap()) {
 						RegistryEntry<Enchantment> registryEntry = entry.getKey();
+						List<AttributeModifierSlot> slots = registryEntry.value().definition().slots();
+
 						// Todo: Same as above
-						if (registryEntry.value().effects().contains(componentType) /*&& ((Enchantment)registryEntry.value()).slotMatches(equipmentSlot)*/) {
+						if (registryEntry.value().effects().contains(componentType) && (slots.contains(AttributeModifierSlot.ANY) || slots.contains(AttributeModifierSlot.ARMOR))) {
 							list.add(new EnchantmentEffectContext(stack, null, entity, (item) -> {
 								TrinketsApi.onTrinketBroken(stack, ref, entity);
 							}));
