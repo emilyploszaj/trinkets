@@ -1,8 +1,6 @@
 package dev.emi.trinkets.mixin;
 
 import com.google.common.collect.ImmutableList;
-
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -225,14 +223,11 @@ public abstract class PlayerScreenHandlerMixin extends ScreenHandler implements 
 
 	@Inject(at = @At("HEAD"), method = "onClosed")
 	private void onClosed(PlayerEntity player, CallbackInfo info) {
-		try (World world = player.getWorld()) {
-			if (world.isClient) {
-				TrinketsClient.activeGroup = null;
-				TrinketsClient.activeType = null;
-				TrinketsClient.quickMoveGroup = null;
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
+		World world = player.getWorld();
+		if (world.isClient) {
+			TrinketsClient.activeGroup = null;
+			TrinketsClient.activeType = null;
+			TrinketsClient.quickMoveGroup = null;
 		}
 	}
 
@@ -264,18 +259,15 @@ public abstract class PlayerScreenHandlerMixin extends ScreenHandler implements 
 
 							if (res) {
 								if (this.insertItem(stack, i, i + 1, false)) {
-									try (World world = player.getWorld()) {
-										if (world.isClient) {
-											TrinketsClient.quickMoveTimer = 20;
-											TrinketsClient.quickMoveGroup = TrinketsApi.getPlayerSlots(this.owner).get(type.getGroup());
-											if (ref.index() > 0) {
-												TrinketsClient.quickMoveType = type;
-											} else {
-												TrinketsClient.quickMoveType = null;
-											}
+									World world = player.getWorld();
+									if (world.isClient) {
+										TrinketsClient.quickMoveTimer = 20;
+										TrinketsClient.quickMoveGroup = TrinketsApi.getPlayerSlots(this.owner).get(type.getGroup());
+										if (ref.index() > 0) {
+											TrinketsClient.quickMoveType = type;
+										} else {
+											TrinketsClient.quickMoveType = null;
 										}
-									} catch (IOException e) {
-										e.printStackTrace();
 									}
 								}
 							}

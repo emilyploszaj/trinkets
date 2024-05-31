@@ -95,17 +95,16 @@ public class TrinketScreenManager {
 		}
 
 		if (group == null) {
-			try (MinecraftClient client = MinecraftClient.getInstance()) {
-				for (SlotGroup g : TrinketsApi.getPlayerSlots(client.player).values()) {
-					Rect2i r = currentScreen.trinkets$getGroupRect(g);
-					if (r.getX() < 0 && currentScreen.trinkets$isRecipeBookOpen()) {
-						continue;
-					}
-					if (r.contains(Math.round(mouseX) - x, Math.round(mouseY) - y)) {
-						TrinketsClient.activeGroup = g;
-						TrinketsClient.quickMoveGroup = null;
-						break;
-					}
+			MinecraftClient client = MinecraftClient.getInstance();
+			for (SlotGroup g : TrinketsApi.getPlayerSlots(client.player).values()) {
+				Rect2i r = currentScreen.trinkets$getGroupRect(g);
+				if (r.getX() < 0 && currentScreen.trinkets$isRecipeBookOpen()) {
+					continue;
+				}
+				if (r.contains(Math.round(mouseX) - x, Math.round(mouseY) - y)) {
+					TrinketsClient.activeGroup = g;
+					TrinketsClient.quickMoveGroup = null;
+					break;
 				}
 			}
 		}

@@ -24,7 +24,6 @@ import net.minecraft.registry.tag.TagKey;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -67,18 +66,15 @@ public class TrinketsApi {
 	 * called in the callback of {@link ItemStack#damage(int, Random, ServerPlayerEntity, Runnable)}
 	 */
 	public static void onTrinketBroken(ItemStack stack, SlotReference ref, LivingEntity entity) {
-		try (World world = entity.getWorld()) {
-			if (!world.isClient) {
-				var packet = new BreakPayload(entity.getId(), ref.inventory().getSlotType().getGroup(), ref.inventory().getSlotType().getName(), ref.index());
-				if (entity instanceof ServerPlayerEntity player) {
-					ServerPlayNetworking.send(player, packet);
-				}
-				PlayerLookup.tracking(entity).forEach(watcher -> {
-					ServerPlayNetworking.send(watcher, packet);
-				});
+		World world = entity.getWorld();
+		if (!world.isClient) {
+			var packet = new BreakPayload(entity.getId(), ref.inventory().getSlotType().getGroup(), ref.inventory().getSlotType().getName(), ref.index());
+			if (entity instanceof ServerPlayerEntity player) {
+				ServerPlayNetworking.send(player, packet);
 			}
-		} catch (IOException e) {
-			e.printStackTrace();
+			PlayerLookup.tracking(entity).forEach(watcher -> {
+				ServerPlayNetworking.send(watcher, packet);
+			});
 		}
 	}
 

@@ -1,7 +1,5 @@
 package dev.emi.trinkets;
 
-import java.io.IOException;
-
 import dev.emi.trinkets.api.SlotGroup;
 import dev.emi.trinkets.api.SlotReference;
 import dev.emi.trinkets.api.SlotType;
@@ -52,18 +50,15 @@ public class SurvivalTrinketSlot extends Slot implements TrinketSlot {
 	public boolean isEnabled() {
 		if (alwaysVisible) {
 			if (x < 0) {
-				try (World world = trinketInventory.getComponent().getEntity().getWorld()) {
-					if (world.isClient) {
-						MinecraftClient client = MinecraftClient.getInstance();
-						Screen s = client.currentScreen;
-						if (s instanceof InventoryScreen screen) {
-							if (screen.getRecipeBookWidget().isOpen()) {
-								return false;
-							}
+				World world = trinketInventory.getComponent().getEntity().getWorld();
+				if (world.isClient) {
+					MinecraftClient client = MinecraftClient.getInstance();
+					Screen s = client.currentScreen;
+					if (s instanceof InventoryScreen screen) {
+						if (screen.getRecipeBookWidget().isOpen()) {
+							return false;
 						}
 					}
-				} catch (IOException e) {
-					e.printStackTrace();
 				}
 			}
 			return true;

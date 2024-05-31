@@ -1,6 +1,5 @@
 package dev.emi.trinkets.mixin;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -163,64 +162,61 @@ public abstract class LivingEntityMixin extends Entity {
 					TrinketsApi.getTrinket(oldStack.getItem()).onUnequip(oldStack, ref, entity);
 					TrinketsApi.getTrinket(newStack.getItem()).onEquip(newStack, ref, entity);
 
-					try (World world = this.getWorld()) {
-						if (!world.isClient) {
-							contentUpdates.put(newRef, newStackCopy);
-							UUID uuid = SlotAttributes.getUuid(ref);
+					World world = this.getWorld();
+					if (!world.isClient) {
+						contentUpdates.put(newRef, newStackCopy);
+						UUID uuid = SlotAttributes.getUuid(ref);
 
-							if (!oldStack.isEmpty()) {
-								Trinket trinket = TrinketsApi.getTrinket(oldStack.getItem());
-								Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> map = trinket.getModifiers(oldStack, ref, entity, uuid);
-								Multimap<String, EntityAttributeModifier> slotMap = HashMultimap.create();
-								Set<RegistryEntry<EntityAttribute>> toRemove = Sets.newHashSet();
-								for (RegistryEntry<EntityAttribute> attr : map.keySet()) {
-									if (attr.hasKeyAndValue() && attr.value() instanceof SlotEntityAttribute slotAttr) {
-										slotMap.putAll(slotAttr.slot, map.get(attr));
-										toRemove.add(attr);
-									}
+						if (!oldStack.isEmpty()) {
+							Trinket trinket = TrinketsApi.getTrinket(oldStack.getItem());
+							Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> map = trinket.getModifiers(oldStack, ref, entity, uuid);
+							Multimap<String, EntityAttributeModifier> slotMap = HashMultimap.create();
+							Set<RegistryEntry<EntityAttribute>> toRemove = Sets.newHashSet();
+							for (RegistryEntry<EntityAttribute> attr : map.keySet()) {
+								if (attr.hasKeyAndValue() && attr.value() instanceof SlotEntityAttribute slotAttr) {
+									slotMap.putAll(slotAttr.slot, map.get(attr));
+									toRemove.add(attr);
 								}
-								for (RegistryEntry<EntityAttribute> attr : toRemove) {
-									map.removeAll(attr);
-								}
-								//this.getAttributes().removeModifiers(map);
-								map.asMap().forEach((attribute, modifiers) -> {
-									EntityAttributeInstance entityAttributeInstance = this.getAttributes().getCustomInstance(attribute);
-									if (entityAttributeInstance != null) {
-										modifiers.forEach(modifier -> entityAttributeInstance.removeModifier(modifier.uuid()));
-									}
-								});
-
-								trinkets.removeModifiers(slotMap);
 							}
-
-							if (!newStack.isEmpty()) {
-								Trinket trinket = TrinketsApi.getTrinket(newStack.getItem());
-								Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> map = trinket.getModifiers(newStack, ref, entity, uuid);
-								Multimap<String, EntityAttributeModifier> slotMap = HashMultimap.create();
-								Set<RegistryEntry<EntityAttribute>> toRemove = Sets.newHashSet();
-								for (RegistryEntry<EntityAttribute> attr : map.keySet()) {
-									if (attr.hasKeyAndValue() && attr.value() instanceof SlotEntityAttribute slotAttr) {
-										slotMap.putAll(slotAttr.slot, map.get(attr));
-										toRemove.add(attr);
-									}
-								}
-								for (RegistryEntry<EntityAttribute> attr : toRemove) {
-									map.removeAll(attr);
-								}
-								//this.getAttributes().addTemporaryModifiers(map);
-								map.forEach((attribute, attributeModifier) -> {
-									EntityAttributeInstance entityAttributeInstance = this.getAttributes().getCustomInstance(attribute);
-									if (entityAttributeInstance != null) {
-										entityAttributeInstance.removeModifier(attributeModifier.uuid());
-										entityAttributeInstance.addTemporaryModifier(attributeModifier);
-									}
-
-								});
-								trinkets.addTemporaryModifiers(slotMap);
+							for (RegistryEntry<EntityAttribute> attr : toRemove) {
+								map.removeAll(attr);
 							}
+							//this.getAttributes().removeModifiers(map);
+							map.asMap().forEach((attribute, modifiers) -> {
+								EntityAttributeInstance entityAttributeInstance = this.getAttributes().getCustomInstance(attribute);
+								if (entityAttributeInstance != null) {
+									modifiers.forEach(modifier -> entityAttributeInstance.removeModifier(modifier.uuid()));
+								}
+							});
+
+							trinkets.removeModifiers(slotMap);
 						}
-					} catch (IOException e) {
-						e.printStackTrace();
+
+						if (!newStack.isEmpty()) {
+							Trinket trinket = TrinketsApi.getTrinket(newStack.getItem());
+							Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> map = trinket.getModifiers(newStack, ref, entity, uuid);
+							Multimap<String, EntityAttributeModifier> slotMap = HashMultimap.create();
+							Set<RegistryEntry<EntityAttribute>> toRemove = Sets.newHashSet();
+							for (RegistryEntry<EntityAttribute> attr : map.keySet()) {
+								if (attr.hasKeyAndValue() && attr.value() instanceof SlotEntityAttribute slotAttr) {
+									slotMap.putAll(slotAttr.slot, map.get(attr));
+									toRemove.add(attr);
+								}
+							}
+							for (RegistryEntry<EntityAttribute> attr : toRemove) {
+								map.removeAll(attr);
+							}
+							//this.getAttributes().addTemporaryModifiers(map);
+							map.forEach((attribute, attributeModifier) -> {
+								EntityAttributeInstance entityAttributeInstance = this.getAttributes().getCustomInstance(attribute);
+								if (entityAttributeInstance != null) {
+									entityAttributeInstance.removeModifier(attributeModifier.uuid());
+									entityAttributeInstance.addTemporaryModifier(attributeModifier);
+								}
+
+							});
+							trinkets.addTemporaryModifiers(slotMap);
+						}
 					}
 				}
 				TrinketsApi.getTrinket(newStack.getItem()).tick(newStack, ref, entity);
@@ -233,35 +229,32 @@ public abstract class LivingEntityMixin extends Entity {
 				}
 			});
 
-			try (World world = this.getWorld()) {
-				if (!world.isClient) {
-					Set<TrinketInventory> inventoriesToSend = trinkets.getTrackingUpdates();
+			World world = this.getWorld();
+			if (!world.isClient) {
+				Set<TrinketInventory> inventoriesToSend = trinkets.getTrackingUpdates();
 
-					if (!contentUpdates.isEmpty() || !inventoriesToSend.isEmpty()) {
-						Map<String, NbtCompound> map = new HashMap<>();
+				if (!contentUpdates.isEmpty() || !inventoriesToSend.isEmpty()) {
+                    Map<String, NbtCompound> map = new HashMap<>();
 
-						for (TrinketInventory trinketInventory : inventoriesToSend) {
-							map.put(trinketInventory.getSlotType().getGroup() + "/" + trinketInventory.getSlotType().getName(), trinketInventory.getSyncTag());
-						}
-						SyncInventoryPayload packet = new SyncInventoryPayload(this.getId(), contentUpdates, map);
-
-						for (ServerPlayerEntity player : PlayerLookup.tracking(entity)) {
-							ServerPlayNetworking.send(player, packet);
-						}
-
-						if (entity instanceof ServerPlayerEntity serverPlayer) {
-							ServerPlayNetworking.send(serverPlayer, packet);
-
-							if (!inventoriesToSend.isEmpty()) {
-								((TrinketPlayerScreenHandler) serverPlayer.playerScreenHandler).trinkets$updateTrinketSlots(false);
-							}
-						}
-
-						inventoriesToSend.clear();
+					for (TrinketInventory trinketInventory : inventoriesToSend) {
+						map.put(trinketInventory.getSlotType().getGroup() + "/" + trinketInventory.getSlotType().getName(), trinketInventory.getSyncTag());
 					}
+                    SyncInventoryPayload packet = new SyncInventoryPayload(this.getId(), contentUpdates, map);
+
+					for (ServerPlayerEntity player : PlayerLookup.tracking(entity)) {
+						ServerPlayNetworking.send(player, packet);
+					}
+
+					if (entity instanceof ServerPlayerEntity serverPlayer) {
+						ServerPlayNetworking.send(serverPlayer, packet);
+
+						if (!inventoriesToSend.isEmpty()) {
+							((TrinketPlayerScreenHandler) serverPlayer.playerScreenHandler).trinkets$updateTrinketSlots(false);
+						}
+					}
+
+					inventoriesToSend.clear();
 				}
-			} catch (IOException e) {
-				e.printStackTrace();
 			}
 
 			lastEquippedTrinkets.clear();

@@ -30,45 +30,44 @@ public class TrinketsClient implements ClientModInitializer {
 	@Override
 	public void onInitializeClient() {
 		ClientPlayNetworking.registerGlobalReceiver(TrinketsNetwork.SYNC_INVENTORY, (payload, context) -> {
-			try (MinecraftClient client = context.client()) {
-				Entity entity = client.world.getEntityById(payload.entityId());
-				if (entity instanceof LivingEntity) {
-					TrinketsApi.getTrinketComponent((LivingEntity) entity).ifPresent(trinkets -> {
-						for (Map.Entry<String, NbtCompound> entry : payload.inventoryUpdates().entrySet()) {
-							String[] split = entry.getKey().split("/");
-							String group = split[0];
-							String slot = split[1];
-							Map<String, TrinketInventory> slots = trinkets.getInventory().get(group);
-							if (slots != null) {
-								TrinketInventory inv = slots.get(slot);
-								if (inv != null) {
-									inv.applySyncTag(entry.getValue());
-								}
+			MinecraftClient client = context.client();
+			Entity entity = client.world.getEntityById(payload.entityId());
+			if (entity instanceof LivingEntity) {
+				TrinketsApi.getTrinketComponent((LivingEntity) entity).ifPresent(trinkets -> {
+					for (Map.Entry<String, NbtCompound> entry : payload.inventoryUpdates().entrySet()) {
+						String[] split = entry.getKey().split("/");
+						String group = split[0];
+						String slot = split[1];
+						Map<String, TrinketInventory> slots = trinkets.getInventory().get(group);
+						if (slots != null) {
+							TrinketInventory inv = slots.get(slot);
+							if (inv != null) {
+								inv.applySyncTag(entry.getValue());
 							}
 						}
+					}
 
-						if (entity instanceof PlayerEntity && ((PlayerEntity) entity).playerScreenHandler instanceof TrinketPlayerScreenHandler screenHandler) {
-							screenHandler.trinkets$updateTrinketSlots(false);
-							if (TrinketScreenManager.currentScreen != null) {
-								TrinketScreenManager.currentScreen.trinkets$updateTrinketSlots();
-							}
+					if (entity instanceof PlayerEntity && ((PlayerEntity) entity).playerScreenHandler instanceof TrinketPlayerScreenHandler screenHandler) {
+						screenHandler.trinkets$updateTrinketSlots(false);
+						if (TrinketScreenManager.currentScreen != null) {
+							TrinketScreenManager.currentScreen.trinkets$updateTrinketSlots();
 						}
+					}
 
-						for (Map.Entry<String, ItemStack> entry : payload.contentUpdates().entrySet()) {
-							String[] split = entry.getKey().split("/");
-							String group = split[0];
-							String slot = split[1];
-							int index = Integer.parseInt(split[2]);
-							Map<String, TrinketInventory> slots = trinkets.getInventory().get(group);
-							if (slots != null) {
-								TrinketInventory inv = slots.get(slot);
-								if (inv != null && index < inv.size()) {
-									inv.setStack(index, entry.getValue());
-								}
+					for (Map.Entry<String, ItemStack> entry : payload.contentUpdates().entrySet()) {
+						String[] split = entry.getKey().split("/");
+						String group = split[0];
+						String slot = split[1];
+						int index = Integer.parseInt(split[2]);
+						Map<String, TrinketInventory> slots = trinkets.getInventory().get(group);
+						if (slots != null) {
+							TrinketInventory inv = slots.get(slot);
+							if (inv != null && index < inv.size()) {
+								inv.setStack(index, entry.getValue());
 							}
 						}
-					});
-				}
+					}
+				});
 			}
 		});
 		ClientPlayNetworking.registerGlobalReceiver(TrinketsNetwork.SYNC_SLOTS, (payload, context) -> {
@@ -79,10 +78,9 @@ public class TrinketsClient implements ClientModInitializer {
 			if (player != null) {
 				((TrinketPlayerScreenHandler) player.playerScreenHandler).trinkets$updateTrinketSlots(true);
 
-				try (MinecraftClient client = context.client()) {
-					if (client.currentScreen instanceof TrinketScreen trinketScreen) {
-						trinketScreen.trinkets$updateTrinketSlots();
-					}
+				MinecraftClient client = context.client();
+				if (client.currentScreen instanceof TrinketScreen trinketScreen) {
+					trinketScreen.trinkets$updateTrinketSlots();
 				}
 
 				for (AbstractClientPlayerEntity clientWorldPlayer : player.clientWorld.getPlayers()) {
@@ -93,22 +91,21 @@ public class TrinketsClient implements ClientModInitializer {
 		});
 		ClientPlayNetworking.registerGlobalReceiver(TrinketsNetwork.BREAK, (payload, context) -> {
 
-			try (MinecraftClient client = context.client()) {
-				Entity e = client.world.getEntityById(payload.entityId());
-				if (e instanceof LivingEntity entity) {
-					TrinketsApi.getTrinketComponent(entity).ifPresent(comp -> {
-						var groupMap = comp.getInventory().get(payload.group());
-						if (groupMap != null) {
-							TrinketInventory inv = groupMap.get(payload.slot());
-							if (payload.index() < inv.size()) {
-								ItemStack stack = inv.getStack(payload.index());
-								SlotReference ref = new SlotReference(inv, payload.index());
-								Trinket trinket = TrinketsApi.getTrinket(stack.getItem());
-								trinket.onBreak(stack, ref, entity);
-							}
+			MinecraftClient client = context.client();
+			Entity e = client.world.getEntityById(payload.entityId());
+			if (e instanceof LivingEntity entity) {
+				TrinketsApi.getTrinketComponent(entity).ifPresent(comp -> {
+					var groupMap = comp.getInventory().get(payload.group());
+					if (groupMap != null) {
+						TrinketInventory inv = groupMap.get(payload.slot());
+						if (payload.index() < inv.size()) {
+							ItemStack stack = inv.getStack(payload.index());
+							SlotReference ref = new SlotReference(inv, payload.index());
+							Trinket trinket = TrinketsApi.getTrinket(stack.getItem());
+							trinket.onBreak(stack, ref, entity);
 						}
-					});
-				}
+					}
+				});
 			}
 
 		});
