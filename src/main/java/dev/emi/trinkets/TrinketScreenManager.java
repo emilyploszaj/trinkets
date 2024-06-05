@@ -9,7 +9,6 @@ import dev.emi.trinkets.api.SlotType;
 import dev.emi.trinkets.api.TrinketsApi;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.util.math.Rect2i;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.util.Identifier;
@@ -96,7 +95,8 @@ public class TrinketScreenManager {
 		}
 
 		if (group == null) {
-			for (SlotGroup g : TrinketsApi.getPlayerSlots(MinecraftClient.getInstance().player).values()) {
+			MinecraftClient client = MinecraftClient.getInstance();
+			for (SlotGroup g : TrinketsApi.getPlayerSlots(client.player).values()) {
 				Rect2i r = currentScreen.trinkets$getGroupRect(g);
 				if (r.getX() < 0 && currentScreen.trinkets$isRecipeBookOpen()) {
 					continue;

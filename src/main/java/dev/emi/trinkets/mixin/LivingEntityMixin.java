@@ -51,6 +51,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.GameRules;
+import net.minecraft.world.World;
 
 /**
  * Trinket dropping on death, trinket EAMs, and trinket equip/unequip calls
@@ -162,7 +163,8 @@ public abstract class LivingEntityMixin extends Entity {
 					TrinketsApi.getTrinket(oldStack.getItem()).onUnequip(oldStack, ref, entity);
 					TrinketsApi.getTrinket(newStack.getItem()).onEquip(newStack, ref, entity);
 
-					if (!this.getWorld().isClient) {
+					World world = this.getWorld();
+					if (!world.isClient) {
 						contentUpdates.put(newRef, newStackCopy);
 						Identifier identifier = SlotAttributes.getIdentifier(ref);
 
@@ -228,7 +230,8 @@ public abstract class LivingEntityMixin extends Entity {
 				}
 			});
 
-			if (!this.getWorld().isClient) {
+			World world = this.getWorld();
+			if (!world.isClient) {
 				Set<TrinketInventory> inventoriesToSend = trinkets.getTrackingUpdates();
 
 				if (!contentUpdates.isEmpty() || !inventoriesToSend.isEmpty()) {

@@ -20,13 +20,13 @@ import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.Identifier;
 import org.ladysnake.cca.api.v3.component.sync.AutoSyncedComponent;
-import net.fabricmc.fabric.api.util.NbtType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Pair;
@@ -200,7 +200,7 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 				if (groupSlots != null) {
 					for (String slotKey : groupTag.getKeys()) {
 						NbtCompound slotTag = groupTag.getCompound(slotKey);
-						NbtList list = slotTag.getList("Items", NbtType.COMPOUND);
+						NbtList list = slotTag.getList("Items", NbtElement.COMPOUND_TYPE);
 						TrinketInventory inv = groupSlots.get(slotKey);
 
 						if (inv != null) {
@@ -220,7 +220,7 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 				} else {
 					for (String slotKey : groupTag.getKeys()) {
 						NbtCompound slotTag = groupTag.getCompound(slotKey);
-						NbtList list = slotTag.getList("Items", NbtType.COMPOUND);
+						NbtList list = slotTag.getList("Items", NbtElement.COMPOUND_TYPE);
 						for (int i = 0; i < list.size(); i++) {
 							NbtCompound c = list.getCompound(i);
 							dropped.add(ItemStack.fromNbtOrEmpty(lookup, c));
@@ -276,7 +276,7 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 
 						for (String slotKey : groupTag.getKeys()) {
 							NbtCompound slotTag = groupTag.getCompound(slotKey);
-							NbtList list = slotTag.getList("Items", NbtType.COMPOUND);
+							NbtList list = slotTag.getList("Items", NbtElement.COMPOUND_TYPE);
 							TrinketInventory inv = groupSlots.get(slotKey);
 
 							if (inv != null) {

@@ -70,7 +70,8 @@ public class TrinketsApi {
 	 * called in the callback of {@link ItemStack#damage(int, ServerWorld, ServerPlayerEntity, Consumer)}
 	 */
 	public static void onTrinketBroken(ItemStack stack, SlotReference ref, LivingEntity entity) {
-		if (!entity.getWorld().isClient) {
+		World world = entity.getWorld();
+		if (!world.isClient) {
 			var packet = new BreakPayload(entity.getId(), ref.inventory().getSlotType().getGroup(), ref.inventory().getSlotType().getName(), ref.index());
 			if (entity instanceof ServerPlayerEntity player) {
 				ServerPlayNetworking.send(player, packet);
