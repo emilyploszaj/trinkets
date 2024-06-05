@@ -1,11 +1,12 @@
 package dev.emi.trinkets.mixin;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Predicate;
 
 import com.llamalad7.mixinextras.sugar.Local;
+import dev.emi.trinkets.TrinketSlotTarget;
 import dev.emi.trinkets.api.TrinketComponent;
 import dev.emi.trinkets.api.TrinketsApi;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
@@ -47,12 +48,12 @@ public abstract class EnchantmentHelperMixin {
 							TrinketsApi.onTrinketBroken(stack, ref, entity);
 						});
 
-						for (Object2IntMap.Entry<RegistryEntry<Enchantment>> entry : enchantments.getEnchantmentsMap()) {
+						for (Object2IntMap.Entry<RegistryEntry<Enchantment>> entry : enchantments.getEnchantmentEntries()) {
 							RegistryEntry<Enchantment> registryEntry = entry.getKey();
-                            List<AttributeModifierSlot> slots = registryEntry.value().definition().slots();
+							List<AttributeModifierSlot> slots = registryEntry.value().definition().slots();
+							Set<String> trinketSlots = ((TrinketSlotTarget) (Object) registryEntry.value().definition()).trinkets$slots();
 
-							// Todo: Trinkets need an extension to enchantments to support this better!
-							if (slots.contains(AttributeModifierSlot.ANY) || slots.contains(AttributeModifierSlot.ARMOR)) {
+							if (slots.contains(AttributeModifierSlot.ANY) || slots.contains(AttributeModifierSlot.ARMOR) || trinketSlots.contains(ref.inventory().getSlotType().getId())) {
 								contextAwareConsumer.accept(registryEntry, entry.getIntValue(),context);
 							}
 						}
@@ -70,12 +71,15 @@ public abstract class EnchantmentHelperMixin {
 			comp.forEach((ref, stack) -> {
 				if (stackPredicate.test(stack)) {
 					ItemEnchantmentsComponent enchantments = stack.getOrDefault(DataComponentTypes.ENCHANTMENTS, ItemEnchantmentsComponent.DEFAULT);
-					for(Object2IntMap.Entry<RegistryEntry<Enchantment>> entry : enchantments.getEnchantmentsMap()) {
+					for(Object2IntMap.Entry<RegistryEntry<Enchantment>> entry : enchantments.getEnchantmentEntries()) {
 						RegistryEntry<Enchantment> registryEntry = entry.getKey();
 						List<AttributeModifierSlot> slots = registryEntry.value().definition().slots();
+						Set<String> trinketSlots = ((TrinketSlotTarget) (Object) registryEntry.value().definition()).trinkets$slots();
 
-						// Todo: Same as above
-						if (registryEntry.value().effects().contains(componentType) && (slots.contains(AttributeModifierSlot.ANY) || slots.contains(AttributeModifierSlot.ARMOR))) {
+						if (registryEntry.value().effects().contains(componentType)
+								&& (slots.contains(AttributeModifierSlot.ANY) || slots.contains(AttributeModifierSlot.ARMOR)
+								|| trinketSlots.contains(ref.inventory().getSlotType().getId()))
+						) {
 							list.add(new EnchantmentEffectContext(stack, null, entity, (item) -> {
 								TrinketsApi.onTrinketBroken(stack, ref, entity);
 							}));

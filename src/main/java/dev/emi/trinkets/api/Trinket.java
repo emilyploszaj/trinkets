@@ -1,8 +1,6 @@
 package dev.emi.trinkets.api;
 
 import java.util.ArrayList;
-import java.util.Optional;
-import java.util.UUID;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
@@ -10,25 +8,20 @@ import com.google.common.collect.Multimaps;
 
 import dev.emi.trinkets.mixin.accessor.LivingEntityAccessor;
 import java.util.function.Consumer;
-import net.fabricmc.fabric.api.util.NbtType;
+
 import net.minecraft.component.EnchantmentEffectComponentTypes;
 import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.item.Equipment;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.registry.Registries;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.math.random.Random;
 
 public interface Trinket {
 
@@ -124,7 +117,7 @@ public interface Trinket {
 
 		if (stack.contains(TrinketsAttributeModifiersComponent.TYPE)) {
 			for (var entry : stack.getOrDefault(TrinketsAttributeModifiersComponent.TYPE, TrinketsAttributeModifiersComponent.DEFAULT).modifiers()) {
-				if (entry.slot().isEmpty() || entry.slot().get().equals(slot.inventory().getSlotType().getGroup() + "/" + slot.inventory().getSlotType().getName())) {
+				if (entry.slot().isEmpty() || entry.slot().get().equals(slot.inventory().getSlotType().getId())) {
 					map.put(entry.attribute(), entry.modifier());
 				}
 			}

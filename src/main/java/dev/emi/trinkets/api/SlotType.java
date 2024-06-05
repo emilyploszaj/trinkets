@@ -156,4 +156,8 @@ public class SlotType {
 	public int hashCode() {
 		return Objects.hash(group, name);
 	}
+
+	public String getId() {
+		return this.group + "/" + this.name;
+	}
 }

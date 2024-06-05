@@ -24,7 +24,7 @@ public class SlotAttributes {
 	}
 
 	public static Identifier getIdentifier(SlotReference ref) {
-		String key = ref.inventory().getSlotType().getGroup() + "/" + ref.inventory().getSlotType().getName() + "/" + ref.index();
+		String key = ref.inventory().getSlotType().getId() + "/" + ref.index();
 		CACHED_IDS.computeIfAbsent(key, Identifier::of);
 		return CACHED_IDS.get(key);
 	}
