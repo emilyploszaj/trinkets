@@ -25,7 +25,12 @@ public class EnchantmentDefinitionMixin implements TrinketSlotTarget {
 	public Set<String> trinkets$slots() {
 		return this.trinketSlots;
 	}
-	
+
+	@Override
+	public void trinkets$slots(Set<String> slots) {
+		this.trinketSlots = slots;
+	}
+
 	@ModifyExpressionValue(method = "<clinit>", at = @At(value = "INVOKE", target = "Lcom/mojang/serialization/codecs/RecordCodecBuilder;mapCodec(Ljava/util/function/Function;)Lcom/mojang/serialization/MapCodec;"))
 	private static MapCodec<Enchantment.Definition> extendCodec(MapCodec<Enchantment.Definition> codec) {
 		return RecordCodecBuilder.mapCodec(instance -> instance.group(
@@ -34,7 +39,7 @@ public class EnchantmentDefinitionMixin implements TrinketSlotTarget {
 						.optionalFieldOf("trinkets:slots", Set.of())
 						.forGetter(x -> ((TrinketSlotTarget) (Object) x).trinkets$slots())
 			).apply(instance, (Enchantment.Definition def, Set<String> slots) -> {
-				((EnchantmentDefinitionMixin) (Object) def).trinketSlots = slots;
+				((TrinketSlotTarget) (Object) def).trinkets$slots(slots);
 				return def;
 			}));
 	}

@@ -2,11 +2,12 @@ package dev.emi.trinkets.api;
 
 import com.google.common.collect.ImmutableMap;
 import com.mojang.datafixers.util.Function3;
+import dev.emi.trinkets.TrinketSlotTarget;
 import dev.emi.trinkets.TrinketsMain;
 import dev.emi.trinkets.data.EntitySlotLoader;
 import dev.emi.trinkets.payload.BreakPayload;
+import net.minecraft.enchantment.Enchantment;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.random.Random;
 import org.ladysnake.cca.api.v3.component.ComponentKey;
 import org.ladysnake.cca.api.v3.component.ComponentRegistryV3;
 import net.fabricmc.api.EnvType;
@@ -157,6 +158,14 @@ public class TrinketsApi {
 			}
 		}
 		return state.get();
+	}
+
+	public static Enchantment.Definition withTrinketSlots(Enchantment.Definition definition, Set<String> slots) {
+		var def = new Enchantment.Definition(definition.supportedItems(), definition.primaryItems(), definition.weight(), definition.maxLevel(),
+				definition.minCost(), definition.maxCost(), definition.anvilCost(), definition.slots());
+
+		((TrinketSlotTarget) (Object) def).trinkets$slots(slots);
+		return def;
 	}
 
 	static {
