@@ -176,7 +176,7 @@ public class TrinketsApi {
 
 		TrinketsApi.registerTrinketPredicate(Identifier.of("trinkets", "tag"), (stack, ref, entity) -> {
 			SlotType slot = ref.inventory().getSlotType();
-			TagKey<Item> tag = TagKey.of(RegistryKeys.ITEM, Identifier.of("trinkets", slot.getGroup() + "/" + slot.getName()));
+			TagKey<Item> tag = TagKey.of(RegistryKeys.ITEM, Identifier.of("trinkets", slot.getId()));
 
 			if (stack.isIn(tag) || stack.isIn(trinketsAll)) {
 				return TriState.TRUE;

@@ -238,7 +238,7 @@ public abstract class LivingEntityMixin extends Entity {
                     Map<String, NbtCompound> map = new HashMap<>();
 
 					for (TrinketInventory trinketInventory : inventoriesToSend) {
-						map.put(trinketInventory.getSlotType().getGroup() + "/" + trinketInventory.getSlotType().getName(), trinketInventory.getSyncTag());
+						map.put(trinketInventory.getSlotType().getId(), trinketInventory.getSyncTag());
 					}
                     SyncInventoryPayload packet = new SyncInventoryPayload(this.getId(), contentUpdates, map);
 
