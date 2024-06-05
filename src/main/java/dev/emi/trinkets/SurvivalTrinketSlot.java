@@ -12,6 +12,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.util.Identifier;
+import net.minecraft.world.World;
 
 /**
  * A gui slot for a trinket slot, used in the survival inventory, but suited for any case
@@ -49,7 +50,8 @@ public class SurvivalTrinketSlot extends Slot implements TrinketSlot {
 	public boolean isEnabled() {
 		if (alwaysVisible) {
 			if (x < 0) {
-				if (trinketInventory.getComponent().getEntity().getWorld().isClient) {
+				World world = trinketInventory.getComponent().getEntity().getWorld();
+				if (world.isClient) {
 					MinecraftClient client = MinecraftClient.getInstance();
 					Screen s = client.currentScreen;
 					if (s instanceof InventoryScreen screen) {

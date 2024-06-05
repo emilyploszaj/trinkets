@@ -1,7 +1,6 @@
 package dev.emi.trinkets.mixin;
 
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.item.ItemGroups;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -22,7 +21,6 @@ import dev.emi.trinkets.api.TrinketsApi;
 import net.minecraft.client.gui.screen.ingame.AbstractInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen.CreativeScreenHandler;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.util.math.Rect2i;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;

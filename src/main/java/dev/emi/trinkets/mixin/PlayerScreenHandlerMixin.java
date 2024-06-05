@@ -35,6 +35,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.screen.PlayerScreenHandler;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
+import net.minecraft.world.World;
 
 /**
  * Adds trinket slots to the player's screen handler
@@ -222,7 +223,8 @@ public abstract class PlayerScreenHandlerMixin extends ScreenHandler implements 
 
 	@Inject(at = @At("HEAD"), method = "onClosed")
 	private void onClosed(PlayerEntity player, CallbackInfo info) {
-		if (player.getWorld().isClient) {
+		World world = player.getWorld();
+		if (world.isClient) {
 			TrinketsClient.activeGroup = null;
 			TrinketsClient.activeType = null;
 			TrinketsClient.quickMoveGroup = null;
@@ -257,7 +259,8 @@ public abstract class PlayerScreenHandlerMixin extends ScreenHandler implements 
 
 							if (res) {
 								if (this.insertItem(stack, i, i + 1, false)) {
-									if (player.getWorld().isClient) {
+									World world = player.getWorld();
+									if (world.isClient) {
 										TrinketsClient.quickMoveTimer = 20;
 										TrinketsClient.quickMoveGroup = TrinketsApi.getPlayerSlots(this.owner).get(type.getGroup());
 										if (ref.index() > 0) {
