@@ -106,7 +106,31 @@ public class TrinketsMain implements ModInitializer, EntityComponentInitializer 
 						)
 					)
 				)
+				.then(
+					literal("clear")
+					.executes(context -> {
+						try {
+							return clearCommand(context);
+						} catch (Exception e){
+							e.printStackTrace();
+							return -1;
+						}
+					})
+				)
 			));
+	}
+
+	private static int clearCommand(CommandContext<ServerCommandSource> context){
+		ServerPlayerEntity player = context.getSource().getPlayer();
+		if (player != null) {
+			TrinketComponent comp = TrinketsApi.getTrinketComponent(player).get();
+			for (var entry : comp.getInventory().entrySet()){
+				for (var inv : entry.getValue().values()){
+					inv.clear();
+				}
+			}
+		}
+		return 1;
 	}
 
 	private static int trinketsCommand(CommandContext<ServerCommandSource> context, int amount) {

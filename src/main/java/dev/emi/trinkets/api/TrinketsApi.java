@@ -38,7 +38,7 @@ public class TrinketsApi {
 	public static final ComponentKey<TrinketComponent> TRINKET_COMPONENT = ComponentRegistryV3.INSTANCE
 			.getOrCreate(Identifier.of(TrinketsMain.MOD_ID, "trinkets"), TrinketComponent.class);
 	private static final Map<Identifier, Function3<ItemStack, SlotReference, LivingEntity, TriState>> PREDICATES = new HashMap<>();
-	
+
 	private static final Map<Item, Trinket> TRINKETS = new HashMap<>();
 	private static final Trinket DEFAULT_TRINKET;
 
@@ -184,7 +184,7 @@ public class TrinketsApi {
 			return TriState.DEFAULT;
 		});
 		TrinketsApi.registerTrinketPredicate(Identifier.of("trinkets", "relevant"), (stack, ref, entity) -> {
-			var map = TrinketsApi.getTrinket(stack.getItem()).getModifiers(stack, ref, entity, SlotAttributes.getIdentifier(ref));
+			var map = Trinket.trinketModifiers(stack, ref, entity);
 			if (!map.isEmpty()) {
 				return TriState.TRUE;
 			}

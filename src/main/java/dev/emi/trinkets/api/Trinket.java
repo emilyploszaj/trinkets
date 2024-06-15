@@ -103,26 +103,43 @@ public interface Trinket {
 		return stack.getItem() instanceof Equipment eq ? eq.getEquipSound() : null;
 	}
 
+	//internalizes getTrinket and slotIdentifier, both which typically are generated just before the modifiers call anyway
+	static Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> trinketModifiers(ItemStack stack, SlotReference slot, LivingEntity entity){
+		Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> map = TrinketsApi.getTrinket(stack.getItem()).getModifiers(stack, slot, entity, SlotAttributes.getIdentifier(slot));
+		if (stack.contains(TrinketsAttributeModifiersComponent.TYPE)) {
+			for (var entry : stack.getOrDefault(TrinketsAttributeModifiersComponent.TYPE, TrinketsAttributeModifiersComponent.DEFAULT).modifiers()) {
+				if (entry.slot().isEmpty() || entry.slot().get().equals(slot.inventory().getSlotType().getId())) {
+					map.put(entry.attribute(), SlotAttributes.toSlotReferencedModifier(entry.modifier(), slot));
+				}
+			}
+		}
+		return map;
+	}
+
+	//overload if a custom method for retrieving the trinket is used. Also exposes the slotIdentifier if custom on that is needed
+	static Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> trinketModifiers(Trinket trinket, ItemStack stack, SlotReference slot, LivingEntity entity, Identifier slotIdentifier){
+		Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> map = trinket.getModifiers(stack, slot, entity, slotIdentifier);
+		if (stack.contains(TrinketsAttributeModifiersComponent.TYPE)) {
+			for (var entry : stack.getOrDefault(TrinketsAttributeModifiersComponent.TYPE, TrinketsAttributeModifiersComponent.DEFAULT).modifiers()) {
+				if (entry.slot().isEmpty() || entry.slot().get().equals(slot.inventory().getSlotType().getId())) {
+					map.put(entry.attribute(), SlotAttributes.toSlotReferencedModifier(entry.modifier(), slot));
+				}
+			}
+		}
+		return map;
+	}
+
 	/**
 	 * Returns the Entity Attribute Modifiers for a stack in a slot. Child implementations should
 	 * remain pure
 	 * <p>
-	 * If modifiers do not change based on stack, slot, or entity, caching based on passed UUID
+	 * If modifiers do not change based on stack, slot, or entity, caching based on passed slotIdentifier
 	 * should be considered
 	 *
 	 * @param slotIdentifier The Identifier to use for creating attributes
 	 */
 	default Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> getModifiers(ItemStack stack, SlotReference slot, LivingEntity entity, Identifier slotIdentifier) {
-		Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> map = Multimaps.newMultimap(Maps.newLinkedHashMap(), ArrayList::new);
-
-		if (stack.contains(TrinketsAttributeModifiersComponent.TYPE)) {
-			for (var entry : stack.getOrDefault(TrinketsAttributeModifiersComponent.TYPE, TrinketsAttributeModifiersComponent.DEFAULT).modifiers()) {
-				if (entry.slot().isEmpty() || entry.slot().get().equals(slot.inventory().getSlotType().getId())) {
-					map.put(entry.attribute(), entry.modifier());
-				}
-			}
-		}
-		return map;
+		return Multimaps.newMultimap(Maps.newLinkedHashMap(), ArrayList::new);
 	}
 
 	/**

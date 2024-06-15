@@ -16,6 +16,8 @@ import dev.emi.trinkets.api.Trinket;
 import dev.emi.trinkets.api.TrinketComponent;
 import dev.emi.trinkets.api.TrinketInventory;
 import dev.emi.trinkets.api.TrinketsApi;
+import dev.emi.trinkets.api.event.TrinketEquipCallback;
+import dev.emi.trinkets.api.event.TrinketUnequipCallback;
 import dev.emi.trinkets.payload.SyncInventoryPayload;
 import net.minecraft.component.EnchantmentEffectComponentTypes;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
@@ -62,12 +64,12 @@ import net.minecraft.world.World;
 public abstract class LivingEntityMixin extends Entity {
 	@Unique
 	private final Map<String, ItemStack> lastEquippedTrinkets = new HashMap<>();
-	
-	@Shadow
-	protected abstract AttributeContainer getAttributes();
 
-	private LivingEntityMixin() {
-		super(null, null);
+	@Shadow
+	public abstract AttributeContainer getAttributes();
+
+	private LivingEntityMixin(EntityType<?> type, World world) {
+		super(type, world);
 	}
 
 	@Inject(at = @At("HEAD"), method = "canFreeze", cancellable = true)
@@ -96,7 +98,7 @@ public abstract class LivingEntityMixin extends Entity {
 			DropRule dropRule = TrinketsApi.getTrinket(stack.getItem()).getDropRule(stack, ref, entity);
 
 			dropRule = TrinketDropCallback.EVENT.invoker().drop(dropRule, stack, ref, entity);
-			
+
 			TrinketInventory inventory = ref.inventory();
 
 			if (dropRule == DropRule.DEFAULT) {
@@ -128,10 +130,12 @@ public abstract class LivingEntityMixin extends Entity {
 		}));
 	}
 
+	@Unique
 	private void dropFromEntity(ItemStack stack) {
 		ItemEntity entity = dropStack(stack);
 		// Mimic player drop behavior for only players
-		if (entity != null && ((Entity) this) instanceof PlayerEntity) {
+        //noinspection ConstantValue
+        if (entity != null && ((Entity) this) instanceof PlayerEntity) {
 			entity.setPos(entity.getX(), this.getEyeY() - 0.3, entity.getZ());
 			entity.setPickupDelay(40);
 			float magnitude = this.random.nextFloat() * 0.5f;
@@ -161,16 +165,16 @@ public abstract class LivingEntityMixin extends Entity {
 				if (!ItemStack.areEqual(newStack, oldStack)) {
 
 					TrinketsApi.getTrinket(oldStack.getItem()).onUnequip(oldStack, ref, entity);
+					TrinketUnequipCallback.EVENT.invoker().onUnequip(oldStack, ref, entity);
 					TrinketsApi.getTrinket(newStack.getItem()).onEquip(newStack, ref, entity);
+					TrinketEquipCallback.EVENT.invoker().onEquip(newStack, ref, entity);
 
 					World world = this.getWorld();
 					if (!world.isClient) {
 						contentUpdates.put(newRef, newStackCopy);
-						Identifier identifier = SlotAttributes.getIdentifier(ref);
 
 						if (!oldStack.isEmpty()) {
-							Trinket trinket = TrinketsApi.getTrinket(oldStack.getItem());
-							Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> map = trinket.getModifiers(oldStack, ref, entity, identifier);
+							Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> map = Trinket.trinketModifiers(oldStack, ref, entity);
 							Multimap<String, EntityAttributeModifier> slotMap = HashMultimap.create();
 							Set<RegistryEntry<EntityAttribute>> toRemove = Sets.newHashSet();
 							for (RegistryEntry<EntityAttribute> attr : map.keySet()) {
@@ -194,8 +198,7 @@ public abstract class LivingEntityMixin extends Entity {
 						}
 
 						if (!newStack.isEmpty()) {
-							Trinket trinket = TrinketsApi.getTrinket(newStack.getItem());
-							Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> map = trinket.getModifiers(newStack, ref, entity, identifier);
+							Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> map = Trinket.trinketModifiers(newStack, ref, entity);
 							Multimap<String, EntityAttributeModifier> slotMap = HashMultimap.create();
 							Set<RegistryEntry<EntityAttribute>> toRemove = Sets.newHashSet();
 							for (RegistryEntry<EntityAttribute> attr : map.keySet()) {
