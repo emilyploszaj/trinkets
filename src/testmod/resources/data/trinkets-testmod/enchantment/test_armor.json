@@ -1,0 +1,30 @@
+{
+  "description": "Test armor",
+  "supported_items": "trinkets-testmod:test",
+  "weight": 1,
+  "max_level": 5,
+  "min_cost": {
+    "base": 5,
+    "per_level_above_first": 3
+  },
+  "max_cost": {
+    "base": 50,
+    "per_level_above_first": 5
+  },
+  "anvil_cost": 3,
+  "slots": [
+    "armor"
+  ],
+  "effects": {
+    "minecraft:post_attack": [
+      {
+        "enchanted": "victim",
+        "affected": "attacker",
+        "effect": {
+          "type": "minecraft:ignite",
+          "duration": 20
+        }
+      }
+    ]
+  }
+}

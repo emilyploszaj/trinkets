@@ -27,7 +27,7 @@ import java.util.UUID;
 
 public class TestTrinket extends TrinketItem implements TrinketRenderer {
 
-	private static final Identifier TEXTURE = new Identifier(TrinketsTest.MOD_ID, "textures/entity/trinket/hat.png");
+	private static final Identifier TEXTURE = Identifier.of(TrinketsTest.MOD_ID, "textures/entity/trinket/hat.png");
 	private BipedEntityModel<LivingEntity> model;
 
 	public TestTrinket(Settings settings) {
@@ -42,13 +42,13 @@ public class TestTrinket extends TrinketItem implements TrinketRenderer {
 	}
 
 	@Override
-	public Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> getModifiers(ItemStack stack, SlotReference slot, LivingEntity entity, UUID uuid) {
-		Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> modifiers = super.getModifiers(stack, slot, entity, uuid);
-		EntityAttributeModifier speedModifier = new EntityAttributeModifier(uuid, "trinkets-testmod:movement_speed",
+	public Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> getModifiers(ItemStack stack, SlotReference slot, LivingEntity entity, Identifier id) {
+		Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> modifiers = super.getModifiers(stack, slot, entity, id);
+		EntityAttributeModifier speedModifier = new EntityAttributeModifier(id.withSuffixedPath("trinkets-testmod/movement_speed"),
 				0.4, EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 		modifiers.put(EntityAttributes.GENERIC_MOVEMENT_SPEED, speedModifier);
-		SlotAttributes.addSlotModifier(modifiers, "offhand/ring", uuid, 6, EntityAttributeModifier.Operation.ADD_VALUE);
-		SlotAttributes.addSlotModifier(modifiers, "hand/glove", uuid, 1, EntityAttributeModifier.Operation.ADD_VALUE);
+		SlotAttributes.addSlotModifier(modifiers, "offhand/ring", id.withSuffixedPath("trinkets-testmod/ring_slot"), 6, EntityAttributeModifier.Operation.ADD_VALUE);
+		SlotAttributes.addSlotModifier(modifiers, "hand/glove", id.withSuffixedPath("trinkets-testmod/glove_slot"), 1, EntityAttributeModifier.Operation.ADD_VALUE);
 		return modifiers;
 	}
 
@@ -60,7 +60,7 @@ public class TestTrinket extends TrinketItem implements TrinketRenderer {
 		model.animateModel(entity, limbAngle, limbDistance, tickDelta);
 		TrinketRenderer.followBodyRotations(entity, model);
 		VertexConsumer vertexConsumer = vertexConsumers.getBuffer(model.getLayer(TEXTURE));
-		model.render(matrices, vertexConsumer, light, OverlayTexture.DEFAULT_UV, 1, 1, 1, 1);
+		model.render(matrices, vertexConsumer, light, OverlayTexture.DEFAULT_UV, 1);
 	}
 
 	@Environment(EnvType.CLIENT)

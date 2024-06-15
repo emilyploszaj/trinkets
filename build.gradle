@@ -56,7 +56,7 @@ dependencies {
 
 	// Dev Runtime
 	testmodImplementation sourceSets.main.output
-	modLocalRuntime "dev.emi:emi-fabric:${emi_version}"
+	//modLocalRuntime "dev.emi:emi-fabric:${emi_version}"
 	//modRuntimeOnly "me.shedaniel:RoughlyEnoughItems-fabric:${project.rei_version}"
 	//modLocalRuntime "com.terraformersmc:modmenu:${project.mod_menu_version}"
 }

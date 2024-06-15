@@ -1,13 +1,15 @@
 package dev.emi.trinkets.api;
 
 import java.util.ArrayList;
-import java.util.UUID;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 
 import dev.emi.trinkets.mixin.accessor.LivingEntityAccessor;
+import java.util.function.Consumer;
+
+import net.minecraft.component.EnchantmentEffectComponentTypes;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.EntityAttribute;
@@ -17,8 +19,9 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvent;
-import net.minecraft.util.math.random.Random;
+import net.minecraft.util.Identifier;
 
 public interface Trinket {
 
@@ -73,7 +76,7 @@ public interface Trinket {
 	 * @return Whether the stack can be unequipped
 	 */
 	default boolean canUnequip(ItemStack stack, SlotReference slot, LivingEntity entity) {
-		return !EnchantmentHelper.hasBindingCurse(stack) || (entity instanceof PlayerEntity player && player.isCreative());
+		return !EnchantmentHelper.hasAnyEnchantmentsWith(stack, EnchantmentEffectComponentTypes.PREVENT_ARMOR_CHANGE) || (entity instanceof PlayerEntity player && player.isCreative());
 	}
 
 	/**
@@ -107,14 +110,14 @@ public interface Trinket {
 	 * If modifiers do not change based on stack, slot, or entity, caching based on passed UUID
 	 * should be considered
 	 *
-	 * @param uuid The UUID to use for creating attributes
+	 * @param slotIdentifier The Identifier to use for creating attributes
 	 */
-	default Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> getModifiers(ItemStack stack, SlotReference slot, LivingEntity entity, UUID uuid) {
+	default Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> getModifiers(ItemStack stack, SlotReference slot, LivingEntity entity, Identifier slotIdentifier) {
 		Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> map = Multimaps.newMultimap(Maps.newLinkedHashMap(), ArrayList::new);
 
 		if (stack.contains(TrinketsAttributeModifiersComponent.TYPE)) {
 			for (var entry : stack.getOrDefault(TrinketsAttributeModifiersComponent.TYPE, TrinketsAttributeModifiersComponent.DEFAULT).modifiers()) {
-				if (entry.slot().isEmpty() || entry.slot().get().equals(slot.inventory().getSlotType().getGroup() + "/" + slot.inventory().getSlotType().getName())) {
+				if (entry.slot().isEmpty() || entry.slot().get().equals(slot.inventory().getSlotType().getId())) {
 					map.put(entry.attribute(), entry.modifier());
 				}
 			}
@@ -124,7 +127,7 @@ public interface Trinket {
 
 	/**
 	 * Called by Trinkets when a trinket is broken on the client if {@link TrinketsApi#onTrinketBroken}
-	 * is called by the callback in {@link ItemStack#damage(int, Random, ServerPlayerEntity, Runnable)} server side
+	 * is called by the callback in {@link ItemStack#damage(int, ServerWorld, ServerPlayerEntity, Consumer)} server side
 	 * <p>
 	 * The default implementation works the same as breaking vanilla equipment, a sound is played and
 	 * particles are spawned based on the item

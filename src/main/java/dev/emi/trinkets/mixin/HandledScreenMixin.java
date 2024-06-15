@@ -29,9 +29,9 @@ import net.minecraft.util.Identifier;
 @Mixin(HandledScreen.class)
 public abstract class HandledScreenMixin extends Screen {
 	@Unique
-	private static final Identifier MORE_SLOTS = new Identifier("trinkets", "textures/gui/more_slots.png");
+	private static final Identifier MORE_SLOTS = Identifier.of("trinkets", "textures/gui/more_slots.png");
 	@Unique
-	private static final Identifier BLANK_BACK = new Identifier("trinkets", "textures/gui/blank_back.png");
+	private static final Identifier BLANK_BACK = Identifier.of("trinkets", "textures/gui/blank_back.png");
 
 	private HandledScreenMixin() {
 		super(null);

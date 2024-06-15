@@ -7,7 +7,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import java.util.Optional;
 
-import net.minecraft.component.DataComponentType;
+import net.minecraft.component.ComponentType;
 import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.network.RegistryByteBuf;
@@ -36,7 +36,7 @@ public record TrinketsAttributeModifiersComponent(List<Entry> modifiers, boolean
 			TrinketsAttributeModifiersComponent::showInTooltip,
 			TrinketsAttributeModifiersComponent::new);
 
-	public static final DataComponentType<TrinketsAttributeModifiersComponent> TYPE = DataComponentType.<TrinketsAttributeModifiersComponent>builder().codec(CODEC).packetCodec(PACKET_CODEC).build();
+	public static final ComponentType<TrinketsAttributeModifiersComponent> TYPE = ComponentType.<TrinketsAttributeModifiersComponent>builder().codec(CODEC).packetCodec(PACKET_CODEC).build();
 
 	public TrinketsAttributeModifiersComponent(List<Entry> modifiers, boolean showInTooltip) {
 		this.modifiers = modifiers;

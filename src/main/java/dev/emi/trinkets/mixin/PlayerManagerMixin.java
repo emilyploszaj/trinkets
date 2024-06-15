@@ -39,7 +39,7 @@ public abstract class PlayerManagerMixin {
 			Set<TrinketInventory> inventoriesToSend = trinkets.getTrackingUpdates();
 
 			for (TrinketInventory trinketInventory : inventoriesToSend) {
-				tag.put(trinketInventory.getSlotType().getGroup() + "/" + trinketInventory.getSlotType().getName(), trinketInventory.getSyncTag());
+				tag.put(trinketInventory.getSlotType().getId(), trinketInventory.getSyncTag());
 			}
 			ServerPlayNetworking.send(player, new SyncInventoryPayload(player.getId(), Map.of(), tag));
 			inventoriesToSend.clear();

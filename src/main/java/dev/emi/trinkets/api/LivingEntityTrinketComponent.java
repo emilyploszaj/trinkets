@@ -18,6 +18,7 @@ import dev.emi.trinkets.TrinketPlayerScreenHandler;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.util.Identifier;
 import org.ladysnake.cca.api.v3.component.sync.AutoSyncedComponent;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.EntityAttribute;
@@ -161,7 +162,7 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 				if (groupInv != null) {
 					TrinketInventory inv = groupInv.get(slot);
 					if (inv != null) {
-						inv.removeModifier(modifier.uuid());
+						inv.removeModifier(modifier.id());
 					}
 				}
 			}
@@ -234,9 +235,9 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 		Multimap<String, EntityAttributeModifier> slotMap = HashMultimap.create();
 		this.forEach((ref, stack) -> {
 			if (!stack.isEmpty()) {
-				UUID uuid = SlotAttributes.getUuid(ref);
+				Identifier identifier = SlotAttributes.getIdentifier(ref);
 				Trinket trinket = TrinketsApi.getTrinket(stack.getItem());
-				Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> map = trinket.getModifiers(stack, ref, entity, uuid);
+				Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> map = trinket.getModifiers(stack, ref, entity, identifier);
 				for (RegistryEntry<EntityAttribute> entityAttribute : map.keySet()) {
 					if (entityAttribute.hasKeyAndValue() && entityAttribute.value() instanceof SlotAttributes.SlotEntityAttribute slotEntityAttribute) {
 						slotMap.putAll(slotEntityAttribute.slot, map.get(entityAttribute));

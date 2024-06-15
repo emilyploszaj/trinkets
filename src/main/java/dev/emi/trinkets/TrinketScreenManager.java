@@ -14,7 +14,7 @@ import net.minecraft.screen.slot.Slot;
 import net.minecraft.util.Identifier;
 
 public class TrinketScreenManager {
-	private static final Identifier MORE_SLOTS = new Identifier("trinkets", "textures/gui/more_slots.png");
+	private static final Identifier MORE_SLOTS = Identifier.of("trinkets", "textures/gui/more_slots.png");
 	public static TrinketScreen currentScreen;
 	public static Rect2i currentBounds = new Rect2i(0, 0, 0, 0);
 	public static Rect2i typeBounds = new Rect2i(0, 0, 0, 0);
