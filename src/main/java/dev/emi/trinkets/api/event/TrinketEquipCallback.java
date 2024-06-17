@@ -11,7 +11,7 @@ public interface TrinketEquipCallback {
     Event<TrinketEquipCallback> EVENT = EventFactory.createArrayBacked(TrinketEquipCallback.class,
         listeners -> (stack, slot, entity) -> {
             for (TrinketEquipCallback listener: listeners){
-                listener.onEquip(stack,slot,entity);
+                listener.onEquip(stack, slot, entity);
             }
         });
 

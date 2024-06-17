@@ -54,7 +54,7 @@ public abstract class EnchantmentHelperMixin {
 							Set<String> trinketSlots = ((TrinketSlotTarget) (Object) registryEntry.value().definition()).trinkets$slots();
 
 							if (slots.contains(AttributeModifierSlot.ANY) || slots.contains(AttributeModifierSlot.ARMOR) || trinketSlots.contains(ref.inventory().getSlotType().getId())) {
-								contextAwareConsumer.accept(registryEntry, entry.getIntValue(),context);
+								contextAwareConsumer.accept(registryEntry, entry.getIntValue(), context);
 							}
 						}
 					}

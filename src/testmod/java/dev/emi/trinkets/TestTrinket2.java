@@ -36,7 +36,7 @@ public class TestTrinket2 extends TrinketItem {
 	public Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> getModifiers(ItemStack stack, SlotReference slot, LivingEntity entity, Identifier id) {
 		/*//testing the composition of the new attribute suffix
 		TrinketsTest.LOGGER.info(SlotAttributes.toSlotReferencedModifier(new EntityAttributeModifier(id.withSuffixedPath("trinkets-testmod/movement_speed"),
-				0.4, EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL),slot));*/
+				0.4, EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL), slot));*/
 		Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> modifiers = Multimaps.newMultimap(Maps.newLinkedHashMap(), ArrayList::new);
 		EntityAttributeModifier speedModifier = new EntityAttributeModifier(id.withSuffixedPath("trinkets-testmod/movement_speed"),
 				0.1, EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
