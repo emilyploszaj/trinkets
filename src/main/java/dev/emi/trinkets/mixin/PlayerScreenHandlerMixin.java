@@ -79,7 +79,9 @@ public abstract class PlayerScreenHandlerMixin extends ScreenHandler implements 
 	@Override
 	public void trinkets$updateTrinketSlots(boolean slotsChanged) {
 		TrinketsApi.getTrinketComponent(owner).ifPresent(trinkets -> {
-			if (slotsChanged) trinkets.update();
+			if (slotsChanged) {
+				trinkets.update();
+			}
 			Map<String, SlotGroup> groups = trinkets.getGroups();
 			groupPos.clear();
 			while (trinketSlotStart < trinketSlotEnd) {
@@ -250,7 +252,7 @@ public abstract class PlayerScreenHandlerMixin extends ScreenHandler implements 
 							if (!(s instanceof SurvivalTrinketSlot) || !s.canInsert(stack)) {
 								continue;
 							}
-							
+
 							SurvivalTrinketSlot ts = (SurvivalTrinketSlot) s;
 							SlotType type = ts.getType();
 							SlotReference ref = new SlotReference((TrinketInventory) ts.inventory, ts.getIndex());
