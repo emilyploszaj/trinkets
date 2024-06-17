@@ -9,7 +9,7 @@ import net.minecraft.item.ItemStack;
 public interface TrinketEquipCallback {
     Event<TrinketEquipCallback> EVENT = EventFactory.createArrayBacked(TrinketEquipCallback.class,
     listeners -> (stack, slot, entity) -> {
-        for (var listener: listeners){
+        for (TrinketEquipCallback listener: listeners){
             listener.onEquip(stack,slot,entity);
         }
     });

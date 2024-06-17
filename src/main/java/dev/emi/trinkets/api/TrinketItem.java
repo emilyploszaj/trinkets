@@ -12,11 +12,15 @@ import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
 import net.minecraft.world.event.GameEvent;
 
+import java.util.Collection;
+import java.util.Map;
+import java.util.Optional;
+
 /**
  * A convenient base class for trinket items that automatically registers itself and
  */
 public class TrinketItem extends Item implements Trinket {
-	
+
 	public TrinketItem(Item.Settings settings) {
 		super(settings);
 		TrinketsApi.registerTrinket(this, this);
@@ -36,10 +40,10 @@ public class TrinketItem extends Item implements Trinket {
 	}
 
 	public static boolean equipItem(LivingEntity user, ItemStack stack) {
-		var optional = TrinketsApi.getTrinketComponent(user);
+		Optional<TrinketComponent> optional = TrinketsApi.getTrinketComponent(user);
 		if (optional.isPresent()) {
 			TrinketComponent comp = optional.get();
-			for (var group : comp.getInventory().values()) {
+			for (Map<String, TrinketInventory> group : comp.getInventory().values()) {
 				for (TrinketInventory inv : group.values()) {
 					for (int i = 0; i < inv.size(); i++) {
 						if (inv.getStack(i).isEmpty()) {

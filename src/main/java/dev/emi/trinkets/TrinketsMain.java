@@ -5,14 +5,7 @@ import static com.mojang.brigadier.arguments.StringArgumentType.string;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
-import dev.emi.trinkets.api.Trinket;
-import dev.emi.trinkets.api.TrinketItem;
-import dev.emi.trinkets.api.TrinketComponent;
-import dev.emi.trinkets.api.LivingEntityTrinketComponent;
-import dev.emi.trinkets.api.TrinketsApi;
-import dev.emi.trinkets.api.TrinketsAttributeModifiersComponent;
-import dev.emi.trinkets.api.SlotGroup;
-import dev.emi.trinkets.api.SlotType;
+import dev.emi.trinkets.api.*;
 import dev.emi.trinkets.payload.BreakPayload;
 import dev.emi.trinkets.payload.SyncInventoryPayload;
 import dev.emi.trinkets.payload.SyncSlotsPayload;
@@ -45,6 +38,9 @@ import net.minecraft.resource.ResourceType;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
+import org.spongepowered.asm.mixin.injection.struct.InjectorGroupInfo;
+
+import java.util.Map;
 
 public class TrinketsMain implements ModInitializer, EntityComponentInitializer {
 
@@ -124,8 +120,8 @@ public class TrinketsMain implements ModInitializer, EntityComponentInitializer 
 		ServerPlayerEntity player = context.getSource().getPlayer();
 		if (player != null) {
 			TrinketComponent comp = TrinketsApi.getTrinketComponent(player).get();
-			for (var entry : comp.getInventory().entrySet()){
-				for (var inv : entry.getValue().values()){
+			for (Map.Entry<String, Map<String, TrinketInventory>> entry : comp.getInventory().entrySet()){
+				for (TrinketInventory inv : entry.getValue().values()){
 					inv.clear();
 				}
 			}

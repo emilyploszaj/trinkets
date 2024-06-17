@@ -35,7 +35,7 @@ public abstract class PlayerManagerMixin {
 		EntitySlotLoader.SERVER.sync(player);
 		((TrinketPlayerScreenHandler) player.playerScreenHandler).trinkets$updateTrinketSlots(false);
 		TrinketsApi.getTrinketComponent(player).ifPresent(trinkets -> {
-			var tag = new HashMap<String, NbtCompound>();
+			Map<String, NbtCompound> tag = new HashMap<>();
 			Set<TrinketInventory> inventoriesToSend = trinkets.getTrackingUpdates();
 
 			for (TrinketInventory trinketInventory : inventoriesToSend) {

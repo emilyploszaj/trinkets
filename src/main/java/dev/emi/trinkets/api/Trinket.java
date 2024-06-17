@@ -107,7 +107,7 @@ public interface Trinket {
 	static Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> trinketModifiers(ItemStack stack, SlotReference slot, LivingEntity entity){
 		Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> map = TrinketsApi.getTrinket(stack.getItem()).getModifiers(stack, slot, entity, SlotAttributes.getIdentifier(slot));
 		if (stack.contains(TrinketsAttributeModifiersComponent.TYPE)) {
-			for (var entry : stack.getOrDefault(TrinketsAttributeModifiersComponent.TYPE, TrinketsAttributeModifiersComponent.DEFAULT).modifiers()) {
+			for (TrinketsAttributeModifiersComponent. Entry entry : stack.getOrDefault(TrinketsAttributeModifiersComponent.TYPE, TrinketsAttributeModifiersComponent.DEFAULT).modifiers()) {
 				if (entry.slot().isEmpty() || entry.slot().get().equals(slot.inventory().getSlotType().getId())) {
 					map.put(entry.attribute(), SlotAttributes.toSlotReferencedModifier(entry.modifier(), slot));
 				}
@@ -120,7 +120,7 @@ public interface Trinket {
 	static Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> trinketModifiers(Trinket trinket, ItemStack stack, SlotReference slot, LivingEntity entity, Identifier slotIdentifier){
 		Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> map = trinket.getModifiers(stack, slot, entity, slotIdentifier);
 		if (stack.contains(TrinketsAttributeModifiersComponent.TYPE)) {
-			for (var entry : stack.getOrDefault(TrinketsAttributeModifiersComponent.TYPE, TrinketsAttributeModifiersComponent.DEFAULT).modifiers()) {
+			for (TrinketsAttributeModifiersComponent. Entry entry : stack.getOrDefault(TrinketsAttributeModifiersComponent.TYPE, TrinketsAttributeModifiersComponent.DEFAULT).modifiers()) {
 				if (entry.slot().isEmpty() || entry.slot().get().equals(slot.inventory().getSlotType().getId())) {
 					map.put(entry.attribute(), SlotAttributes.toSlotReferencedModifier(entry.modifier(), slot));
 				}

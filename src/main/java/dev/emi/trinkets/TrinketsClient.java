@@ -95,7 +95,7 @@ public class TrinketsClient implements ClientModInitializer {
 			Entity e = client.world.getEntityById(payload.entityId());
 			if (e instanceof LivingEntity entity) {
 				TrinketsApi.getTrinketComponent(entity).ifPresent(comp -> {
-					var groupMap = comp.getInventory().get(payload.group());
+					Map<String, TrinketInventory> groupMap = comp.getInventory().get(payload.group());
 					if (groupMap != null) {
 						TrinketInventory inv = groupMap.get(payload.slot());
 						if (payload.index() < inv.size()) {
