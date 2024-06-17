@@ -24,12 +24,12 @@ public class SlotAttributes {
 	}
 
 	public static Identifier getIdentifier(SlotReference ref) {
-		String key = ref.getRefId();
+		String key = ref.getId();
 		return CACHED_IDS.computeIfAbsent(key, Identifier::of);
 	}
 
 	public static EntityAttributeModifier toSlotReferencedModifier(EntityAttributeModifier modifier, SlotReference ref){
-		return new EntityAttributeModifier(modifier.id().withSuffixedPath("/" + ref.getRefId()),modifier.value(),modifier.operation());
+		return new EntityAttributeModifier(modifier.id().withSuffixedPath("/" + ref.getId()), modifier.value(), modifier.operation());
 	}
 
 	public static class SlotEntityAttribute extends EntityAttribute {

@@ -68,8 +68,8 @@ public abstract class LivingEntityMixin extends Entity {
 	@Shadow
 	public abstract AttributeContainer getAttributes();
 
-	private LivingEntityMixin(EntityType<?> type, World world) {
-		super(type, world);
+	private LivingEntityMixin() {
+		super(null, null);
 	}
 
 	@Inject(at = @At("HEAD"), method = "canFreeze", cancellable = true)
@@ -134,7 +134,6 @@ public abstract class LivingEntityMixin extends Entity {
 	private void dropFromEntity(ItemStack stack) {
 		ItemEntity entity = dropStack(stack);
 		// Mimic player drop behavior for only players
-        //noinspection ConstantValue
         if (entity != null && ((Entity) this) instanceof PlayerEntity) {
 			entity.setPos(entity.getX(), this.getEyeY() - 0.3, entity.getZ());
 			entity.setPickupDelay(40);

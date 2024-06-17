@@ -53,13 +53,14 @@ public abstract class ItemStackMixin {
 
 			boolean hideAdditionalTooltip = self.contains(DataComponentTypes.HIDE_ADDITIONAL_TOOLTIP);
 			boolean showAttributeTooltip = self.getOrDefault(DataComponentTypes.ATTRIBUTE_MODIFIERS, AttributeModifiersComponent.DEFAULT).showInTooltip();
-			if (hideAdditionalTooltip && !showAttributeTooltip)
-				//literally nothing to do
+			if (hideAdditionalTooltip && !showAttributeTooltip) {
+				// nothing to do
 				return;
+			}
 
 			boolean canEquipAnywhere = true;
 			Set<SlotType> slots = Sets.newHashSet();
-			Map<MutableText, Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier>> modifiers = Maps.newHashMap();
+			Map<SlotType, Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier>> modifiers = Maps.newHashMap();
 			Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> defaultModifier = null;
 			boolean allModifiersSame = true;
 			int slotCount = 0;
@@ -95,8 +96,8 @@ public abstract class ItemStackMixin {
 							}
 
 							boolean duplicate = false;
-							for (Map.Entry<MutableText, Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier>> entry : modifiers.entrySet()) {
-								if (entry.getKey().getString().equals(slotType.getTranslation().getString())) {
+							for (Map.Entry<SlotType, Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier>> entry : modifiers.entrySet()) {
+								if (entry.getKey().getTranslation().getString().equals(slotType.getTranslation().getString())) {
 									if (areMapsEqual(entry.getValue(), map)) {
 										duplicate = true;
 										break;
@@ -105,7 +106,7 @@ public abstract class ItemStackMixin {
 							}
 
 							if (!duplicate) {
-								modifiers.put(slotType.getTranslation(), map);
+								modifiers.put(slotType, map);
 							}
 							continue outer;
 						} else if (canInsert) {
@@ -142,9 +143,9 @@ public abstract class ItemStackMixin {
 						addAttributes(list, defaultModifier);
 					}
 				} else {
-					for (Map.Entry<MutableText, Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier>> entry : modifiers.entrySet()) {
+					for (Map.Entry<SlotType, Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier>> entry : modifiers.entrySet()) {
 						list.add(Text.translatable("trinkets.tooltip.attributes.single",
-								entry.getKey().formatted(Formatting.BLUE)).formatted(Formatting.GRAY));
+								entry.getKey().getTranslation().formatted(Formatting.BLUE)).formatted(Formatting.GRAY));
 						addAttributes(list, entry.getValue());
 					}
 				}
