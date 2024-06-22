@@ -68,6 +68,7 @@ public record TrinketsAttributeModifiersComponent(List<Entry> modifiers, boolean
 		public Builder add(RegistryEntry<EntityAttribute> attribute, EntityAttributeModifier modifier) {
 			return add(attribute, modifier, Optional.empty());
 		}
+
 		public Builder add(RegistryEntry<EntityAttribute> attribute, EntityAttributeModifier modifier, String slot) {
 			return add(attribute, modifier, Optional.of(slot));
 		}
