@@ -9,11 +9,11 @@ import net.minecraft.item.ItemStack;
 
 public interface TrinketEquipCallback {
     Event<TrinketEquipCallback> EVENT = EventFactory.createArrayBacked(TrinketEquipCallback.class,
-        listeners -> (stack, slot, entity) -> {
-            for (TrinketEquipCallback listener: listeners){
-                listener.onEquip(stack, slot, entity);
-            }
-        });
+    listeners -> (stack, slot, entity) -> {
+        for (TrinketEquipCallback listener: listeners){
+            listener.onEquip(stack, slot, entity);
+        }
+    });
 
     /**
      * Called when an entity equips a trinket, after the {@link Trinket#onEquip} method of the Trinket

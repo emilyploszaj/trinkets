@@ -9,6 +9,7 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 
+import dev.emi.trinkets.TrinketModifiers;
 import dev.emi.trinkets.api.SlotAttributes;
 import dev.emi.trinkets.api.SlotReference;
 import dev.emi.trinkets.api.SlotType;
@@ -173,7 +174,7 @@ public abstract class LivingEntityMixin extends Entity {
 						contentUpdates.put(newRef, newStackCopy);
 
 						if (!oldStack.isEmpty()) {
-							Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> map = Trinket.trinketModifiers(oldStack, ref, entity);
+							Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> map = TrinketModifiers.get(oldStack, ref, entity);
 							Multimap<String, EntityAttributeModifier> slotMap = HashMultimap.create();
 							Set<RegistryEntry<EntityAttribute>> toRemove = Sets.newHashSet();
 							for (RegistryEntry<EntityAttribute> attr : map.keySet()) {
@@ -197,7 +198,7 @@ public abstract class LivingEntityMixin extends Entity {
 						}
 
 						if (!newStack.isEmpty()) {
-							Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> map = Trinket.trinketModifiers(newStack, ref, entity);
+							Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> map = TrinketModifiers.get(newStack, ref, entity);
 							Multimap<String, EntityAttributeModifier> slotMap = HashMultimap.create();
 							Set<RegistryEntry<EntityAttribute>> toRemove = Sets.newHashSet();
 							for (RegistryEntry<EntityAttribute> attr : map.keySet()) {

@@ -14,6 +14,7 @@ import java.util.function.Predicate;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
+import dev.emi.trinkets.TrinketModifiers;
 import dev.emi.trinkets.TrinketPlayerScreenHandler;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.registry.RegistryWrapper;
@@ -235,7 +236,7 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 		Multimap<String, EntityAttributeModifier> slotMap = HashMultimap.create();
 		this.forEach((ref, stack) -> {
 			if (!stack.isEmpty()) {
-				Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> map = Trinket.trinketModifiers(stack, ref, entity);
+				Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> map = TrinketModifiers.get(stack, ref, entity);
 				for (RegistryEntry<EntityAttribute> entityAttribute : map.keySet()) {
 					if (entityAttribute.hasKeyAndValue() && entityAttribute.value() instanceof SlotAttributes.SlotEntityAttribute slotEntityAttribute) {
 						slotMap.putAll(slotEntityAttribute.slot, map.get(entityAttribute));

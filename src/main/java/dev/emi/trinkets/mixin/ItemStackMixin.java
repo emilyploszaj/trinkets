@@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import com.llamalad7.mixinextras.sugar.Local;
+import dev.emi.trinkets.TrinketModifiers;
 import dev.emi.trinkets.TrinketSlot;
 import dev.emi.trinkets.api.SlotAttributes;
 import dev.emi.trinkets.api.SlotReference;
@@ -87,7 +88,7 @@ public abstract class ItemStackMixin {
 							if (!sameTranslationExists) {
 								slots.add(slotType);
 							}
-							Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> map = Trinket.trinketModifiers(self, ref, player);
+							Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> map = TrinketModifiers.get(self, ref, player);
 
 							if (defaultModifier == null) {
 								defaultModifier = map;

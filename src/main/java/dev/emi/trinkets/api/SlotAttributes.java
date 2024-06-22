@@ -28,10 +28,6 @@ public class SlotAttributes {
 		return CACHED_IDS.computeIfAbsent(key, Identifier::of);
 	}
 
-	public static EntityAttributeModifier toSlotReferencedModifier(EntityAttributeModifier modifier, SlotReference ref){
-		return new EntityAttributeModifier(modifier.id().withSuffixedPath("/" + ref.getId()), modifier.value(), modifier.operation());
-	}
-
 	public static class SlotEntityAttribute extends EntityAttribute {
 		public String slot;
 

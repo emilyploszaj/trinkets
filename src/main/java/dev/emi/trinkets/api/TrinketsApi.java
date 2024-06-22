@@ -3,6 +3,7 @@ package dev.emi.trinkets.api;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Multimap;
 import com.mojang.datafixers.util.Function3;
+import dev.emi.trinkets.TrinketModifiers;
 import dev.emi.trinkets.TrinketSlotTarget;
 import dev.emi.trinkets.TrinketsMain;
 import dev.emi.trinkets.data.EntitySlotLoader;
@@ -188,7 +189,7 @@ public class TrinketsApi {
 			return TriState.DEFAULT;
 		});
 		TrinketsApi.registerTrinketPredicate(Identifier.of("trinkets", "relevant"), (stack, ref, entity) -> {
-			Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> map = Trinket.trinketModifiers(stack, ref, entity);
+			Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> map = TrinketModifiers.get(stack, ref, entity);
 			if (!map.isEmpty()) {
 				return TriState.TRUE;
 			}
