@@ -10,7 +10,7 @@ import net.minecraft.item.ItemStack;
 public interface TrinketDropCallback {
 	Event<TrinketDropCallback> EVENT = EventFactory.createArrayBacked(TrinketDropCallback.class,
 	listeners -> (rule, stack, ref, entity) -> {
-		for (var listener : listeners) {
+		for (TrinketDropCallback listener : listeners) {
 			rule = listener.drop(rule, stack, ref, entity);
 		}
 		return rule;

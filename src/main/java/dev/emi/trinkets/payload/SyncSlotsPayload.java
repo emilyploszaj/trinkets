@@ -18,7 +18,7 @@ public record SyncSlotsPayload(Map<EntityType<?>, Map<String, SlotGroup>> map) i
 			(x) -> (Map<EntityType<?>, Map<String, SlotGroup>>) new HashMap<EntityType<?>, Map<String, SlotGroup>>(x),
 			PacketCodecs.registryValue(RegistryKeys.ENTITY_TYPE),
 			PacketCodecs.map(HashMap::new, PacketCodecs.STRING, PacketCodecs.NBT_COMPOUND.xmap(SlotGroup::read, (x) -> {
-				var nbt = new NbtCompound();
+				NbtCompound nbt = new NbtCompound();
 				x.write(nbt);
 				return nbt;
 			}))

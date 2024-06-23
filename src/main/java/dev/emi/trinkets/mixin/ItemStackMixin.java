@@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import com.llamalad7.mixinextras.sugar.Local;
+import dev.emi.trinkets.TrinketModifiers;
 import dev.emi.trinkets.TrinketSlot;
 import dev.emi.trinkets.api.SlotAttributes;
 import dev.emi.trinkets.api.SlotReference;
@@ -21,6 +22,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.spongepowered.asm.mixin.Mixin;
@@ -38,7 +40,7 @@ import java.util.Set;
 
 /**
  * Adds a tooltip for trinkets describing slots and attributes
- * 
+ *
  * @author Emi
  */
 @Mixin(ItemStack.class)
@@ -49,6 +51,14 @@ public abstract class ItemStackMixin {
 	private void getTooltip(Item.TooltipContext context, PlayerEntity player, TooltipType tooltipType, CallbackInfoReturnable<List<Text>> info, @Local(ordinal = 0) List<Text> list) {
 		TrinketsApi.getTrinketComponent(player).ifPresent(comp -> {
 			ItemStack self = (ItemStack) (Object) this;
+
+			boolean hideAdditionalTooltip = self.contains(DataComponentTypes.HIDE_ADDITIONAL_TOOLTIP);
+			boolean showAttributeTooltip = self.getOrDefault(DataComponentTypes.ATTRIBUTE_MODIFIERS, AttributeModifiersComponent.DEFAULT).showInTooltip();
+			if (hideAdditionalTooltip && !showAttributeTooltip) {
+				// nothing to do
+				return;
+			}
+
 			boolean canEquipAnywhere = true;
 			Set<SlotType> slots = Sets.newHashSet();
 			Map<SlotType, Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier>> modifiers = Maps.newHashMap();
@@ -78,11 +88,8 @@ public abstract class ItemStackMixin {
 							if (!sameTranslationExists) {
 								slots.add(slotType);
 							}
-							Trinket trinket = TrinketsApi.getTrinket((self).getItem());
+							Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> map = TrinketModifiers.get(self, ref, player);
 
-							Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> map =
-									trinket.getModifiers(self, ref, player, SlotAttributes.getIdentifier(ref));
-							
 							if (defaultModifier == null) {
 								defaultModifier = map;
 							} else if (allModifiersSame) {
@@ -113,7 +120,7 @@ public abstract class ItemStackMixin {
 				}
 			}
 
-			if (!self.contains(DataComponentTypes.HIDE_ADDITIONAL_TOOLTIP)) {
+			if (!hideAdditionalTooltip) {
 				if (canEquipAnywhere && slotCount > 1) {
 					list.add(Text.translatable("trinkets.tooltip.slots.any").formatted(Formatting.GRAY));
 				} else if (slots.size() > 1) {
@@ -130,17 +137,17 @@ public abstract class ItemStackMixin {
 				}
 			}
 
-			if (!modifiers.isEmpty() && self.getOrDefault(DataComponentTypes.ATTRIBUTE_MODIFIERS, AttributeModifiersComponent.DEFAULT).showInTooltip()) {
+			if (!modifiers.isEmpty() && showAttributeTooltip) {
 				if (allModifiersSame) {
 					if (defaultModifier != null && !defaultModifier.isEmpty()) {
 						list.add(Text.translatable("trinkets.tooltip.attributes.all").formatted(Formatting.GRAY));
 						addAttributes(list, defaultModifier);
 					}
 				} else {
-					for (SlotType type : modifiers.keySet()) {
+					for (Map.Entry<SlotType, Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier>> entry : modifiers.entrySet()) {
 						list.add(Text.translatable("trinkets.tooltip.attributes.single",
-								type.getTranslation().formatted(Formatting.BLUE)).formatted(Formatting.GRAY));
-						addAttributes(list, modifiers.get(type));
+								entry.getKey().getTranslation().formatted(Formatting.BLUE)).formatted(Formatting.GRAY));
+						addAttributes(list, entry.getValue());
 					}
 				}
 			}
@@ -201,7 +208,11 @@ public abstract class ItemStackMixin {
 					for (EntityAttributeModifier modifier : col1) {
 						EntityAttributeModifier eam = iter.next();
 
-						if (!modifier.toNbt().equals(eam.toNbt())) {
+						//we can't check identifiers. EAMs will have slot-specific identifiers so fail total equality by nature.
+						if (!modifier.operation().equals(eam.operation())) {
+							return false;
+						}
+						if (modifier.value() != eam.value()) {
 							return false;
 						}
 					}

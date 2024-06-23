@@ -200,7 +200,7 @@ public class EntitySlotLoader extends SinglePreparationResourceReloader<Map<Stri
 	}
 
 	public void sync(List<? extends ServerPlayerEntity> players) {
-		var packet = new SyncSlotsPayload(Map.copyOf(this.slots));
+		SyncSlotsPayload packet = new SyncSlotsPayload(Map.copyOf(this.slots));
 		players.forEach(player -> ServerPlayNetworking.send(player, packet));
 		players.forEach(player -> ((TrinketPlayerScreenHandler) player.playerScreenHandler).trinkets$updateTrinketSlots(true));
 	}

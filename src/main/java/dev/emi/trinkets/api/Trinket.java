@@ -107,22 +107,18 @@ public interface Trinket {
 	 * Returns the Entity Attribute Modifiers for a stack in a slot. Child implementations should
 	 * remain pure
 	 * <p>
-	 * If modifiers do not change based on stack, slot, or entity, caching based on passed UUID
+	 * If modifiers do not change based on stack, slot, or entity, caching based on passed identifier
 	 * should be considered
 	 *
+	 * @param stack ItemStack being polled for modifiers
+	 * @param slot the {@link SlotReference} for the {@link TrinketInventory} the Trinket is relevant to
+	 * @param entity the LivingEntity holding the Trinket
 	 * @param slotIdentifier The Identifier to use for creating attributes
+	 * @return the Multimap with any needed entries added
+	 * @see SlotAttributes#addSlotModifier
 	 */
 	default Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> getModifiers(ItemStack stack, SlotReference slot, LivingEntity entity, Identifier slotIdentifier) {
-		Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> map = Multimaps.newMultimap(Maps.newLinkedHashMap(), ArrayList::new);
-
-		if (stack.contains(TrinketsAttributeModifiersComponent.TYPE)) {
-			for (var entry : stack.getOrDefault(TrinketsAttributeModifiersComponent.TYPE, TrinketsAttributeModifiersComponent.DEFAULT).modifiers()) {
-				if (entry.slot().isEmpty() || entry.slot().get().equals(slot.inventory().getSlotType().getId())) {
-					map.put(entry.attribute(), entry.modifier());
-				}
-			}
-		}
-		return map;
+		return Multimaps.newMultimap(Maps.newLinkedHashMap(), ArrayList::new);
 	}
 
 	/**

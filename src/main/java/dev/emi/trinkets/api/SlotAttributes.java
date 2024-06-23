@@ -13,9 +13,9 @@ import net.minecraft.util.Identifier;
 public class SlotAttributes {
 	private static final Map<String, Identifier> CACHED_IDS = Maps.newHashMap();
 	private static final Map<String, RegistryEntry<EntityAttribute>> CACHED_ATTRIBUTES = Maps.newHashMap();
-	
+
 	/**
-	 * Adds an Entity Attribute Nodifier for slot count to the provided multimap
+	 * Adds an Entity Attribute Modifier for slot count to the provided multimap
 	 */
 	public static void addSlotModifier(Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> map, String slot, Identifier identifier, double amount,
 			EntityAttributeModifier.Operation operation) {
@@ -24,13 +24,12 @@ public class SlotAttributes {
 	}
 
 	public static Identifier getIdentifier(SlotReference ref) {
-		String key = ref.inventory().getSlotType().getId() + "/" + ref.index();
-		CACHED_IDS.computeIfAbsent(key, Identifier::of);
-		return CACHED_IDS.get(key);
+		String key = ref.getId();
+		return CACHED_IDS.computeIfAbsent(key, Identifier::of);
 	}
 
 	public static class SlotEntityAttribute extends EntityAttribute {
-		public String slot; 
+		public String slot;
 
 		private SlotEntityAttribute(String slot) {
 			super("trinkets.slot." + slot.replace("/", "."), 0);
