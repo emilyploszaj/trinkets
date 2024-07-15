@@ -133,14 +133,11 @@ public abstract class LivingEntityMixin extends Entity {
 
 	@Unique
 	private void dropFromEntity(ItemStack stack) {
-		ItemEntity entity = dropStack(stack);
 		// Mimic player drop behavior for only players
-        if (entity != null && ((Entity) this) instanceof PlayerEntity) {
-			entity.setPos(entity.getX(), this.getEyeY() - 0.3, entity.getZ());
-			entity.setPickupDelay(40);
-			float magnitude = this.random.nextFloat() * 0.5f;
-			float angle = this.random.nextFloat() * ((float)Math.PI * 2);
-			entity.setVelocity(-MathHelper.sin(angle) * magnitude, 0.2f, MathHelper.cos(angle) * magnitude);
+		if (((Entity) this) instanceof PlayerEntity player) {
+			ItemEntity entity = player.dropItem(stack, true, false);
+		} else {
+			ItemEntity entity = dropStack(stack);
 		}
 	}
 
