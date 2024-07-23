@@ -1,0 +1,20 @@
+{
+	"trinkets.tooltip.slots.any" : "Varustettava §9mihin tahansa§r helypaikkaan",
+	"trinkets.tooltip.slots.list" : "Varustettava seuraaviin helypaikkoihin:",
+	"trinkets.tooltip.slots.single" : "Varustettava %d helupaikkaan",
+	"trinkets.tooltip.attributes.all" : "Varustettuna:",
+	"trinkets.tooltip.attributes.single" : "Kun varustettu %d helypaikkaan:",
+	"trinkets.tooltip.attributes.slots" : "%d Paikkaa",
+	"trinkets.slot.head.face": "Naama",
+	"trinkets.slot.head.hat": "Hattu",
+	"trinkets.slot.chest.necklace": "Kaulakoru",
+	"trinkets.slot.chest.back": "Selkä",
+	"trinkets.slot.chest.cape": "Viitta",
+	"trinkets.slot.legs.belt": "Vyö",
+	"trinkets.slot.feet.aglet": "Mauhanpää",
+	"trinkets.slot.feet.shoes": "Kengät",
+	"trinkets.slot.hand.glove": "Hanska",
+	"trinkets.slot.offhand.glove": "Hanska",
+	"trinkets.slot.hand.ring": "Sormus",
+	"trinkets.slot.offhand.ring": "Sormus"
+}
