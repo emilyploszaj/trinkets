@@ -1,0 +1,20 @@
+{
+	"trinkets.tooltip.slots.any" : "Można wyposażyć w miejscu: §9any§r",
+	"trinkets.tooltip.slots.list" : "Można wyposażyć w miejscu:",
+	"trinkets.tooltip.slots.single" : "Można wyposażyć w miejscu: %d",
+	"trinkets.tooltip.attributes.all" : "Gdy założony:",
+	"trinkets.tooltip.attributes.single" : "Gdy założony w miejscu %d:",
+	"trinkets.tooltip.attributes.slots" : "%d miejscach",
+	"trinkets.slot.head.face": "Twarz",
+	"trinkets.slot.head.hat": "Czapka",
+	"trinkets.slot.chest.necklace": "Naszyjnik",
+	"trinkets.slot.chest.back": "Plecy",
+	"trinkets.slot.chest.cape": "Peleryna",
+	"trinkets.slot.legs.belt": "Pas",
+	"trinkets.slot.feet.aglet": "Skuwka",
+	"trinkets.slot.feet.shoes": "Buty",
+	"trinkets.slot.hand.glove": "Rękawica",
+	"trinkets.slot.offhand.glove": "Rękawica",
+	"trinkets.slot.hand.ring": "Pierścień",
+	"trinkets.slot.offhand.ring": "Pierścień"
+}
