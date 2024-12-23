@@ -1,0 +1,20 @@
+{
+	"trinkets.tooltip.slots.any" : "Có thể trang bị vào §9bất kỳ§r khe phụ kiện nào",
+	"trinkets.tooltip.slots.list" : "Có thể trang bị vào các khe phụ kiện:",
+	"trinkets.tooltip.slots.single" : "Có thể trang bị vào khe phụ kiện %d",
+	"trinkets.tooltip.attributes.all" : "Khi được trang bị:",
+	"trinkets.tooltip.attributes.single" : "Khi được trang bị vào khe phụ kiện %d:",
+	"trinkets.tooltip.attributes.slots" : "%d Khe",
+	"trinkets.slot.head.face": "Mặt",
+	"trinkets.slot.head.hat": "Mũ",
+	"trinkets.slot.chest.necklace": "Dây chuyền",
+	"trinkets.slot.chest.back": "Lưng",
+	"trinkets.slot.chest.cape": "Áo choàng",
+	"trinkets.slot.legs.belt": "Thắt lưng",
+	"trinkets.slot.feet.aglet": "Khóa dây giày",
+	"trinkets.slot.feet.shoes": "Giày",
+	"trinkets.slot.hand.glove": "Găng tay",
+	"trinkets.slot.offhand.glove": "Găng tay",
+	"trinkets.slot.hand.ring": "Nhẫn",
+	"trinkets.slot.offhand.ring": "Nhẫn"
+}
