@@ -3,7 +3,6 @@
   "package": "dev.emi.trinkets.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
-    "accessor.RecipeBookScreenAccessor",
     "accessor.ScreenHandlerAccessor",
     "datafixer.Schema1460Mixin",
     "EnchantmentDefinitionMixin",
@@ -16,6 +15,7 @@
   "client": [
     "accessor.CreativeSlotAccessor",
     "accessor.LivingEntityAccessor",
+    "accessor.RecipeBookScreenAccessor",
     "ClickableWidgetMixin",
     "ClientPlayNetworkHandlerMixin",
     "CreativeInventoryScreenMixin",
