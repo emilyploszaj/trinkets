@@ -163,7 +163,7 @@ public abstract class ItemStackMixin {
 				double g = modifier.value();
 
 				if (modifier.operation() != EntityAttributeModifier.Operation.ADD_MULTIPLIED_BASE && modifier.operation() != EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL) {
-					if (entry.getKey().equals(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE)) {
+					if (entry.getKey().equals(EntityAttributes.KNOCKBACK_RESISTANCE)) {
 						g *= 10.0D;
 					}
 				} else {

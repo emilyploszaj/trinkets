@@ -14,8 +14,8 @@ import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.TypedActionResult;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -59,10 +59,10 @@ public class TrinketsMain implements ModInitializer, EntityComponentInitializer 
 			Trinket trinket = TrinketsApi.getTrinket(stack.getItem());
 			if (trinket.canEquipFromUse(stack, player)) {
 				if (TrinketItem.equipItem(player, stack)) {
-					return TypedActionResult.success(stack);
+					return ActionResult.SUCCESS;
 				}
 			}
-			return TypedActionResult.pass(stack);
+			return ActionResult.PASS;
 		});
 		Registry.register(Registries.DATA_COMPONENT_TYPE, Identifier.of(MOD_ID, "attribute_modifiers"), TrinketsAttributeModifiersComponent.TYPE);
 		PayloadTypeRegistry.playS2C().register(TrinketsNetwork.BREAK, BreakPayload.CODEC);

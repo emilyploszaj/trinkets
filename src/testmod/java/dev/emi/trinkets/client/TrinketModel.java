@@ -4,10 +4,10 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.*;
 import net.minecraft.client.render.entity.model.BipedEntityModel;
-import net.minecraft.entity.LivingEntity;
+import net.minecraft.client.render.entity.state.BipedEntityRenderState;
 
 @Environment(EnvType.CLIENT)
-public class TrinketModel extends BipedEntityModel<LivingEntity> {
+public class TrinketModel extends BipedEntityModel<BipedEntityRenderState> {
 
 	public TrinketModel(ModelPart root) {
 		super(root);

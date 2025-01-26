@@ -145,7 +145,7 @@ public class EntitySlotLoader extends SinglePreparationResourceReloader<Map<Stri
 
 					types.addAll(entityTypes);*/
 				} else {
-					types.add(Registries.ENTITY_TYPE.getOrEmpty(Identifier.of(entityName))
+					types.add(Registries.ENTITY_TYPE.getOptionalValue(Identifier.of(entityName))
 							.orElseThrow(() -> new IllegalArgumentException("Unknown entity '" + entityName + "'")));
 				}
 			} catch (IllegalArgumentException e) {
@@ -212,6 +212,6 @@ public class EntitySlotLoader extends SinglePreparationResourceReloader<Map<Stri
 
 	@Override
 	public Collection<Identifier> getFabricDependencies() {
-		return Lists.newArrayList(SlotLoader.ID, ResourceReloadListenerKeys.TAGS);
+		return Lists.newArrayList(SlotLoader.ID);
 	}
 }

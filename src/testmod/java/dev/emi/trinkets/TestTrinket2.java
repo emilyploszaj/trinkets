@@ -40,7 +40,7 @@ public class TestTrinket2 extends TrinketItem {
 		Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> modifiers = Multimaps.newMultimap(Maps.newLinkedHashMap(), ArrayList::new);
 		EntityAttributeModifier speedModifier = new EntityAttributeModifier(id.withSuffixedPath("trinkets-testmod/movement_speed"),
 				0.1, EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
-		modifiers.put(EntityAttributes.GENERIC_MOVEMENT_SPEED, speedModifier);
+		modifiers.put(EntityAttributes.MOVEMENT_SPEED, speedModifier);
 		return modifiers;
 	}
 }
