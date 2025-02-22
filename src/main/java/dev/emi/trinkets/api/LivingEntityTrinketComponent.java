@@ -19,6 +19,7 @@ import dev.emi.trinkets.TrinketPlayerScreenHandler;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import org.ladysnake.cca.api.v3.component.sync.AutoSyncedComponent;
 import net.minecraft.entity.LivingEntity;
@@ -87,8 +88,8 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 							} else {
 								if (this.entity instanceof PlayerEntity player) {
 									player.getInventory().offerOrDrop(stack);
-								} else {
-									this.entity.dropStack(stack);
+								} else if (this.entity.getWorld() instanceof ServerWorld serverWorld) {
+									this.entity.dropStack(serverWorld, stack);
 								}
 							}
 						}
@@ -230,8 +231,10 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 				}
 			}
 		}
-		for (ItemStack itemStack : dropped) {
-			this.entity.dropStack(itemStack);
+		if (this.entity.getWorld() instanceof ServerWorld serverWorld) {
+			for (ItemStack itemStack : dropped) {
+				this.entity.dropStack(serverWorld, itemStack);
+			}
 		}
 		Multimap<String, EntityAttributeModifier> slotMap = HashMultimap.create();
 		this.forEach((ref, stack) -> {
@@ -309,7 +312,7 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 				NbtList list = new NbtList();
 				TrinketInventory inv = slot.getValue();
 				for (int i = 0; i < inv.size(); i++) {
-					NbtCompound c = (NbtCompound) inv.getStack(i).encodeAllowEmpty(lookup);
+					NbtCompound c = (NbtCompound) inv.getStack(i).toNbtAllowEmpty(lookup);
 					list.add(c);
 				}
 				slotTag.put("Metadata", this.syncing ? inv.getSyncTag() : inv.toTag());

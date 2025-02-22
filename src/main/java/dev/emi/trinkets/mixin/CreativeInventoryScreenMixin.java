@@ -1,6 +1,7 @@
 package dev.emi.trinkets.mixin;
 
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -18,7 +19,6 @@ import dev.emi.trinkets.TrinketScreenManager;
 import dev.emi.trinkets.TrinketsClient;
 import dev.emi.trinkets.api.SlotGroup;
 import dev.emi.trinkets.api.TrinketsApi;
-import net.minecraft.client.gui.screen.ingame.AbstractInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen.CreativeScreenHandler;
 import net.minecraft.client.util.math.Rect2i;
@@ -33,7 +33,7 @@ import net.minecraft.util.collection.DefaultedList;
  * @author Emi
  */
 @Mixin(CreativeInventoryScreen.class)
-public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScreen<CreativeScreenHandler> implements TrinketScreen {
+public abstract class CreativeInventoryScreenMixin extends HandledScreen<CreativeScreenHandler> implements TrinketScreen {
 	@Shadow
 	private static ItemGroup selectedTab;
 	@Shadow

@@ -9,18 +9,21 @@ import com.google.common.collect.Multimaps;
 import dev.emi.trinkets.mixin.accessor.LivingEntityAccessor;
 import java.util.function.Consumer;
 
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.EnchantmentEffectComponentTypes;
+import net.minecraft.component.type.EquippableComponent;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
-import net.minecraft.item.Equipment;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.registry.Registries;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvent;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Identifier;
 
 public interface Trinket {
@@ -100,7 +103,11 @@ public interface Trinket {
 	 * @return The {@link SoundEvent} to play for equipping
 	 */
 	default RegistryEntry<SoundEvent> getEquipSound(ItemStack stack, SlotReference slot, LivingEntity entity) {
-		return stack.getItem() instanceof Equipment eq ? eq.getEquipSound() : null;
+		EquippableComponent component = stack.get(DataComponentTypes.EQUIPPABLE);
+		if (component != null) {
+			return component.equipSound();
+		}
+		return Registries.SOUND_EVENT.getEntry(SoundEvents.INTENTIONALLY_EMPTY);
 	}
 
 	/**

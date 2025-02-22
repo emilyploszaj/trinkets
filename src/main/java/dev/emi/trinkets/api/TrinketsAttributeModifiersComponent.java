@@ -32,7 +32,7 @@ public record TrinketsAttributeModifiersComponent(List<Entry> modifiers, boolean
 	public static final PacketCodec<RegistryByteBuf, TrinketsAttributeModifiersComponent> PACKET_CODEC = PacketCodec.tuple(
 			Entry.PACKET_CODEC.collect(PacketCodecs.toList()),
 			TrinketsAttributeModifiersComponent::modifiers,
-			PacketCodecs.BOOL,
+			PacketCodecs.BOOLEAN,
 			TrinketsAttributeModifiersComponent::showInTooltip,
 			TrinketsAttributeModifiersComponent::new);
 

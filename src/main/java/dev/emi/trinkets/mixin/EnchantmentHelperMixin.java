@@ -63,7 +63,7 @@ public abstract class EnchantmentHelperMixin {
 		}
 	}
 
-	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EquipmentSlot;values()[Lnet/minecraft/entity/EquipmentSlot;"), method = "chooseEquipmentWith")
+	@Inject(at = @At(value = "INVOKE", target = "Ljava/util/List;iterator()Ljava/util/Iterator;", ordinal = 0), method = "chooseEquipmentWith")
 	private static void addTrinketsAsChoices(ComponentType<?> componentType, LivingEntity entity, Predicate<ItemStack> stackPredicate, CallbackInfoReturnable<Optional<EnchantmentEffectContext>> info, @Local List<EnchantmentEffectContext> list) {
 		Optional<TrinketComponent> optional = TrinketsApi.getTrinketComponent(entity);
 		if (optional.isPresent()) {

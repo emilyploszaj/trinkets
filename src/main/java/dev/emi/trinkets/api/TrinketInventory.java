@@ -10,6 +10,7 @@ import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.DefaultedList;
 
@@ -178,7 +179,9 @@ public class TrinketInventory implements Inventory {
 					if (i < newStacks.size()) {
 						newStacks.set(i, stack);
 					} else {
-						entity.dropStack(stack);
+						if (entity.getWorld() instanceof ServerWorld serverWorld) {
+							entity.dropStack(serverWorld, stack);
+						}
 					}
 				}
 
