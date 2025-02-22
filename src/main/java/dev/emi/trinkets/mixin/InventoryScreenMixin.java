@@ -26,7 +26,7 @@ import net.minecraft.screen.slot.Slot;
  */
 @Mixin(InventoryScreen.class)
 public abstract class InventoryScreenMixin extends RecipeBookScreen<PlayerScreenHandler> implements RecipeBookProvider, TrinketScreen {
-	public InventoryScreenMixin() {
+	private InventoryScreenMixin() {
 		super(null, null, null, null);
 	}
 
