@@ -2,7 +2,6 @@ package dev.emi.trinkets.mixin;
 
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -78,17 +77,6 @@ public abstract class CreativeInventoryScreenMixin extends HandledScreen<Creativ
 	@Inject(at = @At("HEAD"), method = "init")
 	private void init(CallbackInfo info) {
 		TrinketScreenManager.init(this);
-	}
-
-	@Intrinsic
-	@Override
-	public void close() {
-		super.close();
-	}
-
-	@Inject(at = @At("HEAD"), method = "close")
-	private void close(CallbackInfo info) {
-		TrinketScreenManager.close();
 	}
 
 	@Inject(at = @At("HEAD"), method = "removed")
