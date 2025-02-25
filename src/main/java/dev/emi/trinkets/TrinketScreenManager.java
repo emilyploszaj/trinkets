@@ -30,6 +30,10 @@ public class TrinketScreenManager {
 		currentBounds = new Rect2i(0, 0, 0, 0);
 	}
 
+	public static void close() {
+		init(null);
+	}
+
 	public static void removeSelections() {
 		TrinketsClient.activeGroup = null;
 		TrinketsClient.quickMoveGroup = null;

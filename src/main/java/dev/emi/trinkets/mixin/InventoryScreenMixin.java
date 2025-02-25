@@ -3,6 +3,7 @@ package dev.emi.trinkets.mixin;
 import dev.emi.trinkets.mixin.accessor.RecipeBookScreenAccessor;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.RecipeBookScreen;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -33,6 +34,17 @@ public abstract class InventoryScreenMixin extends RecipeBookScreen<PlayerScreen
 	@Inject(at = @At("HEAD"), method = "init")
 	private void init(CallbackInfo info) {
 		TrinketScreenManager.init(this);
+	}
+
+	@Intrinsic
+	@Override
+	public void close() {
+		super.close();
+	}
+
+	@Inject(at = @At("HEAD"), method = "close")
+	private void close(CallbackInfo info) {
+		TrinketScreenManager.close();
 	}
 
 	@Inject(at = @At("TAIL"), method = "handledScreenTick")
