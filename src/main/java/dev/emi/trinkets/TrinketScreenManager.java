@@ -1,5 +1,6 @@
 package dev.emi.trinkets;
 
+import java.lang.ref.WeakReference;
 import java.util.List;
 
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -16,7 +17,7 @@ import net.minecraft.util.Identifier;
 
 public class TrinketScreenManager {
 	private static final Identifier MORE_SLOTS = Identifier.of("trinkets", "textures/gui/more_slots.png");
-	public static TrinketScreen currentScreen;
+	private static WeakReference<TrinketScreen> currentScreen;
 	public static Rect2i currentBounds = new Rect2i(0, 0, 0, 0);
 	public static Rect2i typeBounds = new Rect2i(0, 0, 0, 0);
 	public static Rect2i quickMoveBounds = new Rect2i(0, 0, 0, 0);
@@ -25,9 +26,13 @@ public class TrinketScreenManager {
 	public static SlotGroup quickMoveGroup = null;
 
 	public static void init(TrinketScreen screen) {
-		currentScreen = screen;
+		currentScreen = new WeakReference<>(screen);
 		group = null;
 		currentBounds = new Rect2i(0, 0, 0, 0);
+	}
+
+	public static void close() {
+		init(null);
 	}
 
 	public static void removeSelections() {
@@ -36,6 +41,11 @@ public class TrinketScreenManager {
 	}
 
 	public static void update(float mouseX, float mouseY) {
+		TrinketScreen currentScreen = getCurrentScreen();
+		if (currentScreen == null) {
+			return;
+		}
+
 		TrinketPlayerScreenHandler handler = currentScreen.trinkets$getHandler();
 		Slot focusedSlot = currentScreen.trinkets$getFocusedSlot();
 		int x = currentScreen.trinkets$getX();
@@ -184,6 +194,11 @@ public class TrinketScreenManager {
 	}
 
 	public static void drawGroup(DrawContext context, SlotGroup group, SlotType type) {
+		TrinketScreen currentScreen = getCurrentScreen();
+		if (currentScreen == null) {
+			return;
+		}
+
 		TrinketPlayerScreenHandler handler = currentScreen.trinkets$getHandler();
 		RenderSystem.enableDepthTest();
 		context.getMatrices().push();
@@ -272,6 +287,11 @@ public class TrinketScreenManager {
 	}
 
 	public static void drawExtraGroups(DrawContext context) {
+		TrinketScreen currentScreen = getCurrentScreen();
+		if (currentScreen == null) {
+			return;
+		}
+
 		TrinketPlayerScreenHandler handler = currentScreen.trinkets$getHandler();
 		int x = currentScreen.trinkets$getX();
 		int y = currentScreen.trinkets$getY();
@@ -320,6 +340,7 @@ public class TrinketScreenManager {
 	}
 
 	public static boolean isClickInsideTrinketBounds(double mouseX, double mouseY) {
+		TrinketScreen currentScreen = getCurrentScreen();
 		if (currentScreen == null || MinecraftClient.getInstance().currentScreen != currentScreen) {
 			return false;
 		}
@@ -349,5 +370,20 @@ public class TrinketScreenManager {
 			}
 		}
 		return false;
+	}
+
+	static void tryUpdateTrinketsSlot() {
+		TrinketScreen currentScreen = getCurrentScreen();
+
+		if (currentScreen != null) {
+			currentScreen.trinkets$updateTrinketSlots();
+		}
+	}
+
+	private static TrinketScreen getCurrentScreen() {
+		if (currentScreen == null) {
+			return null;
+		}
+		return currentScreen.get();
 	}
 }
