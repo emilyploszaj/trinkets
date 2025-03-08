@@ -80,9 +80,7 @@ public class TrinketsClient implements ClientModInitializer {
 
 						if (entity instanceof PlayerEntity && ((PlayerEntity) entity).playerScreenHandler instanceof TrinketPlayerScreenHandler screenHandler) {
 							screenHandler.trinkets$updateTrinketSlots(false);
-							if (TrinketScreenManager.currentScreen != null) {
-								TrinketScreenManager.currentScreen.trinkets$updateTrinketSlots();
-							}
+                            TrinketScreenManager.tryUpdateTrinketsSlot();
 						}
 
 						for (Pair<String, ItemStack> entry : contentUpdates) {

@@ -83,7 +83,7 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
 
 	@Inject(at = @At("HEAD"), method = "removed")
 	private void removed(CallbackInfo info) {
-		TrinketScreenManager.removeSelections();
+		TrinketScreenManager.close();
 	}
 
 	@Inject(at = @At("TAIL"), method = "handledScreenTick")

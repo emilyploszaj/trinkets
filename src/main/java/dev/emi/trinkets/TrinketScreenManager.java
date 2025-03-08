@@ -25,9 +25,15 @@ public class TrinketScreenManager {
 	public static SlotGroup quickMoveGroup = null;
 
 	public static void init(TrinketScreen screen) {
+		System.out.println(screen);
 		currentScreen = screen;
 		group = null;
 		currentBounds = new Rect2i(0, 0, 0, 0);
+	}
+
+	public static void close() {
+		removeSelections();
+		init(null);
 	}
 
 	public static void removeSelections() {
@@ -36,6 +42,11 @@ public class TrinketScreenManager {
 	}
 
 	public static void update(float mouseX, float mouseY) {
+		TrinketScreen currentScreen = getCurrentScreen();
+		if (currentScreen == null) {
+			return;
+		}
+
 		TrinketPlayerScreenHandler handler = currentScreen.trinkets$getHandler();
 		Slot focusedSlot = currentScreen.trinkets$getFocusedSlot();
 		int x = currentScreen.trinkets$getX();
@@ -183,6 +194,11 @@ public class TrinketScreenManager {
 	}
 
 	public static void drawGroup(DrawContext context, SlotGroup group, SlotType type) {
+		TrinketScreen currentScreen = getCurrentScreen();
+		if (currentScreen == null) {
+			return;
+		}
+
 		TrinketPlayerScreenHandler handler = currentScreen.trinkets$getHandler();
 		RenderSystem.enableDepthTest();
 		context.getMatrices().push();
@@ -267,6 +283,11 @@ public class TrinketScreenManager {
 	}
 
 	public static void drawExtraGroups(DrawContext context) {
+		TrinketScreen currentScreen = getCurrentScreen();
+		if (currentScreen == null) {
+			return;
+		}
+
 		TrinketPlayerScreenHandler handler = currentScreen.trinkets$getHandler();
 		int x = currentScreen.trinkets$getX();
 		int y = currentScreen.trinkets$getY();
@@ -315,6 +336,11 @@ public class TrinketScreenManager {
 	}
 
 	public static boolean isClickInsideTrinketBounds(double mouseX, double mouseY) {
+		TrinketScreen currentScreen = getCurrentScreen();
+		if (currentScreen == null || MinecraftClient.getInstance().currentScreen != currentScreen) {
+			return false;
+		}
+
 		TrinketPlayerScreenHandler handler = currentScreen.trinkets$getHandler();
 		if (currentScreen.trinkets$getFocusedSlot() instanceof TrinketSlot) {
 			return true;
@@ -344,5 +370,17 @@ public class TrinketScreenManager {
 			}
 		}
 		return false;
+	}
+
+	static void tryUpdateTrinketsSlot() {
+		TrinketScreen currentScreen = getCurrentScreen();
+
+		if (currentScreen != null) {
+			currentScreen.trinkets$updateTrinketSlots();
+		}
+	}
+
+	public static TrinketScreen getCurrentScreen() {
+		return currentScreen;
 	}
 }
