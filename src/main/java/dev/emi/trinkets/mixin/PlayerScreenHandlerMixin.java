@@ -87,7 +87,7 @@ public abstract class PlayerScreenHandlerMixin extends ScreenHandler implements 
 			while (trinketSlotStart < trinketSlotEnd) {
 				slots.remove(trinketSlotStart);
 				((ScreenHandlerAccessor) (this)).getTrackedStacks().remove(trinketSlotStart);
-				((ScreenHandlerAccessor) (this)).getPreviousTrackedStacks().remove(trinketSlotStart);
+				((ScreenHandlerAccessor) (this)).getTrackedSlots().remove(trinketSlotStart);
 				trinketSlotEnd--;
 			}
 

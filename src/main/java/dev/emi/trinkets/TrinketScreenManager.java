@@ -3,7 +3,7 @@ package dev.emi.trinkets;
 import java.lang.ref.WeakReference;
 import java.util.List;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.opengl.GlStateManager;
 
 import dev.emi.trinkets.api.SlotGroup;
 import dev.emi.trinkets.api.SlotType;
@@ -200,7 +200,7 @@ public class TrinketScreenManager {
 		}
 
 		TrinketPlayerScreenHandler handler = currentScreen.trinkets$getHandler();
-		RenderSystem.enableDepthTest();
+		GlStateManager._enableDepthTest();
 		context.getMatrices().push();
 		context.getMatrices().translate(0, 0, 305);
 
@@ -271,7 +271,7 @@ public class TrinketScreenManager {
 		}
 
 		context.getMatrices().pop();
-		RenderSystem.disableDepthTest();
+		GlStateManager._disableDepthTest();
 	}
 
 	private static void drawTexture(DrawContext context, Identifier texture, int x, int y, int u, int v, int width, int height) {

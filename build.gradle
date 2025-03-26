@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '1.7-SNAPSHOT'
+	id 'fabric-loom' version '1.10-SNAPSHOT'
 	id 'maven-publish'
 }
 
@@ -49,10 +49,18 @@ dependencies {
 	modApi include("org.ladysnake.cardinal-components-api:cardinal-components-entity:${project.cca_version}")
 
 	// Optional mod dependencies
-	modCompileOnly "me.shedaniel:RoughlyEnoughItems-api-fabric:${project.rei_version}"
-	modCompileOnly "me.shedaniel:RoughlyEnoughItems-default-plugin-fabric:${project.rei_version}"
-	modCompileOnly "me.shedaniel.cloth:cloth-config-fabric:${project.cloth_config_version}"
-	modCompileOnly "dev.emi:emi-fabric:${emi_version}:api"
+	modCompileOnly("me.shedaniel:RoughlyEnoughItems-api-fabric:${project.rei_version}") {
+		exclude group: 'net.fabricmc.fabric-api'
+	}
+	modCompileOnly("me.shedaniel:RoughlyEnoughItems-default-plugin-fabric:${project.rei_version}") {
+		exclude group: 'net.fabricmc.fabric-api'
+	}
+	modCompileOnly("me.shedaniel.cloth:cloth-config-fabric:${project.cloth_config_version}") {
+		exclude group: 'net.fabricmc.fabric-api'
+	}
+	modCompileOnly("dev.emi:emi-fabric:${emi_version}:api") {
+		exclude group: 'net.fabricmc.fabric-api'
+	}
 
 	// Dev Runtime
 	testmodImplementation sourceSets.main.output
