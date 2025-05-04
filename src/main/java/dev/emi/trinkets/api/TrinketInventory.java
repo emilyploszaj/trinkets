@@ -2,6 +2,7 @@ package dev.emi.trinkets.api;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import com.mojang.serialization.Codec;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.player.PlayerEntity;
@@ -9,15 +10,16 @@ import net.minecraft.inventory.Inventories;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtList;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.DefaultedList;
 
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class TrinketInventory implements Inventory {
+	private static final Codec<Collection<EntityAttributeModifier>> ENTITY_ATTRIBUTE_MODIFIERS_CODEC = EntityAttributeModifier.CODEC.listOf().xmap(Function.identity(), List::copyOf);
 
 	private final SlotType slotType;
 	private final int baseSize;
@@ -136,7 +138,7 @@ public class TrinketInventory implements Inventory {
 	}
 
 	public void clearModifiers() {
-		Iterator<Identifier> iter = this.getModifiers().keySet().iterator();
+		java.util.Iterator<Identifier> iter = this.getModifiers().keySet().iterator();
 
 		while(iter.hasNext()) {
 			this.removeModifier(iter.next());
@@ -222,81 +224,54 @@ public class TrinketInventory implements Inventory {
 	}
 
 	public NbtCompound toTag() {
-		NbtCompound NbtCompound = new NbtCompound();
+		NbtCompound nbtCompound = new NbtCompound();
 		if (!this.persistentModifiers.isEmpty()) {
-			NbtList NbtList = new NbtList();
-			for (EntityAttributeModifier entityAttributeModifier : this.persistentModifiers) {
-				NbtList.add(entityAttributeModifier.toNbt());
-			}
-
-			NbtCompound.put("PersistentModifiers", NbtList);
+			nbtCompound.put("PersistentModifiers", ENTITY_ATTRIBUTE_MODIFIERS_CODEC, this.persistentModifiers);
 		}
 		if (!this.modifiers.isEmpty()) {
-			NbtList NbtList = new NbtList();
+			Set<EntityAttributeModifier> modifiers = new HashSet<>();
 			this.modifiers.forEach((uuid, modifier) -> {
 				if (!this.persistentModifiers.contains(modifier)) {
-					NbtList.add(modifier.toNbt());
+					modifiers.add(modifier);
 				}
 			});
 
-			NbtCompound.put("CachedModifiers", NbtList);
+			nbtCompound.put("CachedModifiers", ENTITY_ATTRIBUTE_MODIFIERS_CODEC, modifiers);
 		}
-		return NbtCompound;
+		return nbtCompound;
 	}
 
 	public void fromTag(NbtCompound tag) {
-		if (tag.contains("PersistentModifiers", 9)) {
-			NbtList NbtList = tag.getList("PersistentModifiers", 10);
-
-			for(int i = 0; i < NbtList.size(); ++i) {
-				EntityAttributeModifier entityAttributeModifier = EntityAttributeModifier.fromNbt(NbtList.getCompound(i));
-				if (entityAttributeModifier != null) {
-					this.addPersistentModifier(entityAttributeModifier);
-				}
-			}
+		if (tag.contains("PersistentModifiers")) {
+			tag.get("PersistentModifiers", ENTITY_ATTRIBUTE_MODIFIERS_CODEC).ifPresent(collection -> collection.forEach(this::addPersistentModifier));
 		}
 
-		if (tag.contains("CachedModifiers", 9)) {
-			NbtList NbtList = tag.getList("CachedModifiers", 10);
-
-			for (int i = 0; i < NbtList.size(); ++i) {
-				EntityAttributeModifier entityAttributeModifier = EntityAttributeModifier.fromNbt(NbtList.getCompound(i));
-				if (entityAttributeModifier != null) {
-					this.cachedModifiers.add(entityAttributeModifier);
-					this.addModifier(entityAttributeModifier);
+		if (tag.contains("CachedModifiers")) {
+			tag.get("CachedModifiers", ENTITY_ATTRIBUTE_MODIFIERS_CODEC).ifPresent(collection -> {
+				for (EntityAttributeModifier modifier : collection) {
+					this.cachedModifiers.add(modifier);
+					this.addModifier(modifier);
 				}
-			}
+			});
 
 			this.update();
 		}
 	}
 
 	public NbtCompound getSyncTag() {
-		NbtCompound NbtCompound = new NbtCompound();
+		NbtCompound nbtCompound = new NbtCompound();
 		if (!this.modifiers.isEmpty()) {
-			NbtList NbtList = new NbtList();
-			for (Map.Entry<Identifier, EntityAttributeModifier> modifier : this.modifiers.entrySet()) {
-				NbtList.add(modifier.getValue().toNbt());
-			}
-
-			NbtCompound.put("Modifiers", NbtList);
+			nbtCompound.put("Modifiers", ENTITY_ATTRIBUTE_MODIFIERS_CODEC, this.modifiers.values());
 		}
-		return NbtCompound;
+		return nbtCompound;
 	}
 
 	public void applySyncTag(NbtCompound tag) {
 		this.modifiers.clear();
 		this.persistentModifiers.clear();
 		this.modifiersByOperation.clear();
-		if (tag.contains("Modifiers", 9)) {
-			NbtList NbtList = tag.getList("Modifiers", 10);
-
-			for (int i = 0; i < NbtList.size(); ++i) {
-				EntityAttributeModifier entityAttributeModifier = EntityAttributeModifier.fromNbt(NbtList.getCompound(i));
-				if (entityAttributeModifier != null) {
-					this.addModifier(entityAttributeModifier);
-				}
-			}
+		if (tag.contains("Modifiers")) {
+			tag.get("Modifiers", ENTITY_ATTRIBUTE_MODIFIERS_CODEC).ifPresent(collection -> collection.forEach(this::addModifier));
 		}
 		this.markUpdate();
 		this.update();

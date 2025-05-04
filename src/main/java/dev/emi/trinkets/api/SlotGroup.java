@@ -53,11 +53,11 @@ public final class SlotGroup {
 	}
 
 	public static SlotGroup read(NbtCompound data) {
-		NbtCompound groupData = data.getCompound("GroupData");
-		String name = groupData.getString("Name");
-		int slotId = groupData.getInt("SlotId");
-		int order = groupData.getInt("Order");
-		NbtCompound typesTag = groupData.getCompound("SlotTypes");
+		NbtCompound groupData = data.getCompoundOrEmpty("GroupData");
+		String name = groupData.getString("Name", "");
+		int slotId = groupData.getInt("SlotId", 0);
+		int order = groupData.getInt("Order", 0);
+		NbtCompound typesTag = groupData.getCompoundOrEmpty("SlotTypes");
 		Builder builder = new Builder(name, slotId, order);
 
 		for (String id : typesTag.getKeys()) {

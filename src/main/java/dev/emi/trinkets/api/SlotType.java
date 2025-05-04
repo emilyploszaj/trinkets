@@ -110,31 +110,37 @@ public class SlotType {
 	}
 
 	public static SlotType read(NbtCompound data) {
-		NbtCompound slotData = data.getCompound("SlotData");
-		String group = slotData.getString("Group");
-		String name = slotData.getString("Name");
-		int order = slotData.getInt("Order");
-		int amount = slotData.getInt("Amount");
-		Identifier icon = Identifier.of(slotData.getString("Icon"));
-		NbtList quickMoveList = slotData.getList("QuickMovePredicates", NbtElement.STRING_TYPE);
+		NbtCompound slotData = data.getCompoundOrEmpty("SlotData");
+		String group = slotData.getString("Group", "");
+		String name = slotData.getString("Name", "");
+		int order = slotData.getInt("Order", 0);
+		int amount = slotData.getInt("Amount", 0);
+		Identifier icon = Identifier.of(slotData.getString("Icon", ""));
+		NbtList quickMoveList = slotData.getListOrEmpty("QuickMovePredicates");
 		Set<Identifier> quickMovePredicates = new HashSet<>();
 
 		for (NbtElement tag : quickMoveList) {
-			quickMovePredicates.add(Identifier.of(tag.asString()));
+			if (tag instanceof NbtString string) {
+				quickMovePredicates.add(Identifier.of(string.value()));
+			}
 		}
-		NbtList validatorList = slotData.getList("ValidatorPredicates", NbtElement.STRING_TYPE);
+		NbtList validatorList = slotData.getListOrEmpty("ValidatorPredicates");
 		Set<Identifier> validatorPredicates = new HashSet<>();
 
 		for (NbtElement tag : validatorList) {
-			validatorPredicates.add(Identifier.of(tag.asString()));
+			if (tag instanceof NbtString string) {
+				validatorPredicates.add(Identifier.of(string.value()));
+			}
 		}
-		NbtList tooltipList = slotData.getList("TooltipPredicates", NbtElement.STRING_TYPE);
+		NbtList tooltipList = slotData.getListOrEmpty("TooltipPredicates");
 		Set<Identifier> tooltipPredicates = new HashSet<>();
 
 		for (NbtElement tag : tooltipList) {
-			tooltipPredicates.add(Identifier.of(tag.asString()));
+			if (tag instanceof NbtString string) {
+				tooltipPredicates.add(Identifier.of(string.value()));
+			}
 		}
-		String dropRuleName = slotData.getString("DropRule");
+		String dropRuleName = slotData.getString("DropRule", "");
 		DropRule dropRule = DropRule.DEFAULT;
 
 		if (TrinketEnums.DropRule.has(dropRuleName)) {
