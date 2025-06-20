@@ -1,9 +1,12 @@
 package dev.emi.trinkets.mixin;
 
+import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.util.Identifier;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -16,6 +19,7 @@ import dev.emi.trinkets.SurvivalTrinketSlot;
 import dev.emi.trinkets.TrinketPlayerScreenHandler;
 import dev.emi.trinkets.TrinketScreen;
 import dev.emi.trinkets.TrinketScreenManager;
+import dev.emi.trinkets.TrinketSlot;
 import dev.emi.trinkets.TrinketsClient;
 import dev.emi.trinkets.api.SlotGroup;
 import dev.emi.trinkets.api.TrinketsApi;
@@ -34,6 +38,8 @@ import net.minecraft.util.collection.DefaultedList;
  */
 @Mixin(CreativeInventoryScreen.class)
 public abstract class CreativeInventoryScreenMixin extends HandledScreen<CreativeScreenHandler> implements TrinketScreen {
+	@Unique
+	private static final Identifier SLOT_HIGHLIGHT_FRONT_TEXTURE = Identifier.ofVanilla("container/slot_highlight_front");
 	@Shadow
 	private static ItemGroup selectedTab;
 	@Shadow
@@ -103,13 +109,26 @@ public abstract class CreativeInventoryScreenMixin extends HandledScreen<Creativ
 		}
 	}
 
-	@Inject(at = @At("TAIL"), method = "drawForeground")
-	private void drawForeground(DrawContext context, int mouseX, int mouseY, CallbackInfo info) {
+	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/ingame/HandledScreen;render(Lnet/minecraft/client/gui/DrawContext;IIF)V", shift = At.Shift.AFTER),
+			method = "render")
+	private void drawForeground(DrawContext context, int mouseX, int mouseY, float deltaTicks, CallbackInfo ci) {
 		if (selectedTab.getType() == ItemGroup.Type.INVENTORY) {
+			context.getMatrices().pushMatrix();
+			context.getMatrices().translate(this.x, this.y);
 			TrinketScreenManager.drawActiveGroup(context);
+
+			for (Slot slot : this.handler.slots) {
+				if (slot instanceof TrinketSlot trinketSlot && trinketSlot.renderAfterRegularSlots() && slot.isEnabled()) {
+					this.drawSlot(context, slot);
+					if (slot == this.focusedSlot && slot.canBeHighlighted()) {
+						context.drawGuiTexture(RenderPipelines.GUI_TEXTURED, SLOT_HIGHLIGHT_FRONT_TEXTURE, this.focusedSlot.x - 4, this.focusedSlot.y - 4, 24, 24);
+					}
+				}
+			}
+			context.getMatrices().popMatrix();
 		}
 	}
-	
+
 	@Inject(at = @At("HEAD"), method = "isClickOutsideBounds", cancellable = true)
 	private void isClickOutsideBounds(double mouseX, double mouseY, int left, int top, int button, CallbackInfoReturnable<Boolean> info) {
 		if (selectedTab.getType() == ItemGroup.Type.INVENTORY && TrinketScreenManager.isClickInsideTrinketBounds(mouseX, mouseY)) {

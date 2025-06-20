@@ -78,6 +78,11 @@ public class SurvivalTrinketSlot extends Slot implements TrinketSlot {
 	}
 
 	@Override
+	public boolean renderAfterRegularSlots() {
+		return slotOffset != 0 || !this.alwaysVisible;
+	}
+
+	@Override
 	public Identifier getBackgroundIdentifier() {
 		return type.getIcon();
 	}

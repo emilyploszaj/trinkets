@@ -223,56 +223,42 @@ public class TrinketInventory implements Inventory {
 		});
 	}
 
-	public NbtCompound toTag() {
-		NbtCompound nbtCompound = new NbtCompound();
-		if (!this.persistentModifiers.isEmpty()) {
-			nbtCompound.put("PersistentModifiers", ENTITY_ATTRIBUTE_MODIFIERS_CODEC, this.persistentModifiers);
-		}
+	public TrinketSaveData.Metadata toMetadata() {
+		List<EntityAttributeModifier> cachedModifiers = new ArrayList<>();
+
 		if (!this.modifiers.isEmpty()) {
-			Set<EntityAttributeModifier> modifiers = new HashSet<>();
 			this.modifiers.forEach((uuid, modifier) -> {
 				if (!this.persistentModifiers.contains(modifier)) {
-					modifiers.add(modifier);
+					cachedModifiers.add(modifier);
 				}
 			});
-
-			nbtCompound.put("CachedModifiers", ENTITY_ATTRIBUTE_MODIFIERS_CODEC, modifiers);
 		}
-		return nbtCompound;
+		return new TrinketSaveData.Metadata(List.copyOf(this.persistentModifiers), cachedModifiers);
 	}
 
-	public void fromTag(NbtCompound tag) {
-		if (tag.contains("PersistentModifiers")) {
-			tag.get("PersistentModifiers", ENTITY_ATTRIBUTE_MODIFIERS_CODEC).ifPresent(collection -> collection.forEach(this::addPersistentModifier));
-		}
+	public void fromMetadata(TrinketSaveData.Metadata tag) {
+		tag.persistentModifiers().forEach(this::addPersistentModifier);
 
-		if (tag.contains("CachedModifiers")) {
-			tag.get("CachedModifiers", ENTITY_ATTRIBUTE_MODIFIERS_CODEC).ifPresent(collection -> {
-				for (EntityAttributeModifier modifier : collection) {
-					this.cachedModifiers.add(modifier);
-					this.addModifier(modifier);
-				}
-			});
+		if (!tag.cachedModifiers().isEmpty()) {
+			for (EntityAttributeModifier modifier : tag.cachedModifiers()) {
+				this.cachedModifiers.add(modifier);
+				this.addModifier(modifier);
+			}
 
 			this.update();
 		}
 	}
 
-	public NbtCompound getSyncTag() {
-		NbtCompound nbtCompound = new NbtCompound();
-		if (!this.modifiers.isEmpty()) {
-			nbtCompound.put("Modifiers", ENTITY_ATTRIBUTE_MODIFIERS_CODEC, this.modifiers.values());
-		}
-		return nbtCompound;
+	public TrinketSaveData.Metadata getSyncMetadata() {
+		return new TrinketSaveData.Metadata(List.copyOf(this.modifiers.values()), List.of());
 	}
 
-	public void applySyncTag(NbtCompound tag) {
+	public void applySyncMetadata(TrinketSaveData.Metadata metadata) {
 		this.modifiers.clear();
 		this.persistentModifiers.clear();
 		this.modifiersByOperation.clear();
-		if (tag.contains("Modifiers")) {
-			tag.get("Modifiers", ENTITY_ATTRIBUTE_MODIFIERS_CODEC).ifPresent(collection -> collection.forEach(this::addModifier));
-		}
+
+		metadata.persistentModifiers().forEach(this::addModifier);
 		this.markUpdate();
 		this.update();
 	}

@@ -4,6 +4,7 @@ import dev.emi.trinkets.api.SlotGroup;
 import dev.emi.trinkets.api.SlotType;
 import dev.emi.trinkets.api.SlotReference;
 import dev.emi.trinkets.api.TrinketInventory;
+import dev.emi.trinkets.api.TrinketSaveData;
 import dev.emi.trinkets.api.TrinketsApi;
 import dev.emi.trinkets.api.Trinket;
 import dev.emi.trinkets.data.EntitySlotLoader;
@@ -16,7 +17,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
 
 import java.util.Map;
 
@@ -34,7 +34,7 @@ public class TrinketsClient implements ClientModInitializer {
 			Entity entity = client.world.getEntityById(payload.entityId());
 			if (entity instanceof LivingEntity) {
 				TrinketsApi.getTrinketComponent((LivingEntity) entity).ifPresent(trinkets -> {
-					for (Map.Entry<String, NbtCompound> entry : payload.inventoryUpdates().entrySet()) {
+					for (Map.Entry<String, TrinketSaveData.Metadata> entry : payload.inventoryUpdates().entrySet()) {
 						String[] split = entry.getKey().split("/");
 						String group = split[0];
 						String slot = split[1];
@@ -42,7 +42,7 @@ public class TrinketsClient implements ClientModInitializer {
 						if (slots != null) {
 							TrinketInventory inv = slots.get(slot);
 							if (inv != null) {
-								inv.applySyncTag(entry.getValue());
+								inv.applySyncMetadata(entry.getValue());
 							}
 						}
 					}
