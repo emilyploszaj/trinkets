@@ -3,14 +3,12 @@ package dev.emi.trinkets;
 import java.lang.ref.WeakReference;
 import java.util.List;
 
-import com.mojang.blaze3d.opengl.GlStateManager;
-
 import dev.emi.trinkets.api.SlotGroup;
 import dev.emi.trinkets.api.SlotType;
 import dev.emi.trinkets.api.TrinketsApi;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.util.math.Rect2i;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.util.Identifier;
@@ -200,10 +198,7 @@ public class TrinketScreenManager {
 		}
 
 		TrinketPlayerScreenHandler handler = currentScreen.trinkets$getHandler();
-		GlStateManager._enableDepthTest();
-		context.getMatrices().push();
-		context.getMatrices().translate(0, 0, 305);
-
+		context.getMatrices().pushMatrix();
 		Rect2i r = currentScreen.trinkets$getGroupRect(group);
 		int slotsWidth = handler.trinkets$getSlotWidth(group) + 1;
 		List<Point> slotHeights = handler.trinkets$getSlotHeights(group);
@@ -270,12 +265,11 @@ public class TrinketScreenManager {
 			drawTexture(context, MORE_SLOTS, x + 4, y + 4, 4, 4, 18, 18);
 		}
 
-		context.getMatrices().pop();
-		GlStateManager._disableDepthTest();
+		context.getMatrices().popMatrix();
 	}
 
 	private static void drawTexture(DrawContext context, Identifier texture, int x, int y, int u, int v, int width, int height) {
-		context.drawTexture(RenderLayer::getGuiTextured, texture,  x, y, u, v, width, height, 256, 256);
+		context.drawTexture(RenderPipelines.GUI_TEXTURED, texture,  x, y, u, v, width, height, 256, 256);
 	}
 
 	public static void drawActiveGroup(DrawContext context) {

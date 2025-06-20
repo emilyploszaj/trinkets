@@ -14,13 +14,18 @@ import java.util.function.Predicate;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
+import com.mojang.serialization.DynamicOps;
 import dev.emi.trinkets.TrinketModifiers;
 import dev.emi.trinkets.TrinketPlayerScreenHandler;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.Identifier;
+import net.minecraft.storage.NbtWriteView;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
+import net.minecraft.util.ErrorReporter;
 import org.ladysnake.cca.api.v3.component.sync.AutoSyncedComponent;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.EntityAttribute;
@@ -28,7 +33,6 @@ import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Pair;
@@ -193,40 +197,36 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 	}
 
 	@Override
-	public void readFromNbt(NbtCompound tag, RegistryWrapper.WrapperLookup lookup) {
+	public void readData(ReadView view) {
+		Optional<TrinketSaveData> optional = view.read(TrinketSaveData.MAP_CODEC);
 		DefaultedList<ItemStack> dropped = DefaultedList.of();
-		for (String groupKey : tag.getKeys()) {
-			NbtCompound groupTag = tag.getCompoundOrEmpty(groupKey);
-			if (groupTag != null) {
-				Map<String, TrinketInventory> groupSlots = this.inventory.get(groupKey);
-				if (groupSlots != null) {
-					for (String slotKey : groupTag.getKeys()) {
-						NbtCompound slotTag = groupTag.getCompoundOrEmpty(slotKey);
-						NbtList list = slotTag.getListOrEmpty("Items");
-						TrinketInventory inv = groupSlots.get(slotKey);
+		if (optional.isPresent()) {
+			TrinketSaveData data = optional.orElseThrow();
+			for (String groupKey : data.data().keySet()) {
+				Map<String, TrinketSaveData.InventoryData> groupTag = data.data().get(groupKey);
+				if (groupTag != null) {
+					Map<String, TrinketInventory> groupSlots = this.inventory.get(groupKey);
+					if (groupSlots != null) {
+						for (String slotKey : groupTag.keySet()) {
+							TrinketSaveData.InventoryData slotTag = groupTag.get(slotKey);
+							TrinketInventory inv = groupSlots.get(slotKey);
 
-						if (inv != null) {
-							inv.fromTag(slotTag.getCompoundOrEmpty("Metadata"));
-						}
+							if (inv != null) {
+								inv.fromMetadata(slotTag.metadata());
+							}
 
-						for (int i = 0; i < list.size(); i++) {
-							Optional<NbtCompound> c = list.getCompound(i);
-							ItemStack stack = c.isPresent() && !c.get().isEmpty() ? ItemStack.fromNbt(lookup, c.get()).orElse(ItemStack.EMPTY) : ItemStack.EMPTY;
-							if (inv != null && i < inv.size()) {
-								inv.setStack(i, stack);
-							} else {
-								dropped.add(stack);
+							for (int i = 0; i < slotTag.items().size(); i++) {
+								ItemStack stack = slotTag.items().get(i);
+								if (inv != null && i < inv.size()) {
+									inv.setStack(i, stack);
+								} else {
+									dropped.add(stack);
+								}
 							}
 						}
-					}
-				} else {
-					for (String slotKey : groupTag.getKeys()) {
-						NbtCompound slotTag = groupTag.getCompoundOrEmpty(slotKey);
-						NbtList list = slotTag.getListOrEmpty("Items");
-						for (int i = 0; i < list.size(); i++) {
-							Optional<NbtCompound> c = list.getCompound(i);
-							ItemStack stack = c.isPresent() && !c.get().isEmpty() ? ItemStack.fromNbt(lookup, c.get()).orElse(ItemStack.EMPTY) : ItemStack.EMPTY;
-							dropped.add(stack);
+					} else {
+						for (String slotKey : groupTag.keySet()) {
+							dropped.addAll(groupTag.get(slotKey).items());
 						}
 					}
 				}
@@ -268,27 +268,24 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 		NbtCompound tag = buf.readNbt();
 
 		if (tag != null) {
-
+			DynamicOps<NbtElement> ops = buf.getRegistryManager().getOps(NbtOps.INSTANCE);
 			for (String groupKey : tag.getKeys()) {
 				NbtCompound groupTag = tag.getCompoundOrEmpty(groupKey);
-
 				if (groupTag != null) {
 					Map<String, TrinketInventory> groupSlots = this.inventory.get(groupKey);
-
 					if (groupSlots != null) {
-
 						for (String slotKey : groupTag.getKeys()) {
 							NbtCompound slotTag = groupTag.getCompoundOrEmpty(slotKey);
 							NbtList list = slotTag.getListOrEmpty("Items");
 							TrinketInventory inv = groupSlots.get(slotKey);
 
 							if (inv != null) {
-								inv.applySyncTag(slotTag.getCompoundOrEmpty("Metadata"));
+								inv.applySyncMetadata(slotTag.get("Metadata", TrinketSaveData.Metadata.CODEC, ops).orElse(TrinketSaveData.Metadata.EMPTY));
 							}
 
 							for (int i = 0; i < list.size(); i++) {
-								Optional<NbtCompound> c = list.getCompound(i);
-								ItemStack stack = c.isPresent() && !c.get().isEmpty() ? ItemStack.fromNbt(buf.getRegistryManager(), c.get()).orElse(ItemStack.EMPTY) : ItemStack.EMPTY;
+								NbtCompound c = list.getCompoundOrEmpty(i);
+								ItemStack stack = ItemStack.OPTIONAL_CODEC.decode(ops, c).result().map(com.mojang.datafixers.util.Pair::getFirst).orElse(ItemStack.EMPTY);
 								if (inv != null && i < inv.size()) {
 									inv.setStack(i, stack);
 								}
@@ -305,32 +302,32 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 	}
 
 	@Override
-	public void writeToNbt(NbtCompound tag, RegistryWrapper.WrapperLookup lookup) {
+	public void writeData(WriteView view) {
+		TrinketSaveData data = new TrinketSaveData(new HashMap<>());
 		for (Map.Entry<String, Map<String, TrinketInventory>> group : this.getInventory().entrySet()) {
-			NbtCompound groupTag = new NbtCompound();
+			Map<String, TrinketSaveData.InventoryData> groupTag = new HashMap<>();
 			for (Map.Entry<String, TrinketInventory> slot : group.getValue().entrySet()) {
-				NbtCompound slotTag = new NbtCompound();
-				NbtList list = new NbtList();
 				TrinketInventory inv = slot.getValue();
+
+				List<ItemStack> items = new ArrayList<>();
 				for (int i = 0; i < inv.size(); i++) {
-					NbtCompound c = inv.getStack(i).isEmpty() ? new NbtCompound() : (NbtCompound) inv.getStack(i).toNbt(lookup);
-					list.add(c);
+					items.add(inv.getStack(i).copy());
 				}
-				slotTag.put("Metadata", this.syncing ? inv.getSyncTag() : inv.toTag());
-				slotTag.put("Items", list);
-				groupTag.put(slot.getKey(), slotTag);
+				TrinketSaveData.Metadata metadata = this.syncing ? inv.getSyncMetadata() : inv.toMetadata();
+				groupTag.put(slot.getKey(), new TrinketSaveData.InventoryData(metadata, items));
 			}
-			tag.put(group.getKey(), groupTag);
+			data.data().put(group.getKey(), groupTag);
 		}
+		view.put(TrinketSaveData.MAP_CODEC, data);
 	}
 
 	@Override
 	public void writeSyncPacket(RegistryByteBuf buf, ServerPlayerEntity recipient) {
 		this.syncing = true;
-		NbtCompound tag = new NbtCompound();
-		this.writeToNbt(tag, buf.getRegistryManager());
+		NbtWriteView tag = NbtWriteView.create(ErrorReporter.EMPTY);
+		this.writeData(tag);
 		this.syncing = false;
-		buf.writeNbt(tag);
+		buf.writeNbt(tag.getNbt());
 	}
 
 	@Override
