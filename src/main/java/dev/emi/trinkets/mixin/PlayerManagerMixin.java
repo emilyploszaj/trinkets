@@ -1,6 +1,7 @@
 package dev.emi.trinkets.mixin;
 
 
+import com.llamalad7.mixinextras.sugar.Local;
 import dev.emi.trinkets.TrinketPlayerScreenHandler;
 import dev.emi.trinkets.api.TrinketInventory;
 import dev.emi.trinkets.api.TrinketsApi;
@@ -12,6 +13,7 @@ import java.util.Set;
 
 import dev.emi.trinkets.payload.SyncInventoryPayload;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.server.PlayerManager;
@@ -21,6 +23,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
  * Syncs slot data to player's client on login
@@ -44,5 +47,10 @@ public abstract class PlayerManagerMixin {
 			ServerPlayNetworking.send(player, new SyncInventoryPayload(player.getId(), Map.of(), tag));
 			inventoriesToSend.clear();
 		});
+	}
+
+	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayerEntity;onSpawn()V"), method = "respawnPlayer")
+	private void onPlayerRespawn(ServerPlayerEntity player, boolean alive, Entity.RemovalReason removalReason, CallbackInfoReturnable<ServerPlayerEntity> cir, @Local(ordinal = 1) ServerPlayerEntity newServerPlayer) {
+		((TrinketPlayerScreenHandler) newServerPlayer.playerScreenHandler).trinkets$updateTrinketSlots(true);
 	}
 }
