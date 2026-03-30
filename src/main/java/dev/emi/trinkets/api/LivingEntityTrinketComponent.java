@@ -14,6 +14,7 @@ import java.util.function.Predicate;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
+import com.google.common.collect.Sets;
 import dev.emi.trinkets.TrinketPlayerScreenHandler;
 import dev.onyxstudios.cca.api.v3.component.sync.AutoSyncedComponent;
 import net.fabricmc.fabric.api.util.NbtType;
@@ -81,6 +82,7 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 							if (i < inv.size()) {
 								inv.setStack(i, stack);
 							} else {
+								this.clearSlotModifiers(stack, new SlotReference(oldInv, i));
 								if (this.entity instanceof PlayerEntity player) {
 									player.getInventory().offerOrDrop(stack);
 								} else {
@@ -185,6 +187,25 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 				slotType.getValue().clearModifiers();
 			}
 		}
+	}
+
+	public void clearSlotModifiers(ItemStack oldStack, SlotReference ref) {
+		UUID uuid = SlotAttributes.getUuid(ref);
+		Trinket trinket = TrinketsApi.getTrinket(oldStack.getItem());
+		Multimap<EntityAttribute, EntityAttributeModifier> map = trinket.getModifiers(oldStack, ref, this.getEntity(), uuid);
+		Multimap<String, EntityAttributeModifier> slotMap = HashMultimap.create();
+		Set<SlotAttributes.SlotEntityAttribute> toRemove = Sets.newHashSet();
+		for (EntityAttribute attr : map.keySet()) {
+			if (attr instanceof SlotAttributes.SlotEntityAttribute slotAttr) {
+				slotMap.putAll(slotAttr.slot, map.get(attr));
+				toRemove.add(slotAttr);
+			}
+		}
+		for (SlotAttributes.SlotEntityAttribute attr : toRemove) {
+			map.removeAll(attr);
+		}
+		this.getEntity().getAttributes().removeModifiers(map);
+		this.removeModifiers(slotMap);
 	}
 
 	@Override

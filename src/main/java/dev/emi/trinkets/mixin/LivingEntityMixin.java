@@ -27,6 +27,7 @@ import dev.emi.trinkets.api.Trinket;
 import dev.emi.trinkets.api.TrinketEnums.DropRule;
 import dev.emi.trinkets.api.TrinketInventory;
 import dev.emi.trinkets.api.TrinketsApi;
+import dev.emi.trinkets.api.LivingEntityTrinketComponent;
 import dev.emi.trinkets.api.event.TrinketDropCallback;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
@@ -161,22 +162,8 @@ public abstract class LivingEntityMixin extends Entity {
 						contentUpdates.put(newRef, newStackCopy);
 						UUID uuid = SlotAttributes.getUuid(ref);
 
-						if (!oldStack.isEmpty()) {
-							Trinket trinket = TrinketsApi.getTrinket(oldStack.getItem());
-							Multimap<EntityAttribute, EntityAttributeModifier> map = trinket.getModifiers(oldStack, ref, entity, uuid);
-							Multimap<String, EntityAttributeModifier> slotMap = HashMultimap.create();
-							Set<SlotEntityAttribute> toRemove = Sets.newHashSet();
-							for (EntityAttribute attr : map.keySet()) {
-								if (attr instanceof SlotEntityAttribute slotAttr) {
-									slotMap.putAll(slotAttr.slot, map.get(attr));
-									toRemove.add(slotAttr);
-								}
-							}
-							for (SlotEntityAttribute attr : toRemove) {
-								map.removeAll(attr);
-							}
-							this.getAttributes().removeModifiers(map);
-							trinkets.removeModifiers(slotMap);
+						if (!oldStack.isEmpty() && trinkets instanceof LivingEntityTrinketComponent livingEntityTrinketComponent) {
+							livingEntityTrinketComponent.clearSlotModifiers(oldStack, ref);
 						}
 
 						if (!newStack.isEmpty()) {
