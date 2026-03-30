@@ -13,9 +13,12 @@ import java.util.function.Predicate;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Sets;
 
 import dev.emi.trinkets.TrinketModifiers;
 import dev.emi.trinkets.TrinketPlayerScreenHandler;
+import dev.emi.trinkets.api.SlotAttributes.SlotEntityAttribute;
+import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.registry.entry.RegistryEntry;
@@ -86,6 +89,7 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 							if (i < inv.size()) {
 								inv.setStack(i, stack);
 							} else {
+								this.removeSlotModifiers(stack, new SlotReference(oldInv, i));
 								if (this.entity instanceof PlayerEntity player) {
 									player.getInventory().offerOrDrop(stack);
 								} else if (this.entity.getWorld() instanceof ServerWorld serverWorld) {
@@ -190,6 +194,55 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 				slotType.getValue().clearModifiers();
 			}
 		}
+	}
+
+	public void removeSlotModifiers(ItemStack stack, SlotReference ref) {
+		Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> map = TrinketModifiers.get(stack, ref, entity);
+		Multimap<String, EntityAttributeModifier> slotMap = HashMultimap.create();
+		Set<RegistryEntry<EntityAttribute>> toRemove = Sets.newHashSet();
+		for (RegistryEntry<EntityAttribute> attr : map.keySet()) {
+			if (attr.hasKeyAndValue() && attr.value() instanceof SlotEntityAttribute slotAttr) {
+				slotMap.putAll(slotAttr.slot, map.get(attr));
+				toRemove.add(attr);
+			}
+		}
+		for (RegistryEntry<EntityAttribute> attr : toRemove) {
+			map.removeAll(attr);
+		}
+		//this.getEntity().getAttributes().removeModifiers(map);
+		map.asMap().forEach((attribute, modifiers) -> {
+			EntityAttributeInstance entityAttributeInstance = this.getEntity().getAttributes().getCustomInstance(attribute);
+			if (entityAttributeInstance != null) {
+				modifiers.forEach(modifier -> entityAttributeInstance.removeModifier(modifier.id()));
+			}
+		});
+
+		this.removeModifiers(slotMap);
+	}
+
+	public void addSlotModifiers(ItemStack stack, SlotReference ref) {
+		Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> map = TrinketModifiers.get(stack, ref, entity);
+		Multimap<String, EntityAttributeModifier> slotMap = HashMultimap.create();
+		Set<RegistryEntry<EntityAttribute>> toRemove = Sets.newHashSet();
+		for (RegistryEntry<EntityAttribute> attr : map.keySet()) {
+			if (attr.hasKeyAndValue() && attr.value() instanceof SlotEntityAttribute slotAttr) {
+				slotMap.putAll(slotAttr.slot, map.get(attr));
+				toRemove.add(attr);
+			}
+		}
+		for (RegistryEntry<EntityAttribute> attr : toRemove) {
+			map.removeAll(attr);
+		}
+		//this.getEntity().getAttributes().addTemporaryModifiers(map);
+		map.forEach((attribute, attributeModifier) -> {
+			EntityAttributeInstance entityAttributeInstance = this.getEntity().getAttributes().getCustomInstance(attribute);
+			if (entityAttributeInstance != null) {
+				entityAttributeInstance.removeModifier(attributeModifier.id());
+				entityAttributeInstance.addTemporaryModifier(attributeModifier);
+			}
+
+		});
+		this.addTemporaryModifiers(slotMap);
 	}
 
 	@Override

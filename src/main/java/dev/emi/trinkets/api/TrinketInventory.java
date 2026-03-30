@@ -182,6 +182,9 @@ public class TrinketInventory implements Inventory {
 						newStacks.set(i, stack);
 					} else {
 						if (entity.getWorld() instanceof ServerWorld serverWorld) {
+                            if (this.getComponent() instanceof LivingEntityTrinketComponent livingEntityTrinketComponent) {
+                                livingEntityTrinketComponent.removeSlotModifiers(stack, new SlotReference(this, i));
+                            }
 							entity.dropStack(serverWorld, stack);
 						}
 					}
