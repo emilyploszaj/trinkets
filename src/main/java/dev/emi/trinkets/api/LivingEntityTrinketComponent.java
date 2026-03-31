@@ -82,7 +82,7 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 							if (i < inv.size()) {
 								inv.setStack(i, stack);
 							} else {
-								this.clearSlotModifiers(stack, new SlotReference(oldInv, i));
+								this.removeSlotModifiers(stack, new SlotReference(oldInv, i));
 								if (this.entity instanceof PlayerEntity player) {
 									player.getInventory().offerOrDrop(stack);
 								} else {
@@ -189,7 +189,7 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 		}
 	}
 
-	public void clearSlotModifiers(ItemStack oldStack, SlotReference ref) {
+	public void removeSlotModifiers(ItemStack oldStack, SlotReference ref) {
 		UUID uuid = SlotAttributes.getUuid(ref);
 		Trinket trinket = TrinketsApi.getTrinket(oldStack.getItem());
 		Multimap<EntityAttribute, EntityAttributeModifier> map = trinket.getModifiers(oldStack, ref, this.getEntity(), uuid);
@@ -206,6 +206,25 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 		}
 		this.getEntity().getAttributes().removeModifiers(map);
 		this.removeModifiers(slotMap);
+	}
+
+	public void addSlotModifiers(ItemStack stack, SlotReference ref) {
+		UUID uuid = SlotAttributes.getUuid(ref);
+		Trinket trinket = TrinketsApi.getTrinket(stack.getItem());
+		Multimap<EntityAttribute, EntityAttributeModifier> map = trinket.getModifiers(stack, ref, entity, uuid);
+		Multimap<String, EntityAttributeModifier> slotMap = HashMultimap.create();
+		Set<SlotAttributes.SlotEntityAttribute> toRemove = Sets.newHashSet();
+		for (EntityAttribute attr : map.keySet()) {
+			if (attr instanceof SlotAttributes.SlotEntityAttribute slotAttr) {
+				slotMap.putAll(slotAttr.slot, map.get(attr));
+				toRemove.add(slotAttr);
+			}
+		}
+		for (SlotAttributes.SlotEntityAttribute attr : toRemove) {
+			map.removeAll(attr);
+		}
+		this.getEntity().getAttributes().addTemporaryModifiers(map);
+		this.addTemporaryModifiers(slotMap);
 	}
 
 	@Override

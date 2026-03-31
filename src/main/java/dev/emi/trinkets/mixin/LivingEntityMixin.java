@@ -3,12 +3,8 @@ package dev.emi.trinkets.mixin;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Sets;
-
+import dev.emi.trinkets.api.LivingEntityTrinketComponent;
 import net.minecraft.registry.tag.ItemTags;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -20,14 +16,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import dev.emi.trinkets.TrinketPlayerScreenHandler;
 import dev.emi.trinkets.TrinketsNetwork;
-import dev.emi.trinkets.api.SlotAttributes;
-import dev.emi.trinkets.api.SlotAttributes.SlotEntityAttribute;
 import dev.emi.trinkets.api.SlotType;
-import dev.emi.trinkets.api.Trinket;
 import dev.emi.trinkets.api.TrinketEnums.DropRule;
 import dev.emi.trinkets.api.TrinketInventory;
 import dev.emi.trinkets.api.TrinketsApi;
-import dev.emi.trinkets.api.LivingEntityTrinketComponent;
 import dev.emi.trinkets.api.event.TrinketDropCallback;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
@@ -38,8 +30,6 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.AttributeContainer;
-import net.minecraft.entity.attribute.EntityAttribute;
-import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
@@ -57,9 +47,6 @@ import net.minecraft.world.GameRules;
 public abstract class LivingEntityMixin extends Entity {
 	@Unique
 	private final Map<String, ItemStack> lastEquippedTrinkets = new HashMap<>();
-	
-	@Shadow
-	protected abstract AttributeContainer getAttributes();
 
 	private LivingEntityMixin() {
 		super(null, null);
@@ -158,30 +145,15 @@ public abstract class LivingEntityMixin extends Entity {
 					TrinketsApi.getTrinket(oldStack.getItem()).onUnequip(oldStack, ref, entity);
 					TrinketsApi.getTrinket(newStack.getItem()).onEquip(newStack, ref, entity);
 
-					if (!this.getWorld().isClient) {
+					if (!this.getWorld().isClient  && trinkets instanceof LivingEntityTrinketComponent livingEntityTrinkets) {
 						contentUpdates.put(newRef, newStackCopy);
-						UUID uuid = SlotAttributes.getUuid(ref);
 
-						if (!oldStack.isEmpty() && trinkets instanceof LivingEntityTrinketComponent livingEntityTrinketComponent) {
-							livingEntityTrinketComponent.clearSlotModifiers(oldStack, ref);
+						if (!oldStack.isEmpty()) {
+							livingEntityTrinkets.removeSlotModifiers(oldStack, ref);
 						}
 
 						if (!newStack.isEmpty()) {
-							Trinket trinket = TrinketsApi.getTrinket(newStack.getItem());
-							Multimap<EntityAttribute, EntityAttributeModifier> map = trinket.getModifiers(newStack, ref, entity, uuid);
-							Multimap<String, EntityAttributeModifier> slotMap = HashMultimap.create();
-							Set<SlotEntityAttribute> toRemove = Sets.newHashSet();
-							for (EntityAttribute attr : map.keySet()) {
-								if (attr instanceof SlotEntityAttribute slotAttr) {
-									slotMap.putAll(slotAttr.slot, map.get(attr));
-									toRemove.add(slotAttr);
-								}
-							}
-							for (SlotEntityAttribute attr : toRemove) {
-								map.removeAll(attr);
-							}
-							this.getAttributes().addTemporaryModifiers(map);
-							trinkets.addTemporaryModifiers(slotMap);
+							livingEntityTrinkets.addSlotModifiers(newStack, ref);
 						}
 					}
 				}
