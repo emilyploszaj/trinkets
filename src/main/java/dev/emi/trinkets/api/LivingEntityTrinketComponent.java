@@ -189,10 +189,10 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 		}
 	}
 
-	public void removeSlotModifiers(ItemStack oldStack, SlotReference ref) {
+	public void removeSlotModifiers(ItemStack stack, SlotReference ref) {
 		UUID uuid = SlotAttributes.getUuid(ref);
-		Trinket trinket = TrinketsApi.getTrinket(oldStack.getItem());
-		Multimap<EntityAttribute, EntityAttributeModifier> map = trinket.getModifiers(oldStack, ref, this.getEntity(), uuid);
+		Trinket trinket = TrinketsApi.getTrinket(stack.getItem());
+		Multimap<EntityAttribute, EntityAttributeModifier> map = trinket.getModifiers(stack, ref, this.getEntity(), uuid);
 		Multimap<String, EntityAttributeModifier> slotMap = HashMultimap.create();
 		Set<SlotAttributes.SlotEntityAttribute> toRemove = Sets.newHashSet();
 		for (EntityAttribute attr : map.keySet()) {
