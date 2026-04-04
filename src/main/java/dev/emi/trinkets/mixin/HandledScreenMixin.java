@@ -5,6 +5,8 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import dev.emi.trinkets.TrinketScreenManager;
+import dev.emi.trinkets.TrinketsMain;
+import dev.emi.trinkets.api.TrinketInventory;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.client.render.RenderLayer;
@@ -38,6 +40,9 @@ import java.util.function.Function;
 public abstract class HandledScreenMixin extends Screen {
 	@Shadow @Nullable protected Slot focusedSlot;
 	@Shadow @Final private static Identifier SLOT_HIGHLIGHT_BACK_TEXTURE;
+
+	@Shadow protected abstract void resetTooltipSubmenus(Slot slot);
+
 	@Unique
 	private static final Identifier MORE_SLOTS = Identifier.of("trinkets", "textures/gui/more_slots.png");
 	@Unique
@@ -118,6 +123,18 @@ public abstract class HandledScreenMixin extends Screen {
 				} else if (slot.id != TrinketsClient.activeGroup.getSlotId()) {
 					info.setReturnValue(false);
 				}
+			}
+		}
+	}
+
+	@Inject(at = @At("HEAD"), method = "resetTooltipSubmenus", cancellable = true)
+	private void resetTooltipSubmenus(Slot slot, CallbackInfo info) {
+		if (slot instanceof TrinketSlot && slot.inventory instanceof TrinketInventory inventory) {
+			if (slot.getIndex() >= inventory.size()) {
+				if (slot != this.focusedSlot && this.focusedSlot != null) {
+					this.resetTooltipSubmenus(this.focusedSlot);
+				}
+				info.cancel();
 			}
 		}
 	}
