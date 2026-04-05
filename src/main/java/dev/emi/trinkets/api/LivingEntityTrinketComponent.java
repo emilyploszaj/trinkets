@@ -209,11 +209,19 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 		for (RegistryEntry<EntityAttribute> attr : toRemove) {
 			map.removeAll(attr);
 		}
+		// MC-272769 Mitigation.
+		Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> existsElsewhere = HashMultimap.create();
+		this.forEach(((slotReference, itemStack) -> {
+			if (!slotReference.equals(ref) && !itemStack.isEmpty()) {
+				existsElsewhere.putAll(TrinketModifiers.get(itemStack, slotReference, entity));
+			}
+		}));
+		existsElsewhere.forEach(map::remove);
 		//this.getEntity().getAttributes().removeModifiers(map);
 		map.asMap().forEach((attribute, modifiers) -> {
 			EntityAttributeInstance entityAttributeInstance = this.getEntity().getAttributes().getCustomInstance(attribute);
 			if (entityAttributeInstance != null) {
-				modifiers.forEach(modifier -> entityAttributeInstance.removeModifier(modifier.id()));
+				modifiers.forEach(modifier -> entityAttributeInstance.removeModifier(modifier.id()) );
 			}
 		});
 
