@@ -204,6 +204,15 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 		for (SlotAttributes.SlotEntityAttribute attr : toRemove) {
 			map.removeAll(attr);
 		}
+        // MC-272769 Mitigation.
+		Multimap<EntityAttribute, EntityAttributeModifier> existsElsewhere = HashMultimap.create();
+		this.forEach(((slotReference, itemStack) -> {
+            if (!slotReference.equals(ref) && !itemStack.isEmpty()) {
+                UUID slotUuid = SlotAttributes.getUuid(slotReference);
+                existsElsewhere.putAll(trinket.getModifiers(itemStack, slotReference, entity, slotUuid));
+            }
+        }));
+		existsElsewhere.forEach(map::remove);
 		this.getEntity().getAttributes().removeModifiers(map);
 		this.removeModifiers(slotMap);
 	}
