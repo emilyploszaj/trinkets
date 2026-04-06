@@ -199,6 +199,16 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 	public void removeSlotModifiers(ItemStack stack, SlotReference ref) {
 		Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> map = TrinketModifiers.get(stack, ref, entity);
 		Multimap<String, EntityAttributeModifier> slotMap = HashMultimap.create();
+
+        // MC-272769 Mitigation.
+        Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> existsElsewhere = HashMultimap.create();
+        this.forEach(((slotReference, itemStack) -> {
+            if (!slotReference.equals(ref) && !itemStack.isEmpty()) {
+                existsElsewhere.putAll(TrinketModifiers.get(itemStack, slotReference, entity));
+            }
+        }));
+        existsElsewhere.forEach(map::remove);
+
 		Set<RegistryEntry<EntityAttribute>> toRemove = Sets.newHashSet();
 		for (RegistryEntry<EntityAttribute> attr : map.keySet()) {
 			if (attr.hasKeyAndValue() && attr.value() instanceof SlotEntityAttribute slotAttr) {
@@ -209,14 +219,6 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 		for (RegistryEntry<EntityAttribute> attr : toRemove) {
 			map.removeAll(attr);
 		}
-		// MC-272769 Mitigation.
-		Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> existsElsewhere = HashMultimap.create();
-		this.forEach(((slotReference, itemStack) -> {
-			if (!slotReference.equals(ref) && !itemStack.isEmpty()) {
-				existsElsewhere.putAll(TrinketModifiers.get(itemStack, slotReference, entity));
-			}
-		}));
-		existsElsewhere.forEach(map::remove);
 		//this.getEntity().getAttributes().removeModifiers(map);
 		map.asMap().forEach((attribute, modifiers) -> {
 			EntityAttributeInstance entityAttributeInstance = this.getEntity().getAttributes().getCustomInstance(attribute);
