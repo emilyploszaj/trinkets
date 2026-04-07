@@ -146,13 +146,7 @@ public abstract class LivingEntityMixin extends Entity {
 					if (!this.getWorld().isClient && trinkets instanceof LivingEntityTrinketComponent livingEntityTrinkets) {
 						contentUpdates.put(newRef, newStackCopy);
 
-						if (!oldStack.isEmpty()) {
-							livingEntityTrinkets.removeSlotModifiers(oldStack, ref);
-						}
-
-						if (!newStack.isEmpty() && index < inventory.size()) {
-							livingEntityTrinkets.addSlotModifiers(newStack, ref);
-						}
+						livingEntityTrinkets.processSlotModifiers(ref, oldStack, newStack);
 					}
 				}
 

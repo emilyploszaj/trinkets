@@ -82,7 +82,7 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 							if (i < inv.size()) {
 								inv.setStack(i, stack);
 							} else {
-								this.removeSlotModifiers(stack, new SlotReference(oldInv, i));
+								this.processSlotModifiers(new SlotReference(oldInv, i), stack, ItemStack.EMPTY);
 								if (this.entity instanceof PlayerEntity player) {
 									player.getInventory().offerOrDrop(stack);
 								} else {
@@ -189,53 +189,48 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 		}
 	}
 
-	public void removeSlotModifiers(ItemStack stack, SlotReference ref) {
+	public void processSlotModifiers(SlotReference ref, ItemStack oldStack, ItemStack newStack) {
 		UUID uuid = SlotAttributes.getUuid(ref);
-		Trinket trinket = TrinketsApi.getTrinket(stack.getItem());
-		Multimap<EntityAttribute, EntityAttributeModifier> map = trinket.getModifiers(stack, ref, this.getEntity(), uuid);
-		Multimap<String, EntityAttributeModifier> slotMap = HashMultimap.create();
+		Trinket oldTrinket = TrinketsApi.getTrinket(oldStack.getItem());
+		Trinket newTrinket = TrinketsApi.getTrinket(newStack.getItem());
+		// TODO: Check if empty, if so, static empty Multimap?
+		Multimap<EntityAttribute, EntityAttributeModifier> removeModifiers = oldTrinket.getModifiers(oldStack, ref, this.getEntity(), uuid);
+		Multimap<EntityAttribute, EntityAttributeModifier> addModifiers = newTrinket.getModifiers(newStack, ref, this.getEntity(), uuid);
+		Multimap<String, EntityAttributeModifier> removeSlotMap = HashMultimap.create(), addSlotMap = HashMultimap.create();
 
 		// MC-272769 Mitigation.
 		Multimap<EntityAttribute, EntityAttributeModifier> existsElsewhere = HashMultimap.create();
 		this.forEach(((slotReference, itemStack) -> {
 			if (!slotReference.equals(ref) && !itemStack.isEmpty()) {
 				UUID slotUuid = SlotAttributes.getUuid(slotReference);
-				existsElsewhere.putAll(trinket.getModifiers(itemStack, slotReference, entity, slotUuid));
+				Trinket otherTrinket = TrinketsApi.getTrinket(itemStack.getItem());
+				existsElsewhere.putAll(otherTrinket.getModifiers(itemStack, slotReference, entity, slotUuid));
 			}
 		}));
-		existsElsewhere.forEach(map::remove);
+		existsElsewhere.forEach(removeModifiers::remove);
 
 		Set<SlotAttributes.SlotEntityAttribute> toRemove = Sets.newHashSet();
-		for (EntityAttribute attr : map.keySet()) {
+		for (EntityAttribute attr : removeModifiers.keySet()) {
 			if (attr instanceof SlotAttributes.SlotEntityAttribute slotAttr) {
-				slotMap.putAll(slotAttr.slot, map.get(attr));
+				removeSlotMap.putAll(slotAttr.slot, removeModifiers.get(attr));
 				toRemove.add(slotAttr);
 			}
 		}
-		for (SlotAttributes.SlotEntityAttribute attr : toRemove) {
-			map.removeAll(attr);
-		}
-		this.getEntity().getAttributes().removeModifiers(map);
-		this.removeModifiers(slotMap);
-	}
-
-	public void addSlotModifiers(ItemStack stack, SlotReference ref) {
-		UUID uuid = SlotAttributes.getUuid(ref);
-		Trinket trinket = TrinketsApi.getTrinket(stack.getItem());
-		Multimap<EntityAttribute, EntityAttributeModifier> map = trinket.getModifiers(stack, ref, entity, uuid);
-		Multimap<String, EntityAttributeModifier> slotMap = HashMultimap.create();
-		Set<SlotAttributes.SlotEntityAttribute> toRemove = Sets.newHashSet();
-		for (EntityAttribute attr : map.keySet()) {
+		for (EntityAttribute attr : addModifiers.keySet()) {
 			if (attr instanceof SlotAttributes.SlotEntityAttribute slotAttr) {
-				slotMap.putAll(slotAttr.slot, map.get(attr));
+				addSlotMap.putAll(slotAttr.slot, addModifiers.get(attr));
 				toRemove.add(slotAttr);
 			}
 		}
+
 		for (SlotAttributes.SlotEntityAttribute attr : toRemove) {
-			map.removeAll(attr);
+			removeModifiers.removeAll(attr);
+			addModifiers.removeAll(attr);
 		}
-		this.getEntity().getAttributes().addTemporaryModifiers(map);
-		this.addTemporaryModifiers(slotMap);
+		this.getEntity().getAttributes().removeModifiers(removeModifiers);
+		this.getEntity().getAttributes().addTemporaryModifiers(addModifiers);
+		this.removeModifiers(removeSlotMap);
+		this.addTemporaryModifiers(addSlotMap);
 	}
 
 	@Override
