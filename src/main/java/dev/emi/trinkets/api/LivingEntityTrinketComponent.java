@@ -194,6 +194,17 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 		Trinket trinket = TrinketsApi.getTrinket(stack.getItem());
 		Multimap<EntityAttribute, EntityAttributeModifier> map = trinket.getModifiers(stack, ref, this.getEntity(), uuid);
 		Multimap<String, EntityAttributeModifier> slotMap = HashMultimap.create();
+
+		// MC-272769 Mitigation.
+		Multimap<EntityAttribute, EntityAttributeModifier> existsElsewhere = HashMultimap.create();
+		this.forEach(((slotReference, itemStack) -> {
+			if (!slotReference.equals(ref) && !itemStack.isEmpty()) {
+				UUID slotUuid = SlotAttributes.getUuid(slotReference);
+				existsElsewhere.putAll(trinket.getModifiers(itemStack, slotReference, entity, slotUuid));
+			}
+		}));
+		existsElsewhere.forEach(map::remove);
+
 		Set<SlotAttributes.SlotEntityAttribute> toRemove = Sets.newHashSet();
 		for (EntityAttribute attr : map.keySet()) {
 			if (attr instanceof SlotAttributes.SlotEntityAttribute slotAttr) {
@@ -204,15 +215,6 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 		for (SlotAttributes.SlotEntityAttribute attr : toRemove) {
 			map.removeAll(attr);
 		}
-        // MC-272769 Mitigation.
-		Multimap<EntityAttribute, EntityAttributeModifier> existsElsewhere = HashMultimap.create();
-		this.forEach(((slotReference, itemStack) -> {
-            if (!slotReference.equals(ref) && !itemStack.isEmpty()) {
-                UUID slotUuid = SlotAttributes.getUuid(slotReference);
-                existsElsewhere.putAll(trinket.getModifiers(itemStack, slotReference, entity, slotUuid));
-            }
-        }));
-		existsElsewhere.forEach(map::remove);
 		this.getEntity().getAttributes().removeModifiers(map);
 		this.removeModifiers(slotMap);
 	}
