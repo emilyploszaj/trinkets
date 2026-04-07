@@ -89,7 +89,7 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 							if (i < inv.size()) {
 								inv.setStack(i, stack);
 							} else {
-								this.removeSlotModifiers(stack, new SlotReference(oldInv, i));
+								this.processSlotModifiers(new SlotReference(oldInv, i), stack, ItemStack.EMPTY);
 								if (this.entity instanceof PlayerEntity player) {
 									player.getInventory().offerOrDrop(stack);
 								} else if (this.entity.getWorld() instanceof ServerWorld serverWorld) {
@@ -196,9 +196,10 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 		}
 	}
 
-	public void removeSlotModifiers(ItemStack stack, SlotReference ref) {
-		Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> map = TrinketModifiers.get(stack, ref, entity);
-		Multimap<String, EntityAttributeModifier> slotMap = HashMultimap.create();
+	public void processSlotModifiers(SlotReference ref, ItemStack oldStack, ItemStack newStack) {
+		Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> removeModifiers = TrinketModifiers.get(oldStack, ref, entity);
+        Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> addModifiers = TrinketModifiers.get(newStack, ref, entity);
+		Multimap<String, EntityAttributeModifier> removeSlotMap = HashMultimap.create(), addSlotMap = HashMultimap.create();
 
         // MC-272769 Mitigation.
         Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> existsElsewhere = HashMultimap.create();
@@ -207,52 +208,44 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
                 existsElsewhere.putAll(TrinketModifiers.get(itemStack, slotReference, entity));
             }
         }));
-        existsElsewhere.forEach(map::remove);
+        existsElsewhere.forEach(removeModifiers::remove);
 
 		Set<RegistryEntry<EntityAttribute>> toRemove = Sets.newHashSet();
-		for (RegistryEntry<EntityAttribute> attr : map.keySet()) {
+		for (RegistryEntry<EntityAttribute> attr : removeModifiers.keySet()) {
 			if (attr.hasKeyAndValue() && attr.value() instanceof SlotEntityAttribute slotAttr) {
-				slotMap.putAll(slotAttr.slot, map.get(attr));
+				removeSlotMap.putAll(slotAttr.slot, removeModifiers.get(attr));
 				toRemove.add(attr);
 			}
 		}
+        for (RegistryEntry<EntityAttribute> attr : addModifiers.keySet()) {
+            if (attr.hasKeyAndValue() && attr.value() instanceof SlotEntityAttribute slotAttr) {
+                addSlotMap.putAll(slotAttr.slot, addModifiers.get(attr));
+                toRemove.add(attr);
+            }
+        }
+
 		for (RegistryEntry<EntityAttribute> attr : toRemove) {
-			map.removeAll(attr);
+			removeModifiers.removeAll(attr);
+            addModifiers.removeAll(attr);
 		}
 		//this.getEntity().getAttributes().removeModifiers(map);
-		map.asMap().forEach((attribute, modifiers) -> {
+		removeModifiers.asMap().forEach((attribute, modifiers) -> {
 			EntityAttributeInstance entityAttributeInstance = this.getEntity().getAttributes().getCustomInstance(attribute);
 			if (entityAttributeInstance != null) {
 				modifiers.forEach(modifier -> entityAttributeInstance.removeModifier(modifier.id()) );
 			}
 		});
+        //this.getEntity().getAttributes().addTemporaryModifiers(map);
+        addModifiers.forEach((attribute, attributeModifier) -> {
+            EntityAttributeInstance entityAttributeInstance = this.getEntity().getAttributes().getCustomInstance(attribute);
+            if (entityAttributeInstance != null) {
+                entityAttributeInstance.removeModifier(attributeModifier.id());
+                entityAttributeInstance.addTemporaryModifier(attributeModifier);
+            }
 
-		this.removeModifiers(slotMap);
-	}
-
-	public void addSlotModifiers(ItemStack stack, SlotReference ref) {
-		Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> map = TrinketModifiers.get(stack, ref, entity);
-		Multimap<String, EntityAttributeModifier> slotMap = HashMultimap.create();
-		Set<RegistryEntry<EntityAttribute>> toRemove = Sets.newHashSet();
-		for (RegistryEntry<EntityAttribute> attr : map.keySet()) {
-			if (attr.hasKeyAndValue() && attr.value() instanceof SlotEntityAttribute slotAttr) {
-				slotMap.putAll(slotAttr.slot, map.get(attr));
-				toRemove.add(attr);
-			}
-		}
-		for (RegistryEntry<EntityAttribute> attr : toRemove) {
-			map.removeAll(attr);
-		}
-		//this.getEntity().getAttributes().addTemporaryModifiers(map);
-		map.forEach((attribute, attributeModifier) -> {
-			EntityAttributeInstance entityAttributeInstance = this.getEntity().getAttributes().getCustomInstance(attribute);
-			if (entityAttributeInstance != null) {
-				entityAttributeInstance.removeModifier(attributeModifier.id());
-				entityAttributeInstance.addTemporaryModifier(attributeModifier);
-			}
-
-		});
-		this.addTemporaryModifiers(slotMap);
+        });
+        this.removeModifiers(removeSlotMap);
+        this.addTemporaryModifiers(addSlotMap);
 	}
 
 	@Override
