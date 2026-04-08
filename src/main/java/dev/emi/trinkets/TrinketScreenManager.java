@@ -346,6 +346,10 @@ public class TrinketScreenManager {
 		}
 
 		TrinketPlayerScreenHandler handler = currentScreen.trinkets$getHandler();
+		if (currentScreen.trinkets$getFocusedSlot() instanceof TrinketSlot) {
+			return true;
+		}
+
 		int x = currentScreen.trinkets$getX();
 		int y = currentScreen.trinkets$getY();
 		int mx = (int) (Math.round(mouseX) - x);

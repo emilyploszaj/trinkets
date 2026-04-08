@@ -98,11 +98,6 @@ public abstract class HandledScreenMixin extends Screen {
 			context.getMatrices().translate(0, 0, 100 + 310 + 70 + 70 + 1);
 			original.call(context, renderLayers, sprite, x, y, width, height);
 			context.getMatrices().pop();
-		} else if (this.focusedSlot instanceof TrinketSlot) {
-			context.getMatrices().push();
-			context.getMatrices().translate(0, 0, 100 + 310 + 70 + 70 + 1);
-			original.call(context, renderLayers, sprite, x, y, width, height);
-			context.getMatrices().pop();
 		} else {
 			original.call(context, renderLayers, sprite, x, y, width, height);
 		}
