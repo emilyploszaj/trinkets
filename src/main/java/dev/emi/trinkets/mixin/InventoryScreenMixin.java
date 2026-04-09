@@ -2,6 +2,7 @@ package dev.emi.trinkets.mixin;
 
 import net.minecraft.client.gui.DrawContext;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -27,6 +28,8 @@ import net.minecraft.screen.slot.Slot;
  */
 @Mixin(InventoryScreen.class)
 public abstract class InventoryScreenMixin extends AbstractInventoryScreen<PlayerScreenHandler> implements RecipeBookProvider, TrinketScreen {
+
+	@Shadow private boolean narrow;
 
 	private InventoryScreenMixin() { super(null, null, null); }
 
@@ -94,5 +97,10 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreen<Playe
 	@Override
 	public boolean trinkets$isRecipeBookOpen() {
 		return this.getRecipeBookWidget().isOpen();
+	}
+
+	@Override
+	public boolean trinkets$isNarrow() {
+		return this.narrow;
 	}
 }

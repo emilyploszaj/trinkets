@@ -123,9 +123,11 @@ public class TrinketScreenManager {
 					continue;
 				}
 				if (r.contains(Math.round(mouseX) - x, Math.round(mouseY) - y)) {
-					TrinketsClient.activeGroup = g;
-					TrinketsClient.quickMoveGroup = null;
-					break;
+					if (!(currentScreen.trinkets$isNarrow() && currentScreen.trinkets$isRecipeBookOpen())) {
+						TrinketsClient.activeGroup = g;
+						TrinketsClient.quickMoveGroup = null;
+						break;
+					}
 				}
 			}
 		}
