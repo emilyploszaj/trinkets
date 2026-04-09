@@ -49,7 +49,7 @@ import net.minecraft.world.World;
  * @author Emi
  */
 @Mixin(LivingEntity.class)
-public abstract class LivingEntityMixin extends Entity {
+public abstract class LivingEntityMixin extends Entity implements LivingEntityTrinketComponent.StackHistory {
 	@Unique
 	private final Map<String, ItemStack> lastEquippedTrinkets = new HashMap<>();
 
@@ -136,12 +136,11 @@ public abstract class LivingEntityMixin extends Entity {
 			Map<String, ItemStack> contentUpdates = new HashMap<>();
 			trinkets.forEach((ref, stack) -> {
 				TrinketInventory inventory = ref.inventory();
-				SlotType slotType = inventory.getSlotType();
 				int index = ref.index();
-				ItemStack oldStack = getOldStack(slotType, index);
+				ItemStack oldStack = trinkets$getOldStack(ref);
 				ItemStack newStack = inventory.getStack(index);
 				ItemStack newStackCopy = newStack.copy();
-				String newRef = slotType.getGroup() + "/" + slotType.getName() + "/" + index;
+				String newRef = ref.getId();
 
 				if (!ItemStack.areEqual(newStack, oldStack)) {
 
@@ -204,8 +203,8 @@ public abstract class LivingEntityMixin extends Entity {
 		});
 	}
 
-	@Unique
-	private ItemStack getOldStack(SlotType type, int index) {
-		return lastEquippedTrinkets.getOrDefault(type.getGroup() + "/" + type.getName() + "/" + index, ItemStack.EMPTY);
+	@Override
+	public ItemStack trinkets$getOldStack(SlotReference ref) {
+		return lastEquippedTrinkets.getOrDefault(ref.getId(), ItemStack.EMPTY);
 	}
 }
