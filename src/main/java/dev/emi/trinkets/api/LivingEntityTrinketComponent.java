@@ -82,7 +82,9 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 							if (i < inv.size()) {
 								inv.setStack(i, stack);
 							} else {
-								this.processSlotModifiers(new SlotReference(oldInv, i), stack, ItemStack.EMPTY);
+								SlotReference ref = new SlotReference(oldInv, i);
+								this.processSlotModifiers(ref, stack, ItemStack.EMPTY);
+								TrinketsApi.getTrinket(stack.getItem()).onUnequip(stack, ref, entity);
 								if (this.entity instanceof PlayerEntity player) {
 									player.getInventory().offerOrDrop(stack);
 								} else {

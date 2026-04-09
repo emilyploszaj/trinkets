@@ -184,6 +184,7 @@ public class TrinketInventory implements Inventory {
 						if (entity instanceof LivingEntityTrinketComponent.StackHistory stackHistory) {
 							oldStack = stackHistory.trinkets$getOldStack(ref);
 						}
+						TrinketsApi.getTrinket(oldStack.getItem()).onUnequip(oldStack, ref, entity);
 						if (!this.getComponent().getEntity().getWorld().isClient && this.getComponent() instanceof LivingEntityTrinketComponent livingEntityTrinketComponent) {
 							livingEntityTrinketComponent.processSlotModifiers(ref, oldStack, ItemStack.EMPTY);
 						}
