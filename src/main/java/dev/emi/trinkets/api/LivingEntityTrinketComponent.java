@@ -83,13 +83,18 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 								inv.setStack(i, stack);
 							} else {
 								SlotReference ref = new SlotReference(oldInv, i);
-								this.processSlotModifiers(ref, stack, ItemStack.EMPTY);
-								TrinketsApi.getTrinket(stack.getItem()).onUnequip(stack, ref, entity);
+								ItemStack oldStack = stack;
+								if (entity instanceof LivingEntityTrinketComponent.StackHistory stackHistory && !stackHistory.trinkets$getOldStack(ref).isEmpty()) {
+									oldStack = stackHistory.trinkets$getOldStack(ref);
+								}
+								this.processSlotModifiers(ref, oldStack, ItemStack.EMPTY);
+								TrinketsApi.getTrinket(stack.getItem()).onUnequip(oldStack, ref, entity);
 								if (this.entity instanceof PlayerEntity player) {
 									player.getInventory().offerOrDrop(stack);
 								} else {
 									this.entity.dropStack(stack);
 								}
+								oldInv.getStack(i).setCount(0);
 							}
 						}
 					}

@@ -181,7 +181,7 @@ public class TrinketInventory implements Inventory {
 					} else {
 						SlotReference ref = new SlotReference(this, i);
 						ItemStack oldStack = stack;
-						if (entity instanceof LivingEntityTrinketComponent.StackHistory stackHistory) {
+						if (entity instanceof LivingEntityTrinketComponent.StackHistory stackHistory && !stackHistory.trinkets$getOldStack(ref).isEmpty()) {
 							oldStack = stackHistory.trinkets$getOldStack(ref);
 						}
 						TrinketsApi.getTrinket(oldStack.getItem()).onUnequip(oldStack, ref, entity);
