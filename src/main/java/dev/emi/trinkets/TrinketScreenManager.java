@@ -8,6 +8,7 @@ import com.mojang.blaze3d.opengl.GlStateManager;
 import dev.emi.trinkets.api.SlotGroup;
 import dev.emi.trinkets.api.SlotType;
 import dev.emi.trinkets.api.TrinketsApi;
+import dev.emi.trinkets.mixin.accessor.RecipeBookScreenAccessor;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.render.RenderLayer;
@@ -123,9 +124,11 @@ public class TrinketScreenManager {
 					continue;
 				}
 				if (r.contains(Math.round(mouseX) - x, Math.round(mouseY) - y)) {
-					TrinketsClient.activeGroup = g;
-					TrinketsClient.quickMoveGroup = null;
-					break;
+					if (!(currentScreen.trinkets$isNarrow() && currentScreen.trinkets$isRecipeBookOpen())) {
+						TrinketsClient.activeGroup = g;
+						TrinketsClient.quickMoveGroup = null;
+						break;
+					}
 				}
 			}
 		}

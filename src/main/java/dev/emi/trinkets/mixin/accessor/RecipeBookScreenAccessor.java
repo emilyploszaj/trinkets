@@ -10,4 +10,6 @@ public interface RecipeBookScreenAccessor {
 
 	@Accessor
 	RecipeBookWidget<?> getRecipeBook();
+	@Accessor
+	boolean getNarrow();
 }
