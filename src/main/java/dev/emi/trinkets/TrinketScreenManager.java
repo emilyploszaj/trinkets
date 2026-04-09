@@ -25,7 +25,6 @@ public class TrinketScreenManager {
 	public static SlotGroup quickMoveGroup = null;
 
 	public static void init(TrinketScreen screen) {
-		System.out.println(screen);
 		currentScreen = screen;
 		group = null;
 		currentBounds = new Rect2i(0, 0, 0, 0);
