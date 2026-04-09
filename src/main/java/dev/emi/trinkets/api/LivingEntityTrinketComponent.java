@@ -18,6 +18,7 @@ import com.google.common.collect.Sets;
 import dev.emi.trinkets.TrinketModifiers;
 import dev.emi.trinkets.TrinketPlayerScreenHandler;
 import dev.emi.trinkets.api.SlotAttributes.SlotEntityAttribute;
+import dev.emi.trinkets.api.event.TrinketUnequipCallback;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.registry.RegistryWrapper;
@@ -89,12 +90,16 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 							if (i < inv.size()) {
 								inv.setStack(i, stack);
 							} else {
-								this.processSlotModifiers(new SlotReference(oldInv, i), stack, ItemStack.EMPTY);
+								SlotReference ref = new SlotReference(oldInv, i);
+								this.processSlotModifiers(ref, stack, ItemStack.EMPTY);
+								TrinketsApi.getTrinket(stack.getItem()).onUnequip(stack, ref, entity);
+								TrinketUnequipCallback.EVENT.invoker().onUnequip(stack, ref, entity);
 								if (this.entity instanceof PlayerEntity player) {
 									player.getInventory().offerOrDrop(stack);
 								} else if (this.entity.getWorld() instanceof ServerWorld serverWorld) {
 									this.entity.dropStack(serverWorld, stack);
 								}
+								ref.set(ItemStack.EMPTY);
 							}
 						}
 					}

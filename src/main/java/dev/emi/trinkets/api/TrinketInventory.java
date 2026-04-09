@@ -3,6 +3,7 @@ package dev.emi.trinkets.api;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.mojang.serialization.Codec;
+import dev.emi.trinkets.api.event.TrinketUnequipCallback;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.player.PlayerEntity;
@@ -188,12 +189,15 @@ public class TrinketInventory implements Inventory {
 						if (entity instanceof LivingEntityTrinketComponent.StackHistory stackHistory) {
 							oldStack = stackHistory.trinkets$getOldStack(ref);
 						}
+						TrinketsApi.getTrinket(oldStack.getItem()).onUnequip(oldStack, ref, entity);
+						TrinketUnequipCallback.EVENT.invoker().onUnequip(oldStack, ref, entity);
 						if (!this.getComponent().getEntity().getWorld().isClient && this.getComponent() instanceof LivingEntityTrinketComponent livingEntityTrinketComponent) {
 							livingEntityTrinketComponent.processSlotModifiers(ref, oldStack, ItemStack.EMPTY);
 						}
 						if (entity.getWorld() instanceof ServerWorld serverWorld) {
 							entity.dropStack(serverWorld, stack);
 						}
+						ref.set(ItemStack.EMPTY);
 					}
 				}
 
