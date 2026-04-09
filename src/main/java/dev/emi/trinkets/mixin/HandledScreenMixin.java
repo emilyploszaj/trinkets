@@ -8,7 +8,9 @@ import dev.emi.trinkets.TrinketScreenManager;
 import dev.emi.trinkets.TrinketsMain;
 import dev.emi.trinkets.api.TrinketInventory;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
+import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.render.RenderLayer;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
@@ -29,6 +31,7 @@ import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.util.Identifier;
 
+import java.util.Optional;
 import java.util.function.Function;
 
 /**
@@ -132,5 +135,16 @@ public abstract class HandledScreenMixin extends Screen {
 				info.cancel();
 			}
 		}
+	}
+
+	@WrapOperation(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/Screen;mouseClicked(DDI)Z"), method = "mouseClicked")
+	private boolean overrideRecipeBookClick(HandledScreen<?> instance, double mouseX, double mouseY, int button, Operation<Boolean> original) {
+        if (TrinketScreenManager.isClickInsideTrinketBounds(mouseX, mouseY) && this.focusedSlot != null) {
+			Optional<Element> hoveredElement = this.hoveredElement(mouseX, mouseY);
+			if(hoveredElement.isPresent() && hoveredElement.get() instanceof ButtonWidget) {
+            	return false;
+			}
+        }
+		return original.call(instance, mouseX, mouseY, button);
 	}
 }
