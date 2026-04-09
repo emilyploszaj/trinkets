@@ -410,4 +410,10 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 			}
 		}
 	}
+
+	public interface StackHistory {
+		default ItemStack trinkets$getOldStack(SlotReference ref) {
+			return ItemStack.EMPTY;
+		}
+	}
 }
