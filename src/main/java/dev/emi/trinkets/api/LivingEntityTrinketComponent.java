@@ -17,6 +17,7 @@ import com.google.common.collect.Sets;
 
 import dev.emi.trinkets.TrinketModifiers;
 import dev.emi.trinkets.TrinketPlayerScreenHandler;
+import dev.emi.trinkets.TrinketsMain;
 import dev.emi.trinkets.api.SlotAttributes.SlotEntityAttribute;
 import dev.emi.trinkets.api.event.TrinketUnequipCallback;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
@@ -98,7 +99,7 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 								}
 								droppedItems.put(ref, oldStack);
 								if (this.entity instanceof PlayerEntity player) {
-									player.getInventory().offerOrDrop(stack);
+									player.getInventory().offerOrDrop(stack.copy());
 								} else if (this.entity.getWorld() instanceof ServerWorld serverWorld) {
 									this.entity.dropStack(serverWorld, stack);
 								}
@@ -110,13 +111,31 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 				count += inv.size();
 			}
 		}
+
+		// Handle dropping newly slotless items.
+		forEach((ref, itemStack) -> {
+			if (!groups.containsKey(ref.getSlotType().getGroup()) || !groups.get(ref.getSlotType().getGroup()).getSlots().containsKey(ref.getSlotType().getName())) {
+				droppedItems.put(ref, itemStack);
+				if (this.entity instanceof PlayerEntity player) {
+					player.getInventory().offerOrDrop(itemStack.copy());
+				} else if (this.entity.getWorld() instanceof ServerWorld serverWorld) {
+					this.entity.dropStack(serverWorld, itemStack);
+				}
+			}
+		});
+
 		size = count;
 		this.inventory = inventory;
+
 		for (Map.Entry<SlotReference, ItemStack> dropped : droppedItems.entrySet()) {
-			this.processSlotModifiers(dropped.getKey(), dropped.getValue(), ItemStack.EMPTY);
-			TrinketsApi.getTrinket(dropped.getValue().getItem()).onUnequip(dropped.getValue(), dropped.getKey(), entity);
-			TrinketUnequipCallback.EVENT.invoker().onUnequip(dropped.getValue(), dropped.getKey(), entity);
-			dropped.getKey().set(ItemStack.EMPTY);
+			try {
+				this.processSlotModifiers(dropped.getKey(), dropped.getValue(), ItemStack.EMPTY);
+				TrinketsApi.getTrinket(dropped.getValue().getItem()).onUnequip(dropped.getValue(), dropped.getKey(), entity);
+				TrinketUnequipCallback.EVENT.invoker().onUnequip(dropped.getValue(), dropped.getKey(), entity);
+				dropped.getKey().set(ItemStack.EMPTY);
+			} catch (Exception e) {
+				TrinketsMain.LOGGER.warn("Caught exception when dropping {} from removed slot {}.", dropped.getValue(), dropped.getKey().getId());
+			}
 		}
 	}
 
