@@ -73,6 +73,7 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 		Map<String, SlotGroup> entitySlots = TrinketsApi.getEntitySlots(this.entity);
 		int count = 0;
 		groups.clear();
+		Map<SlotReference, ItemStack> droppedItems = new HashMap<>();
 		Map<String, Map<String, TrinketInventory>> inventory = new HashMap<>();
 		for (Map.Entry<String, SlotGroup> group : entitySlots.entrySet()) {
 			String groupKey = group.getKey();
@@ -91,15 +92,16 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 								inv.setStack(i, stack);
 							} else {
 								SlotReference ref = new SlotReference(oldInv, i);
-								this.processSlotModifiers(ref, stack, ItemStack.EMPTY);
-								TrinketsApi.getTrinket(stack.getItem()).onUnequip(stack, ref, entity);
-								TrinketUnequipCallback.EVENT.invoker().onUnequip(stack, ref, entity);
+								ItemStack oldStack = stack;
+								if (entity instanceof LivingEntityTrinketComponent.StackHistory stackHistory) {
+									oldStack = stackHistory.trinkets$getOldStack(ref);
+								}
+								droppedItems.put(ref, oldStack);
 								if (this.entity instanceof PlayerEntity player) {
 									player.getInventory().offerOrDrop(stack);
 								} else if (this.entity.getWorld() instanceof ServerWorld serverWorld) {
 									this.entity.dropStack(serverWorld, stack);
 								}
-								ref.set(ItemStack.EMPTY);
 							}
 						}
 					}
@@ -110,6 +112,12 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 		}
 		size = count;
 		this.inventory = inventory;
+		for (Map.Entry<SlotReference, ItemStack> dropped : droppedItems.entrySet()) {
+			this.processSlotModifiers(dropped.getKey(), dropped.getValue(), ItemStack.EMPTY);
+			TrinketsApi.getTrinket(dropped.getValue().getItem()).onUnequip(dropped.getValue(), dropped.getKey(), entity);
+			TrinketUnequipCallback.EVENT.invoker().onUnequip(dropped.getValue(), dropped.getKey(), entity);
+			dropped.getKey().set(ItemStack.EMPTY);
+		}
 	}
 
 	@Override
@@ -209,7 +217,7 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
         // MC-272769 Mitigation.
         Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> existsElsewhere = HashMultimap.create();
         this.forEach(((slotReference, itemStack) -> {
-            if (!slotReference.equals(ref) && !itemStack.isEmpty()) {
+            if (!(slotReference.getSlotType().equals(ref.getSlotType()) && slotReference.index() == ref.index()) && !itemStack.isEmpty()) {
                 existsElsewhere.putAll(TrinketModifiers.get(itemStack, slotReference, entity));
             }
         }));
