@@ -65,6 +65,7 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 		Map<String, SlotGroup> entitySlots = TrinketsApi.getEntitySlots(this.entity);
 		int count = 0;
 		groups.clear();
+		Map<SlotReference, ItemStack> droppedItems = new HashMap<>();
 		Map<String, Map<String, TrinketInventory>> inventory = new HashMap<>();
 		for (Map.Entry<String, SlotGroup> group : entitySlots.entrySet()) {
 			String groupKey = group.getKey();
@@ -87,14 +88,12 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 								if (entity instanceof LivingEntityTrinketComponent.StackHistory stackHistory && !stackHistory.trinkets$getOldStack(ref).isEmpty()) {
 									oldStack = stackHistory.trinkets$getOldStack(ref);
 								}
-								this.processSlotModifiers(ref, oldStack, ItemStack.EMPTY);
-								TrinketsApi.getTrinket(stack.getItem()).onUnequip(oldStack, ref, entity);
+								droppedItems.put(ref, oldStack);
 								if (this.entity instanceof PlayerEntity player) {
 									player.getInventory().offerOrDrop(stack);
 								} else {
 									this.entity.dropStack(stack);
 								}
-								oldInv.getStack(i).setCount(0);
 							}
 						}
 					}
@@ -105,6 +104,11 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 		}
 		size = count;
 		this.inventory = inventory;
+		for (Map.Entry<SlotReference, ItemStack> dropped : droppedItems.entrySet()) {
+			this.processSlotModifiers(dropped.getKey(), dropped.getValue(), ItemStack.EMPTY);
+			TrinketsApi.getTrinket(dropped.getValue().getItem()).onUnequip(dropped.getValue(), dropped.getKey(), entity);
+			dropped.getKey().set(ItemStack.EMPTY);
+		}
 	}
 
 	@Override

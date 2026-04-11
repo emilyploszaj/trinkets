@@ -189,6 +189,7 @@ public class TrinketInventory implements Inventory {
 							livingEntityTrinketComponent.processSlotModifiers(ref, oldStack, ItemStack.EMPTY);
 						}
 						entity.dropStack(stack);
+						ref.set(ItemStack.EMPTY);
 					}
 				}
 
