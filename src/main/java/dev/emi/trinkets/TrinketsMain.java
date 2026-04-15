@@ -16,6 +16,9 @@ import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -52,8 +55,10 @@ public class TrinketsMain implements ModInitializer, EntityComponentInitializer 
 		ResourceManagerHelper resourceManagerHelper = ResourceManagerHelper.get(ResourceType.SERVER_DATA);
 		resourceManagerHelper.registerReloadListener(SlotLoader.INSTANCE);
 		resourceManagerHelper.registerReloadListener(EntitySlotLoader.SERVER);
-		ServerLifecycleEvents.END_DATA_PACK_RELOAD.register((server, serverResourceManager, success)
-				-> EntitySlotLoader.SERVER.sync(server.getPlayerManager().getPlayerList()));
+		ServerLifecycleEvents.END_DATA_PACK_RELOAD.register((server, serverResourceManager, success) -> {
+			EntitySlotLoader.SERVER.sync(server.getPlayerManager().getPlayerList());
+			EntitySlotLoader.SERVER.updateEntities(server);
+		});
 		UseItemCallback.EVENT.register((player, world, hand) -> {
 			ItemStack stack = player.getStackInHand(hand);
 			Trinket trinket = TrinketsApi.getTrinket(stack.getItem());
