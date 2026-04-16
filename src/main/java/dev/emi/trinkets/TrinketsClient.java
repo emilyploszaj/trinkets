@@ -82,6 +82,9 @@ public class TrinketsClient implements ClientModInitializer {
 						if (entity instanceof PlayerEntity && ((PlayerEntity) entity).playerScreenHandler instanceof TrinketPlayerScreenHandler screenHandler) {
 							screenHandler.trinkets$updateTrinketSlots(false);
                             TrinketScreenManager.tryUpdateTrinketsSlot();
+						} else if (client.player != null && client.player.currentScreenHandler instanceof TrinketPlayerScreenHandler screenHandler && !screenHandler.equals(client.player.playerScreenHandler)) {
+							screenHandler.trinkets$updateTrinketSlots(false);
+							TrinketScreenManager.tryUpdateTrinketsSlot();
 						}
 
 						for (Pair<String, ItemStack> entry : contentUpdates) {
@@ -144,6 +147,11 @@ public class TrinketsClient implements ClientModInitializer {
 							if (clientWorldEntity instanceof LivingEntity livingEntity) {
 								TrinketsApi.getTrinketComponent(livingEntity).ifPresent(TrinketComponent::update);
 							}
+						}
+
+						if (player.currentScreenHandler instanceof TrinketPlayerScreenHandler screenHandler && !screenHandler.equals(player.playerScreenHandler)) {
+							screenHandler.trinkets$updateTrinketSlots(false);
+							TrinketScreenManager.tryUpdateTrinketsSlot();
 						}
 					}
 				});

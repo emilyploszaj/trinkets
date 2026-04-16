@@ -214,6 +214,11 @@ public class EntitySlotLoader extends SinglePreparationResourceReloader<Map<Stri
 		PacketByteBuf buf = getSlotsPacket();
 		players.forEach(player -> ServerPlayNetworking.send(player, TrinketsNetwork.SYNC_SLOTS, buf));
 		players.forEach(player -> ((TrinketPlayerScreenHandler) player.playerScreenHandler).trinkets$updateTrinketSlots(true));
+		players.forEach(player -> {
+			if (player.currentScreenHandler instanceof TrinketPlayerScreenHandler screenHandler && !screenHandler.equals(player.playerScreenHandler)) {
+				screenHandler.trinkets$updateTrinketSlots(true);
+			}
+		});
 	}
 
 	public void updateEntities(MinecraftServer server) {

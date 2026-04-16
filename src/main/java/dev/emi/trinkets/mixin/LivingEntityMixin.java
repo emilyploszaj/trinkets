@@ -186,6 +186,9 @@ public abstract class LivingEntityMixin extends Entity implements LivingEntityTr
 
 					for (ServerPlayerEntity player : PlayerLookup.tracking(entity)) {
 						ServerPlayNetworking.send(player, TrinketsNetwork.SYNC_INVENTORY, buf);
+						if (player.currentScreenHandler instanceof TrinketPlayerScreenHandler screenHandler && !screenHandler.equals(player.playerScreenHandler)) {
+							screenHandler.trinkets$updateTrinketSlots(false);
+						}
 					}
 
 					if (entity instanceof ServerPlayerEntity serverPlayer) {
