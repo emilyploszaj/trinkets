@@ -6,6 +6,7 @@ import java.util.Set;
 
 import dev.emi.trinkets.api.LivingEntityTrinketComponent;
 import dev.emi.trinkets.api.SlotReference;
+import dev.emi.trinkets.api.event.SlotCountModificationCallback;
 import net.minecraft.registry.tag.ItemTags;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -163,9 +164,9 @@ public abstract class LivingEntityMixin extends Entity implements LivingEntityTr
 				}
 			});
 
-			if (!this.getWorld().isClient) {
-				Set<TrinketInventory> inventoriesToSend = trinkets.getTrackingUpdates();
+			Set<TrinketInventory> inventoriesToSend = trinkets.getTrackingUpdates();
 
+			if (!this.getWorld().isClient) {
 				if (!contentUpdates.isEmpty() || !inventoriesToSend.isEmpty()) {
 					PacketByteBuf buf = PacketByteBufs.create();
 					buf.writeInt(entity.getId());
@@ -186,9 +187,6 @@ public abstract class LivingEntityMixin extends Entity implements LivingEntityTr
 
 					for (ServerPlayerEntity player : PlayerLookup.tracking(entity)) {
 						ServerPlayNetworking.send(player, TrinketsNetwork.SYNC_INVENTORY, buf);
-						if (player.currentScreenHandler instanceof TrinketPlayerScreenHandler screenHandler && !screenHandler.equals(player.playerScreenHandler)) {
-							screenHandler.trinkets$updateTrinketSlots(false);
-						}
 					}
 
 					if (entity instanceof ServerPlayerEntity serverPlayer) {
@@ -198,10 +196,14 @@ public abstract class LivingEntityMixin extends Entity implements LivingEntityTr
 							((TrinketPlayerScreenHandler) serverPlayer.playerScreenHandler).trinkets$updateTrinketSlots(false);
 						}
 					}
-
-					inventoriesToSend.clear();
 				}
 			}
+
+			if (!inventoriesToSend.isEmpty()) {
+				SlotCountModificationCallback.EVENT.invoker().onChange(trinkets, inventoriesToSend);
+			}
+
+			inventoriesToSend.clear();
 
 			lastEquippedTrinkets.clear();
 			lastEquippedTrinkets.putAll(newlyEquippedTrinkets);
