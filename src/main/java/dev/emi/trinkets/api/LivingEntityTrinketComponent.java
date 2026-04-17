@@ -14,7 +14,9 @@ import java.util.function.Predicate;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
+import com.google.common.collect.Sets;
 import dev.emi.trinkets.TrinketPlayerScreenHandler;
+import dev.emi.trinkets.TrinketsMain;
 import dev.onyxstudios.cca.api.v3.component.sync.AutoSyncedComponent;
 import net.fabricmc.fabric.api.util.NbtType;
 import net.minecraft.entity.LivingEntity;
@@ -26,6 +28,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Pair;
 import net.minecraft.util.collection.DefaultedList;
 
@@ -64,6 +67,7 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 		Map<String, SlotGroup> entitySlots = TrinketsApi.getEntitySlots(this.entity);
 		int count = 0;
 		groups.clear();
+		Map<SlotReference, ItemStack> droppedItems = new HashMap<>();
 		Map<String, Map<String, TrinketInventory>> inventory = new HashMap<>();
 		for (Map.Entry<String, SlotGroup> group : entitySlots.entrySet()) {
 			String groupKey = group.getKey();
@@ -81,8 +85,14 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 							if (i < inv.size()) {
 								inv.setStack(i, stack);
 							} else {
+								SlotReference ref = new SlotReference(oldInv, i);
+								ItemStack oldStack = stack;
+								if (entity instanceof LivingEntityTrinketComponent.StackHistory stackHistory && !stackHistory.trinkets$getOldStack(ref).isEmpty()) {
+									oldStack = stackHistory.trinkets$getOldStack(ref);
+								}
+								droppedItems.put(ref, oldStack);
 								if (this.entity instanceof PlayerEntity player) {
-									player.getInventory().offerOrDrop(stack);
+									player.getInventory().offerOrDrop(stack.copy());
 								} else {
 									this.entity.dropStack(stack);
 								}
@@ -94,8 +104,30 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 				count += inv.size();
 			}
 		}
+
+		// Handle dropping newly slotless items.
+		forEach((ref, itemStack) -> {
+			if (!groups.containsKey(ref.getSlotType().getGroup()) || !groups.get(ref.getSlotType().getGroup()).getSlots().containsKey(ref.getSlotType().getName())) {
+				droppedItems.put(ref, itemStack);
+				if (this.entity instanceof PlayerEntity player) {
+					player.getInventory().offerOrDrop(itemStack.copy());
+				} else {
+					this.entity.dropStack(itemStack);
+				}
+			}
+		});
+
 		size = count;
 		this.inventory = inventory;
+		for (Map.Entry<SlotReference, ItemStack> dropped : droppedItems.entrySet()) {
+			try {
+				this.processSlotModifiers(dropped.getKey(), dropped.getValue(), ItemStack.EMPTY);
+				TrinketsApi.getTrinket(dropped.getValue().getItem()).onUnequip(dropped.getValue(), dropped.getKey(), entity);
+				dropped.getKey().set(ItemStack.EMPTY);
+			} catch (Exception e) {
+				TrinketsMain.LOGGER.warn("Caught exception when dropping {} from removed slot {}.", dropped.getValue(), dropped.getKey().getId());
+			}
+		}
 	}
 
 	@Override
@@ -185,6 +217,50 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 				slotType.getValue().clearModifiers();
 			}
 		}
+	}
+
+	public void processSlotModifiers(SlotReference ref, ItemStack oldStack, ItemStack newStack) {
+		UUID uuid = SlotAttributes.getUuid(ref);
+		Trinket oldTrinket = TrinketsApi.getTrinket(oldStack.getItem());
+		Trinket newTrinket = TrinketsApi.getTrinket(newStack.getItem());
+		// TODO: Check if empty, if so, static empty Multimap?
+		Multimap<EntityAttribute, EntityAttributeModifier> removeModifiers = oldTrinket.getModifiers(oldStack, ref, this.getEntity(), uuid);
+		Multimap<EntityAttribute, EntityAttributeModifier> addModifiers = newTrinket.getModifiers(newStack, ref, this.getEntity(), uuid);
+		Multimap<String, EntityAttributeModifier> removeSlotMap = HashMultimap.create(), addSlotMap = HashMultimap.create();
+
+		// MC-272769 Mitigation.
+		Multimap<EntityAttribute, EntityAttributeModifier> existsElsewhere = HashMultimap.create();
+		this.forEach(((slotReference, itemStack) -> {
+			if (!slotReference.equals(ref) && !itemStack.isEmpty()) {
+				UUID slotUuid = SlotAttributes.getUuid(slotReference);
+				Trinket otherTrinket = TrinketsApi.getTrinket(itemStack.getItem());
+				existsElsewhere.putAll(otherTrinket.getModifiers(itemStack, slotReference, entity, slotUuid));
+			}
+		}));
+		existsElsewhere.forEach(removeModifiers::remove);
+
+		Set<SlotAttributes.SlotEntityAttribute> toRemove = Sets.newHashSet();
+		for (EntityAttribute attr : removeModifiers.keySet()) {
+			if (attr instanceof SlotAttributes.SlotEntityAttribute slotAttr) {
+				removeSlotMap.putAll(slotAttr.slot, removeModifiers.get(attr));
+				toRemove.add(slotAttr);
+			}
+		}
+		for (EntityAttribute attr : addModifiers.keySet()) {
+			if (attr instanceof SlotAttributes.SlotEntityAttribute slotAttr) {
+				addSlotMap.putAll(slotAttr.slot, addModifiers.get(attr));
+				toRemove.add(slotAttr);
+			}
+		}
+
+		for (SlotAttributes.SlotEntityAttribute attr : toRemove) {
+			removeModifiers.removeAll(attr);
+			addModifiers.removeAll(attr);
+		}
+		this.getEntity().getAttributes().removeModifiers(removeModifiers);
+		this.getEntity().getAttributes().addTemporaryModifiers(addModifiers);
+		this.removeModifiers(removeSlotMap);
+		this.addTemporaryModifiers(addSlotMap);
 	}
 
 	@Override
@@ -362,6 +438,12 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 					consumer.accept(new SlotReference(inv, i), inv.getStack(i));
 				}
 			}
+		}
+	}
+
+	public interface StackHistory {
+		default ItemStack trinkets$getOldStack(SlotReference ref) {
+			return ItemStack.EMPTY;
 		}
 	}
 }

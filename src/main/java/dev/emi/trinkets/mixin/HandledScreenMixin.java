@@ -43,7 +43,7 @@ public abstract class HandledScreenMixin extends Screen {
 	@Inject(at = @At("HEAD"), method = "removed")
 	private void removed(CallbackInfo info) {
 		if ((Object)this instanceof InventoryScreen) {
-			TrinketScreenManager.removeSelections();
+			TrinketScreenManager.close();
 		}
 	}
 

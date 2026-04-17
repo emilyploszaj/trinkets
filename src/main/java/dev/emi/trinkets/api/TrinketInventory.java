@@ -28,6 +28,7 @@ public class TrinketInventory implements Inventory {
 
 	private DefaultedList<ItemStack> stacks;
 	private boolean update = false;
+	private boolean suppressUpdates = false;
 
 	public TrinketInventory(SlotType slotType, TrinketComponent comp, Consumer<TrinketInventory> updateCallback) {
 		this.component = comp;
@@ -153,8 +154,9 @@ public class TrinketInventory implements Inventory {
 	}
 
 	public void update() {
-		if (this.update) {
+		if (this.update && !suppressUpdates) {
 			this.update = false;
+			this.suppressUpdates = true;
 			double baseSize = this.baseSize;
 			for (EntityAttributeModifier mod : this.getModifiersByOperation(EntityAttributeModifier.Operation.ADDITION)) {
 				baseSize += mod.getValue();
@@ -177,12 +179,25 @@ public class TrinketInventory implements Inventory {
 					if (i < newStacks.size()) {
 						newStacks.set(i, stack);
 					} else {
+						SlotReference ref = new SlotReference(this, i);
+						ItemStack oldStack = stack;
+						if (entity instanceof LivingEntityTrinketComponent.StackHistory stackHistory && !stackHistory.trinkets$getOldStack(ref).isEmpty()) {
+							oldStack = stackHistory.trinkets$getOldStack(ref);
+						}
+						TrinketsApi.getTrinket(oldStack.getItem()).onUnequip(oldStack, ref, entity);
+						if (!this.getComponent().getEntity().getWorld().isClient && this.getComponent() instanceof LivingEntityTrinketComponent livingEntityTrinketComponent) {
+							livingEntityTrinketComponent.processSlotModifiers(ref, oldStack, ItemStack.EMPTY);
+						}
 						entity.dropStack(stack);
+						ref.set(ItemStack.EMPTY);
 					}
 				}
 
 				this.stacks = newStacks;
 			}
+			// Process updates sequentially, instead of in the middle of an incomplete update.
+			this.suppressUpdates = false;
+			this.update();
 		}
 	}
 

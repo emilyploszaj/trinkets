@@ -22,20 +22,27 @@ import dev.emi.trinkets.TrinketPlayerScreenHandler;
 import dev.emi.trinkets.TrinketsMain;
 import dev.emi.trinkets.TrinketsNetwork;
 import dev.emi.trinkets.api.SlotGroup;
+import dev.emi.trinkets.api.TrinketComponent;
+import dev.emi.trinkets.api.TrinketsApi;
 import dev.emi.trinkets.data.SlotLoader.GroupData;
 import dev.emi.trinkets.data.SlotLoader.SlotData;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.fabricmc.fabric.api.resource.ResourceReloadListenerKeys;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.registry.Registries;
 import net.minecraft.resource.Resource;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.resource.SinglePreparationResourceReloader;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.JsonHelper;
 import net.minecraft.util.profiler.Profiler;
@@ -207,6 +214,21 @@ public class EntitySlotLoader extends SinglePreparationResourceReloader<Map<Stri
 		PacketByteBuf buf = getSlotsPacket();
 		players.forEach(player -> ServerPlayNetworking.send(player, TrinketsNetwork.SYNC_SLOTS, buf));
 		players.forEach(player -> ((TrinketPlayerScreenHandler) player.playerScreenHandler).trinkets$updateTrinketSlots(true));
+		players.forEach(player -> {
+			if (player.currentScreenHandler instanceof TrinketPlayerScreenHandler screenHandler && !screenHandler.equals(player.playerScreenHandler)) {
+				screenHandler.trinkets$updateTrinketSlots(true);
+			}
+		});
+	}
+
+	public void updateEntities(MinecraftServer server) {
+		for (ServerWorld world : server.getWorlds()) {
+			for (Entity entity : world.iterateEntities()) {
+				if (entity instanceof LivingEntity livingEntity && !(livingEntity instanceof PlayerEntity)) {
+					TrinketsApi.getTrinketComponent(livingEntity).ifPresent(TrinketComponent::update);
+				}
+			}
+		}
 	}
 
 	private PacketByteBuf getSlotsPacket() {
