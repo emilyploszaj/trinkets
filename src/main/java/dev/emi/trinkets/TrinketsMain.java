@@ -6,6 +6,7 @@ import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
 import dev.emi.trinkets.api.*;
+import dev.emi.trinkets.api.event.SlotCountModificationCallback;
 import dev.emi.trinkets.payload.BreakPayload;
 import dev.emi.trinkets.payload.SyncInventoryPayload;
 import dev.emi.trinkets.payload.SyncSlotsPayload;
