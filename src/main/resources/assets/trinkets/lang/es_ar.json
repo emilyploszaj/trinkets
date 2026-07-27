@@ -1,0 +1,21 @@
+{
+	"trinkets.tooltip.slots.any" : "Se puede equipar en §9cualquier§r espacio de accesorio",
+	"trinkets.tooltip.slots.list" : "Se puede equipar en los siguientes espacios de accesorio:",
+	"trinkets.tooltip.slots.single" : "Se puede equipar en el espacio de accesorio %d",
+	"trinkets.tooltip.attributes.all" : "Al estar equipado:",
+	"trinkets.tooltip.attributes.single" : "Al estar equipado en el espacio de accesorio %d:",
+	"trinkets.tooltip.attributes.slots" : "%d espacios",
+	
+	"trinkets.slot.head.face": "Cara",
+	"trinkets.slot.head.hat": "Sombrero",
+	"trinkets.slot.chest.necklace": "Collar",
+	"trinkets.slot.chest.back": "Espalda",
+	"trinkets.slot.chest.cape": "Capa",
+	"trinkets.slot.legs.belt": "Cinturón",
+	"trinkets.slot.feet.aglet": "Puntera",
+	"trinkets.slot.feet.shoes": "Zapatos",
+	"trinkets.slot.hand.glove": "Guante",
+	"trinkets.slot.offhand.glove": "Guante",
+	"trinkets.slot.hand.ring": "Anillo",
+	"trinkets.slot.offhand.ring": "Anillo"
+}
