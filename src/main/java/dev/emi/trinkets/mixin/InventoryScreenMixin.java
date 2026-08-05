@@ -50,12 +50,6 @@ public abstract class InventoryScreenMixin extends RecipeBookScreen<PlayerScreen
 		TrinketScreenManager.drawExtraGroups(context);
 	}
 
-	@Inject(at = @At("TAIL"), method = "drawForeground")
-	private void drawForeground(DrawContext context, int mouseX, int mouseY, CallbackInfo info) {
-		TrinketScreenManager.drawActiveGroup(context);
-	}
-
-
 	@Override
 	public TrinketPlayerScreenHandler trinkets$getHandler() {
 		return (TrinketPlayerScreenHandler) this.handler;

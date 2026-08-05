@@ -4,6 +4,7 @@ package dev.emi.trinkets.mixin;
 import com.llamalad7.mixinextras.sugar.Local;
 import dev.emi.trinkets.TrinketPlayerScreenHandler;
 import dev.emi.trinkets.api.TrinketInventory;
+import dev.emi.trinkets.api.TrinketSaveData;
 import dev.emi.trinkets.api.TrinketsApi;
 import dev.emi.trinkets.data.EntitySlotLoader;
 
@@ -14,12 +15,12 @@ import java.util.Set;
 import dev.emi.trinkets.payload.SyncInventoryPayload;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.Entity;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.server.PlayerManager;
 import net.minecraft.server.network.ConnectedClientData;
 import net.minecraft.server.network.ServerPlayerEntity;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -36,21 +37,26 @@ public abstract class PlayerManagerMixin {
 	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayerEntity;onSpawn()V"), method = "onPlayerConnect")
 	private void onPlayerConnect(ClientConnection connection, ServerPlayerEntity player, ConnectedClientData clientData, CallbackInfo ci) {
 		EntitySlotLoader.SERVER.sync(player);
-		((TrinketPlayerScreenHandler) player.playerScreenHandler).trinkets$updateTrinketSlots(false);
-		TrinketsApi.getTrinketComponent(player).ifPresent(trinkets -> {
-			Map<String, NbtCompound> tag = new HashMap<>();
-			Set<TrinketInventory> inventoriesToSend = trinkets.getTrackingUpdates();
-
-			for (TrinketInventory trinketInventory : inventoriesToSend) {
-				tag.put(trinketInventory.getSlotType().getId(), trinketInventory.getSyncTag());
-			}
-			ServerPlayNetworking.send(player, new SyncInventoryPayload(player.getId(), Map.of(), tag));
-			inventoriesToSend.clear();
-		});
+		this.syncSlots(player);
 	}
 
 	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayerEntity;onSpawn()V"), method = "respawnPlayer")
 	private void onPlayerRespawn(ServerPlayerEntity player, boolean alive, Entity.RemovalReason removalReason, CallbackInfoReturnable<ServerPlayerEntity> cir, @Local(ordinal = 1) ServerPlayerEntity newServerPlayer) {
-		((TrinketPlayerScreenHandler) newServerPlayer.playerScreenHandler).trinkets$updateTrinketSlots(true);
+		this.syncSlots(player);
+	}
+
+	@Unique
+	private void syncSlots(ServerPlayerEntity player) {
+		((TrinketPlayerScreenHandler) player.playerScreenHandler).trinkets$updateTrinketSlots(false);
+		TrinketsApi.getTrinketComponent(player).ifPresent(trinkets -> {
+			Map<String, TrinketSaveData.Metadata> tag = new HashMap<>();
+			Set<TrinketInventory> inventoriesToSend = trinkets.getTrackingUpdates();
+
+			for (TrinketInventory trinketInventory : inventoriesToSend) {
+				tag.put(trinketInventory.getSlotType().getId(), trinketInventory.getSyncMetadata());
+			}
+			ServerPlayNetworking.send(player, new SyncInventoryPayload(player.getId(), Map.of(), tag));
+			inventoriesToSend.clear();
+		});
 	}
 }

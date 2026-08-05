@@ -39,7 +39,7 @@ public class Schema1460Mixin {
 	 * Inject trinket's schema into player data definition (method_5260) and generic entity data definition (method_5236)
 	 * Optionals are ignored if it doesn't fit data definitions.
 	 */
-	@ModifyReturnValue(method = {"method_5260", "method_5236"}, at = @At("RETURN"))
+	@ModifyReturnValue(method = {"method_5260", "method_66160"}, at = @At("RETURN"))
 	private static TypeTemplate attachTrinketFixer(TypeTemplate original) {
 		// Add schema for trinkets to existing datafixers
 		return DSL.allWithRemainder(

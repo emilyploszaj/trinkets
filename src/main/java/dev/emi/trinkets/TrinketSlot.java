@@ -11,10 +11,12 @@ public interface TrinketSlot {
 
 	public boolean isTrinketFocused();
 
+	public boolean renderAfterRegularSlots();
+
 	public Identifier getBackgroundIdentifier();
 
 	public SlotType getType();
-	
+
 	public static boolean canInsert(ItemStack stack, SlotReference slotRef, LivingEntity entity) {
 		boolean res = TrinketsApi.evaluatePredicateSet(slotRef.inventory().getSlotType().getValidatorPredicates(),
 			stack, slotRef, entity);

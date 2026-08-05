@@ -51,8 +51,8 @@ public class SurvivalTrinketSlot extends Slot implements TrinketSlot {
 	public boolean isEnabled() {
 		if (alwaysVisible) {
 			if (x < 0) {
-				World world = trinketInventory.getComponent().getEntity().getWorld();
-				if (world.isClient) {
+				World world = trinketInventory.getComponent().getEntity().getEntityWorld();
+				if (world.isClient()) {
 					MinecraftClient client = MinecraftClient.getInstance();
 					Screen s = client.currentScreen;
 					if (s instanceof InventoryScreen screen) {
@@ -75,6 +75,11 @@ public class SurvivalTrinketSlot extends Slot implements TrinketSlot {
 			return slotOffset == 0 || TrinketsClient.quickMoveType == type && TrinketsClient.quickMoveTimer > 0;
 		}
 		return false;
+	}
+
+	@Override
+	public boolean renderAfterRegularSlots() {
+		return slotOffset != 0 || !this.alwaysVisible;
 	}
 
 	@Override

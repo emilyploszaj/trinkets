@@ -17,7 +17,7 @@ import java.util.List;
 public class LivingEntityStateRenderMixin implements TrinketEntityRenderState {
 
     @Unique
-    private List<Pair<ItemStack, SlotReference>> trinketsState;
+    private List<Pair<ItemStack, SlotReference>> trinketsState = List.of();
 
     @Override
     public void trinkets$setState(List<Pair<ItemStack, SlotReference>> items) {

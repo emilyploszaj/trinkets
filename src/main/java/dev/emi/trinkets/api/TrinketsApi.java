@@ -75,8 +75,8 @@ public class TrinketsApi {
 	 * called in the callback of {@link ItemStack#damage(int, ServerWorld, ServerPlayerEntity, Consumer)}
 	 */
 	public static void onTrinketBroken(ItemStack stack, SlotReference ref, LivingEntity entity) {
-		World world = entity.getWorld();
-		if (!world.isClient) {
+		World world = entity.getEntityWorld();
+		if (!world.isClient()) {
 			BreakPayload packet = new BreakPayload(entity.getId(), ref.inventory().getSlotType().getGroup(), ref.inventory().getSlotType().getName(), ref.index());
 			if (entity instanceof ServerPlayerEntity player) {
 				ServerPlayNetworking.send(player, packet);
@@ -136,7 +136,7 @@ public class TrinketsApi {
 	 */
 	public static Map<String, SlotGroup> getEntitySlots(Entity entity) {
 		if (entity != null) {
-			return getEntitySlots(entity.getWorld(), entity.getType());
+			return getEntitySlots(entity.getEntityWorld(), entity.getType());
 		}
 		return ImmutableMap.of();
 	}

@@ -28,12 +28,12 @@ public class TrinketsTest implements ModInitializer {
 		TEST_TRINKET_2 = Registry.register(Registries.ITEM, identifier("test2"), new TestTrinket2(new Item.Settings().registryKey(RegistryKey.of(RegistryKeys.ITEM, identifier("test2"))).maxCount(1)));
 		TrinketEquipCallback.EVENT.register(((stack, slot, entity) -> {
 			if(stack.isOf(TEST_TRINKET_2)){
-				entity.getWorld().playSound(null, entity.getBlockPos(), SoundEvents.ENTITY_ARROW_HIT, SoundCategory.PLAYERS, 1f, 1f);
+				entity.getEntityWorld().playSound(null, entity.getBlockPos(), SoundEvents.ENTITY_ARROW_HIT, SoundCategory.PLAYERS, 1f, 1f);
 			}
 		}));
 		TrinketUnequipCallback.EVENT.register(((stack, slot, entity) -> {
 			if(stack.isOf(TEST_TRINKET_2)){
-				entity.getWorld().playSound(null, entity.getBlockPos(), SoundEvents.ITEM_TRIDENT_THUNDER.value(), SoundCategory.PLAYERS, 0.5f, 1f);
+				entity.getEntityWorld().playSound(null, entity.getBlockPos(), SoundEvents.ITEM_TRIDENT_THUNDER.value(), SoundCategory.PLAYERS, 0.5f, 1f);
 			}
 		}));
 	}

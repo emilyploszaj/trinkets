@@ -21,6 +21,11 @@ public class CreativeTrinketSlot extends CreativeSlot implements TrinketSlot {
 	}
 
 	@Override
+	public boolean renderAfterRegularSlots() {
+		return original.renderAfterRegularSlots();
+	}
+
+	@Override
 	public Identifier getBackgroundIdentifier() {
 		return original.getBackgroundIdentifier();
 	}

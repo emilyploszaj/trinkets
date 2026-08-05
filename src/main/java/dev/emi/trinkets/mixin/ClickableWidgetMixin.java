@@ -1,6 +1,7 @@
 package dev.emi.trinkets.mixin;
 
 import dev.emi.trinkets.TrinketsClient;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import org.objectweb.asm.Opcodes;
@@ -21,7 +22,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public abstract class ClickableWidgetMixin {
 
 	@Shadow
-	private boolean hovered;
+	protected boolean hovered;
 	
 	@Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/gui/widget/ClickableWidget;hovered:Z",
 			opcode = Opcodes.PUTFIELD, ordinal = 0, shift = Shift.AFTER), method = "render")
@@ -32,7 +33,7 @@ public abstract class ClickableWidgetMixin {
 	}
 
 	@Inject(at = @At("HEAD"), method = "mouseClicked", cancellable = true)
-	private void mouseClicked(double mouseX, double mouseY, int button, CallbackInfoReturnable<Boolean> info) {
+	private void mouseClicked(Click click, boolean doubled, CallbackInfoReturnable<Boolean> info) {
 		if (TrinketsClient.activeGroup != null) {
 			info.setReturnValue(false);
 		}

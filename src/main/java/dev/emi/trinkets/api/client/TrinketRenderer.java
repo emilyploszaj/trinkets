@@ -4,6 +4,7 @@ import dev.emi.trinkets.api.SlotReference;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.command.OrderedRenderCommandQueue;
 import net.minecraft.client.render.entity.EntityRenderer;
 import net.minecraft.client.render.entity.LivingEntityRenderer;
 import net.minecraft.client.render.entity.model.BipedEntityModel;
@@ -29,7 +30,7 @@ public interface TrinketRenderer {
 	 * @param contextModel The model this Trinket is being rendered on
 	 */
 	void render(ItemStack stack, SlotReference slotReference, EntityModel<? extends LivingEntityRenderState> contextModel,
-				MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, LivingEntityRenderState state,
+				MatrixStack matrices, OrderedRenderCommandQueue vertexConsumers, int light, LivingEntityRenderState state,
 				float limbAngle, float limbDistance);
 
 	/**
@@ -44,7 +45,12 @@ public interface TrinketRenderer {
 	static void followBodyRotations(final EntityModel<? extends LivingEntityRenderState> entityModel, final BipedEntityModel<?> model) {
 		if (entityModel instanceof BipedEntityModel<?> bipedModel) {
 			//noinspection rawtypes
-			bipedModel.copyTransforms((BipedEntityModel) model);
+			model.head.setTransform(bipedModel.head.getTransform());
+			model.body.setTransform(bipedModel.body.getTransform());
+			model.leftArm.setTransform(bipedModel.leftArm.getTransform());
+			model.rightArm.setTransform(bipedModel.rightArm.getTransform());
+			model.leftLeg.setTransform(bipedModel.leftLeg.getTransform());
+			model.rightLeg.setTransform(bipedModel.rightLeg.getTransform());
 		}
 	}
 

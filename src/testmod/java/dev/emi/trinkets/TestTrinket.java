@@ -12,6 +12,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.command.OrderedRenderCommandQueue;
 import net.minecraft.client.render.entity.model.BipedEntityModel;
 import net.minecraft.client.render.entity.model.EntityModel;
 import net.minecraft.client.render.entity.state.BipedEntityRenderState;
@@ -56,13 +57,12 @@ public class TestTrinket extends TrinketItem implements TrinketRenderer {
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public void render(ItemStack stack, SlotReference slotReference, EntityModel<? extends LivingEntityRenderState> contextModel, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, LivingEntityRenderState state, float limbAngle, float limbDistance) {
+	public void render(ItemStack stack, SlotReference slotReference, EntityModel<? extends LivingEntityRenderState> contextModel, MatrixStack matrices, OrderedRenderCommandQueue queue, int light, LivingEntityRenderState state, float limbAngle, float limbDistance) {
 		if (state instanceof BipedEntityRenderState bipedEntityRenderState) {
 			BipedEntityModel<BipedEntityRenderState> model = this.getModel();
 			model.setAngles(bipedEntityRenderState);
 			TrinketRenderer.followBodyRotations(contextModel, model);
-			VertexConsumer vertexConsumer = vertexConsumers.getBuffer(model.getLayer(TEXTURE));
-			model.render(matrices, vertexConsumer, light, OverlayTexture.DEFAULT_UV, 1);
+			queue.submitModel(model, bipedEntityRenderState, matrices, model.getLayer(TEXTURE), light, OverlayTexture.packUv(OverlayTexture.getU(0), OverlayTexture.getV(false)), -1, null, state.outlineColor, null);
 		}
 	}
 

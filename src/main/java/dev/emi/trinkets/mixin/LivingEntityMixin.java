@@ -10,13 +10,12 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 
 import dev.emi.trinkets.TrinketModifiers;
-import dev.emi.trinkets.api.SlotAttributes;
 import dev.emi.trinkets.api.SlotReference;
 import dev.emi.trinkets.api.SlotType;
-import dev.emi.trinkets.api.Trinket;
 import dev.emi.trinkets.api.TrinketComponent;
 import dev.emi.trinkets.api.TrinketInventory;
 import dev.emi.trinkets.api.TrinketsApi;
+import dev.emi.trinkets.api.TrinketSaveData;
 import dev.emi.trinkets.api.event.TrinketEquipCallback;
 import dev.emi.trinkets.api.event.TrinketUnequipCallback;
 import dev.emi.trinkets.payload.SyncInventoryPayload;
@@ -50,10 +49,8 @@ import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.GameRules;
+import net.minecraft.world.rule.GameRules;
 import net.minecraft.world.World;
 
 /**
@@ -90,7 +87,7 @@ public abstract class LivingEntityMixin extends Entity {
 	private void dropInventory(ServerWorld world, CallbackInfo info) {
 		LivingEntity entity = (LivingEntity) (Object) this;
 
-		boolean keepInv = world.getGameRules().getBoolean(GameRules.KEEP_INVENTORY);
+		boolean keepInv = world.getGameRules().getValue(GameRules.KEEP_INVENTORY);
 		TrinketsApi.getTrinketComponent(entity).ifPresent(trinkets -> trinkets.forEach((ref, stack) -> {
 			if (stack.isEmpty()) {
 				return;
@@ -136,7 +133,7 @@ public abstract class LivingEntityMixin extends Entity {
 		// Mimic player drop behavior for only players
 		if (((Entity) this) instanceof PlayerEntity player) {
 			ItemEntity entity = player.dropItem(stack, true, false);
-		} else if (this.getWorld() instanceof ServerWorld serverWorld) {
+		} else if (this.getEntityWorld() instanceof ServerWorld serverWorld) {
 			ItemEntity entity = dropStack(serverWorld, stack);
 		}
 	}
@@ -166,8 +163,8 @@ public abstract class LivingEntityMixin extends Entity {
 					TrinketsApi.getTrinket(newStack.getItem()).onEquip(newStack, ref, entity);
 					TrinketEquipCallback.EVENT.invoker().onEquip(newStack, ref, entity);
 
-					World world = this.getWorld();
-					if (!world.isClient) {
+					World world = this.getEntityWorld();
+					if (!world.isClient()) {
 						contentUpdates.put(newRef, newStackCopy);
 
 						if (!oldStack.isEmpty()) {
@@ -230,15 +227,15 @@ public abstract class LivingEntityMixin extends Entity {
 				}
 			});
 
-			World world = this.getWorld();
-			if (!world.isClient) {
+			World world = this.getEntityWorld();
+			if (!world.isClient()) {
 				Set<TrinketInventory> inventoriesToSend = trinkets.getTrackingUpdates();
 
 				if (!contentUpdates.isEmpty() || !inventoriesToSend.isEmpty()) {
-                    Map<String, NbtCompound> map = new HashMap<>();
+                    Map<String, TrinketSaveData.Metadata> map = new HashMap<>();
 
 					for (TrinketInventory trinketInventory : inventoriesToSend) {
-						map.put(trinketInventory.getSlotType().getId(), trinketInventory.getSyncTag());
+						map.put(trinketInventory.getSlotType().getId(), trinketInventory.getSyncMetadata());
 					}
                     SyncInventoryPayload packet = new SyncInventoryPayload(this.getId(), contentUpdates, map);
 
