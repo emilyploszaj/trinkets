@@ -7,6 +7,7 @@ import dev.emi.trinkets.api.TrinketInventory;
 import dev.emi.trinkets.api.TrinketsApi;
 import dev.emi.trinkets.api.Trinket;
 import dev.emi.trinkets.data.EntitySlotLoader;
+import dev.emi.trinkets.api.TrinketComponent;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.MinecraftClient;
@@ -84,6 +85,17 @@ public class TrinketsClient implements ClientModInitializer {
 				for (AbstractClientPlayerEntity clientWorldPlayer : player.clientWorld.getPlayers()) {
 					((TrinketPlayerScreenHandler) clientWorldPlayer.playerScreenHandler).trinkets$updateTrinketSlots(true);
 				}
+
+                for (Entity clientWorldEntity : player.clientWorld.getEntities()) {
+                    if (clientWorldEntity instanceof LivingEntity livingEntity) {
+                        TrinketsApi.getTrinketComponent(livingEntity).ifPresent(TrinketComponent::update);
+                    }
+                }
+
+                if (player.currentScreenHandler instanceof TrinketPlayerScreenHandler screenHandler && !screenHandler.equals(player.playerScreenHandler)) {
+                    screenHandler.trinkets$updateTrinketSlots(false);
+                    TrinketScreenManager.tryUpdateTrinketsSlot();
+                }
 			}
 
 		});

@@ -5,15 +5,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Sets;
 
-import dev.emi.trinkets.TrinketModifiers;
-import dev.emi.trinkets.api.SlotAttributes;
 import dev.emi.trinkets.api.SlotReference;
 import dev.emi.trinkets.api.SlotType;
-import dev.emi.trinkets.api.Trinket;
 import dev.emi.trinkets.api.TrinketComponent;
 import dev.emi.trinkets.api.TrinketInventory;
 import dev.emi.trinkets.api.TrinketsApi;
@@ -21,13 +15,12 @@ import dev.emi.trinkets.api.event.TrinketEquipCallback;
 import dev.emi.trinkets.api.event.TrinketUnequipCallback;
 import dev.emi.trinkets.payload.SyncInventoryPayload;
 import net.minecraft.component.EnchantmentEffectComponentTypes;
-import net.minecraft.entity.attribute.EntityAttributeInstance;
-import net.minecraft.registry.entry.RegistryEntry;
+import dev.emi.trinkets.api.LivingEntityTrinketComponent;
+import dev.emi.trinkets.api.event.SlotCountModificationCallback;
 import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Pair;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -35,7 +28,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import dev.emi.trinkets.TrinketPlayerScreenHandler;
-import dev.emi.trinkets.api.SlotAttributes.SlotEntityAttribute;
 import dev.emi.trinkets.api.TrinketEnums.DropRule;
 import dev.emi.trinkets.api.event.TrinketDropCallback;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
@@ -45,14 +37,10 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.attribute.AttributeContainer;
-import net.minecraft.entity.attribute.EntityAttribute;
-import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 
@@ -62,12 +50,9 @@ import net.minecraft.world.World;
  * @author Emi
  */
 @Mixin(LivingEntity.class)
-public abstract class LivingEntityMixin extends Entity {
+public abstract class LivingEntityMixin extends Entity implements LivingEntityTrinketComponent.StackHistory {
 	@Unique
 	private final Map<String, ItemStack> lastEquippedTrinkets = new HashMap<>();
-
-	@Shadow
-	public abstract AttributeContainer getAttributes();
 
 	private LivingEntityMixin() {
 		super(null, null);
@@ -152,12 +137,11 @@ public abstract class LivingEntityMixin extends Entity {
 			Map<String, ItemStack> contentUpdates = new HashMap<>();
 			trinkets.forEach((ref, stack) -> {
 				TrinketInventory inventory = ref.inventory();
-				SlotType slotType = inventory.getSlotType();
 				int index = ref.index();
-				ItemStack oldStack = getOldStack(slotType, index);
+				ItemStack oldStack = trinkets$getOldStack(ref);
 				ItemStack newStack = inventory.getStack(index);
 				ItemStack newStackCopy = newStack.copy();
-				String newRef = slotType.getGroup() + "/" + slotType.getName() + "/" + index;
+				String newRef = ref.getId();
 
 				if (!ItemStack.areEqual(newStack, oldStack)) {
 
@@ -167,72 +151,30 @@ public abstract class LivingEntityMixin extends Entity {
 					TrinketEquipCallback.EVENT.invoker().onEquip(newStack, ref, entity);
 
 					World world = this.getWorld();
-					if (!world.isClient) {
+					if (!world.isClient && trinkets instanceof LivingEntityTrinketComponent livingEntityTrinkets) {
 						contentUpdates.put(newRef, newStackCopy);
 
-						if (!oldStack.isEmpty()) {
-							Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> map = TrinketModifiers.get(oldStack, ref, entity);
-							Multimap<String, EntityAttributeModifier> slotMap = HashMultimap.create();
-							Set<RegistryEntry<EntityAttribute>> toRemove = Sets.newHashSet();
-							for (RegistryEntry<EntityAttribute> attr : map.keySet()) {
-								if (attr.hasKeyAndValue() && attr.value() instanceof SlotEntityAttribute slotAttr) {
-									slotMap.putAll(slotAttr.slot, map.get(attr));
-									toRemove.add(attr);
-								}
-							}
-							for (RegistryEntry<EntityAttribute> attr : toRemove) {
-								map.removeAll(attr);
-							}
-							//this.getAttributes().removeModifiers(map);
-							map.asMap().forEach((attribute, modifiers) -> {
-								EntityAttributeInstance entityAttributeInstance = this.getAttributes().getCustomInstance(attribute);
-								if (entityAttributeInstance != null) {
-									modifiers.forEach(modifier -> entityAttributeInstance.removeModifier(modifier.id()));
-								}
-							});
-
-							trinkets.removeModifiers(slotMap);
-						}
-
-						if (!newStack.isEmpty()) {
-							Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> map = TrinketModifiers.get(newStack, ref, entity);
-							Multimap<String, EntityAttributeModifier> slotMap = HashMultimap.create();
-							Set<RegistryEntry<EntityAttribute>> toRemove = Sets.newHashSet();
-							for (RegistryEntry<EntityAttribute> attr : map.keySet()) {
-								if (attr.hasKeyAndValue() && attr.value() instanceof SlotEntityAttribute slotAttr) {
-									slotMap.putAll(slotAttr.slot, map.get(attr));
-									toRemove.add(attr);
-								}
-							}
-							for (RegistryEntry<EntityAttribute> attr : toRemove) {
-								map.removeAll(attr);
-							}
-							//this.getAttributes().addTemporaryModifiers(map);
-							map.forEach((attribute, attributeModifier) -> {
-								EntityAttributeInstance entityAttributeInstance = this.getAttributes().getCustomInstance(attribute);
-								if (entityAttributeInstance != null) {
-									entityAttributeInstance.removeModifier(attributeModifier.id());
-									entityAttributeInstance.addTemporaryModifier(attributeModifier);
-								}
-
-							});
-							trinkets.addTemporaryModifiers(slotMap);
-						}
+						livingEntityTrinkets.processSlotModifiers(ref, oldStack, newStack);
 					}
 				}
-				TrinketsApi.getTrinket(newStack.getItem()).tick(newStack, ref, entity);
-				ItemStack tickedStack = inventory.getStack(index);
-				// Avoid calling equip/unequip on stacks that mutate themselves
-				if (tickedStack.getItem() == newStackCopy.getItem()) {
-					newlyEquippedTrinkets.put(newRef, tickedStack.copy());
-				} else {
-					newlyEquippedTrinkets.put(newRef, newStackCopy);
+
+				// Check that the inventory hasn't shrunk past the new stack
+				if (index < inventory.size()) {
+					TrinketsApi.getTrinket(newStack.getItem()).tick(newStack, ref, entity);
+					ItemStack tickedStack = inventory.getStack(index);
+					// Avoid calling equip/unequip on stacks that mutate themselves
+					if (tickedStack.getItem() == newStackCopy.getItem()) {
+						newlyEquippedTrinkets.put(newRef, tickedStack.copy());
+					} else {
+						newlyEquippedTrinkets.put(newRef, newStackCopy);
+					}
 				}
 			});
 
+            Set<TrinketInventory> inventoriesToSend = trinkets.getTrackingUpdates();
+
 			World world = this.getWorld();
 			if (!world.isClient) {
-				Set<TrinketInventory> inventoriesToSend = trinkets.getTrackingUpdates();
 
 				if (!contentUpdates.isEmpty() || !inventoriesToSend.isEmpty()) {
                     Map<String, NbtCompound> map = new HashMap<>();
@@ -253,18 +195,22 @@ public abstract class LivingEntityMixin extends Entity {
 							((TrinketPlayerScreenHandler) serverPlayer.playerScreenHandler).trinkets$updateTrinketSlots(false);
 						}
 					}
-
-					inventoriesToSend.clear();
 				}
 			}
+
+			if (!inventoriesToSend.isEmpty()) {
+				SlotCountModificationCallback.EVENT.invoker().onChange(trinkets, inventoriesToSend);
+			}
+
+			inventoriesToSend.clear();
 
 			lastEquippedTrinkets.clear();
 			lastEquippedTrinkets.putAll(newlyEquippedTrinkets);
 		});
 	}
 
-	@Unique
-	private ItemStack getOldStack(SlotType type, int index) {
-		return lastEquippedTrinkets.getOrDefault(type.getGroup() + "/" + type.getName() + "/" + index, ItemStack.EMPTY);
+	@Override
+	public ItemStack trinkets$getOldStack(SlotReference ref) {
+		return lastEquippedTrinkets.getOrDefault(ref.getId(), ItemStack.EMPTY);
 	}
 }

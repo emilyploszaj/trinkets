@@ -3,6 +3,7 @@ package dev.emi.trinkets.api;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.mojang.serialization.Codec;
+import dev.emi.trinkets.api.event.TrinketUnequipCallback;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.player.PlayerEntity;
@@ -32,6 +33,7 @@ public class TrinketInventory implements Inventory {
 
 	private DefaultedList<ItemStack> stacks;
 	private boolean update = false;
+	private boolean suppressUpdates = false;
 
 	public TrinketInventory(SlotType slotType, TrinketComponent comp, Consumer<TrinketInventory> updateCallback) {
 		this.component = comp;
@@ -157,8 +159,9 @@ public class TrinketInventory implements Inventory {
 	}
 
 	public void update() {
-		if (this.update) {
+		if (this.update && !suppressUpdates) {
 			this.update = false;
+			this.suppressUpdates = true;
 			double baseSize = this.baseSize;
 			for (EntityAttributeModifier mod : this.getModifiersByOperation(EntityAttributeModifier.Operation.ADD_VALUE)) {
 				baseSize += mod.value();
@@ -181,14 +184,28 @@ public class TrinketInventory implements Inventory {
 					if (i < newStacks.size()) {
 						newStacks.set(i, stack);
 					} else {
+						SlotReference ref = new SlotReference(this, i);
+						ItemStack oldStack = stack;
+						if (entity instanceof LivingEntityTrinketComponent.StackHistory stackHistory) {
+							oldStack = stackHistory.trinkets$getOldStack(ref);
+						}
+						TrinketsApi.getTrinket(oldStack.getItem()).onUnequip(oldStack, ref, entity);
+						TrinketUnequipCallback.EVENT.invoker().onUnequip(oldStack, ref, entity);
+						if (!this.getComponent().getEntity().getWorld().isClient && this.getComponent() instanceof LivingEntityTrinketComponent livingEntityTrinketComponent) {
+							livingEntityTrinketComponent.processSlotModifiers(ref, oldStack, ItemStack.EMPTY);
+						}
 						if (entity.getWorld() instanceof ServerWorld serverWorld) {
 							entity.dropStack(serverWorld, stack);
 						}
+						ref.set(ItemStack.EMPTY);
 					}
 				}
 
 				this.stacks = newStacks;
 			}
+			// Process updates sequentially, instead of in the middle of an incomplete update.
+			this.suppressUpdates = false;
+			this.update();
 		}
 	}
 

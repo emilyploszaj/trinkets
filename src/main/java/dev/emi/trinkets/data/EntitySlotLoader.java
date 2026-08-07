@@ -21,18 +21,30 @@ import com.google.gson.JsonSyntaxException;
 import dev.emi.trinkets.TrinketPlayerScreenHandler;
 import dev.emi.trinkets.TrinketsMain;
 import dev.emi.trinkets.api.SlotGroup;
+import dev.emi.trinkets.api.TrinketComponent;
+import dev.emi.trinkets.api.TrinketsApi;
+import dev.emi.trinkets.api.TrinketComponent;
+import dev.emi.trinkets.api.TrinketsApi;
 import dev.emi.trinkets.data.SlotLoader.GroupData;
 import dev.emi.trinkets.data.SlotLoader.SlotData;
 import dev.emi.trinkets.payload.SyncSlotsPayload;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.fabricmc.fabric.api.resource.ResourceReloadListenerKeys;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.registry.Registries;
 import net.minecraft.resource.Resource;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.resource.SinglePreparationResourceReloader;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.JsonHelper;
 import net.minecraft.util.profiler.Profiler;
@@ -203,7 +215,22 @@ public class EntitySlotLoader extends SinglePreparationResourceReloader<Map<Stri
 		SyncSlotsPayload packet = new SyncSlotsPayload(Map.copyOf(this.slots));
 		players.forEach(player -> ServerPlayNetworking.send(player, packet));
 		players.forEach(player -> ((TrinketPlayerScreenHandler) player.playerScreenHandler).trinkets$updateTrinketSlots(true));
+		players.forEach(player -> {
+			if (player.currentScreenHandler instanceof TrinketPlayerScreenHandler screenHandler && !screenHandler.equals(player.playerScreenHandler)) {
+				screenHandler.trinkets$updateTrinketSlots(true);
+			}
+		});
 	}
+
+    public void updateEntities(MinecraftServer server) {
+        for (ServerWorld world : server.getWorlds()) {
+            for (Entity entity : world.iterateEntities()) {
+                if (entity instanceof LivingEntity livingEntity && !(livingEntity instanceof PlayerEntity)) {
+                    TrinketsApi.getTrinketComponent(livingEntity).ifPresent(TrinketComponent::update);
+                }
+            }
+        }
+    }
 
 	@Override
 	public Identifier getFabricId() {
